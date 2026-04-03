@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lbruton.cc — Network Engineer. Problem Solver. Open-Source Builder.</title>
+  <meta name="description" content="Portfolio of open-source tools built by a network engineer — infrastructure utilities, finance trackers, developer tools, and Claude Code plugins.">
+  <meta property="og:title" content="lbruton.cc — Open-Source Tools by Lonnie Bruton">
+  <meta property="og:description" content="Network engineer by trade. Builder by nature. Free, open-source tools for real problems.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.lbruton.cc">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    /* ========================================================================
+       lbruton.cc — Portfolio Landing Page
+       Design language inherited from SpecFlow / StakTrakr / TRMCompare
+       ======================================================================== */
+
+    :root {
+      --bg-deep: #070b14;
+      --bg-primary: #0a0e17;
+      --bg-card: #111a2e;
+      --bg-card-hover: #162040;
+      --border: #1e2a3a;
+      --border-hover: #2d3f5a;
+      --text: #b8c4d4;
+      --text-dim: #6b7d93;
+      --text-bright: #e6edf5;
+      --accent: #818cf8;
+      --accent-dim: #818cf820;
+      --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+      /* Project accent colors — match their hero pages */
+      --hex: #22c55e;
+      --forge: #f59e0b;
+      --trmc: #00b4d8;
+      --whoseon: #a78bfa;
+      --stak: #3b82f6;
+      --mymelo: #f472b6;
+      --specflow: #6366f1;
+      --claude-ctx: #818cf8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg-deep);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--text-bright); }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* ─── Nav ─── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #070b14e8;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-bright); }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding: 100px 0 80px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-deep) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-label {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text);
+      max-width: 600px;
+      margin: 0 auto 32px;
+      line-height: 1.8;
+    }
+    .hero-links {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff !important;
+    }
+    .btn-primary:hover { background: #6366f1; }
+    .btn-outline {
+      border: 1px solid var(--border);
+      color: var(--text) !important;
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--text-bright) !important;
+    }
+
+    /* ─── Sections ─── */
+    section { padding: 72px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      color: var(--text-dim);
+      max-width: 560px;
+      margin-bottom: 40px;
+    }
+
+    /* ─── Project Cards ─── */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: block;
+    }
+    .project-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .card-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .card-name {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-bright);
+    }
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-deep);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    /* ─── About ─── */
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    .about-text p {
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+    .about-sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .about-sidebar h3 {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .sidebar-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .sidebar-item:last-child { border-bottom: none; }
+    .sidebar-label { color: var(--text-dim); }
+    .sidebar-value { color: var(--text-bright); font-weight: 500; }
+
+    /* ─── Philosophy ─── */
+    .philosophy-content {
+      max-width: 680px;
+    }
+    .philosophy-content p {
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+    .philosophy-content em {
+      color: var(--text-bright);
+      font-style: normal;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 2rem; }
+      .hero { padding: 60px 0 50px; }
+      section { padding: 48px 0; }
+      .about-content { grid-template-columns: 1fr; }
+      .project-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="container">
+      <div class="nav-brand">lbruton<span>.cc</span></div>
+      <div class="nav-links">
+        <a href="#projects">Projects</a>
+        <a href="#about">About</a>
+        <a href="#philosophy">How I Build</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-label">Open Source</div>
+      <h1>Tools built to solve<br>real problems.</h1>
+      <p>Network engineer by trade. Photographer by passion. I build free, open-source tools for the problems I actually encounter — from tracking precious metals to auditing switch migrations.</p>
+      <div class="hero-links">
+        <a href="#projects" class="btn-primary">View Projects</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener" class="btn-outline">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://lonniebruton.com" target="_blank" rel="noopener" class="btn-outline">Photography</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects: Network Administration -->
+  <section id="projects">
+    <div class="container">
+      <div class="section-label">Network Administration</div>
+      <div class="section-title">Infrastructure &amp; Network Tools</div>
+      <p class="section-desc">Purpose-built utilities for the problems network engineers actually face — migration audits, vulnerability tracking, and configuration automation.</p>
+      <div class="project-grid">
+
+        <a href="https://github.com/lbruton/HexTrackr" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--hex)"></div>
+            <div class="card-name">HexTrackr</div>
+          </div>
+          <div class="card-desc">Network vulnerability monitoring and device inventory management. Tracks CVEs, firmware versions, and security posture across your infrastructure.</div>
+          <div class="card-tags">
+            <span class="tag">Node.js</span>
+            <span class="tag">SQLite</span>
+            <span class="tag">WebSocket</span>
+            <span class="tag">REST API</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/lbruton/Forge" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--forge)"></div>
+            <div class="card-name">Forge</div>
+          </div>
+          <div class="card-desc">Network configuration template generator. Define your standards once, generate consistent configs for switches, routers, and firewalls.</div>
+          <div class="card-tags">
+            <span class="tag">React</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">Templates</span>
+          </div>
+        </a>
+
+        <a href="https://lbruton.github.io/TRMCompare/" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--trmc)"></div>
+            <div class="card-name">TRMCompare</div>
+          </div>
+          <div class="card-desc">Cisco switch migration audit tool. Paste MAC tables from old and new switches, instantly identify what moved, what's missing, and what's new.</div>
+          <div class="card-tags">
+            <span class="tag">Client-Side</span>
+            <span class="tag">Zero Dependencies</span>
+            <span class="tag">GitHub Pages</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/lbruton/WhoseOnFirst" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--whoseon)"></div>
+            <div class="card-name">WhoseOnFirst</div>
+          </div>
+          <div class="card-desc">Network device first-seen tracking. Know when devices first appeared on your network and maintain a living inventory.</div>
+          <div class="card-tags">
+            <span class="tag">Node.js</span>
+            <span class="tag">SQLite</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects: Finance -->
+  <section>
+    <div class="container">
+      <div class="section-label">Finance &amp; Investment</div>
+      <div class="section-title">Portfolio Tracking</div>
+      <p class="section-desc">Privacy-first financial tools that keep your data local.</p>
+      <div class="project-grid">
+
+        <a href="https://www.staktrakr.com" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--stak)"></div>
+            <div class="card-name">StakTrakr</div>
+          </div>
+          <div class="card-desc">Free, privacy-first precious metals portfolio tracker. Live spot prices, retail market comparison, cloud sync. No account required — your data stays on your device.</div>
+          <div class="card-tags">
+            <span class="tag">PWA</span>
+            <span class="tag">localStorage</span>
+            <span class="tag">Live Prices</span>
+            <span class="tag">Cloud Sync</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects: AI -->
+  <section>
+    <div class="container">
+      <div class="section-label">AI Companions</div>
+      <div class="section-title">Conversational AI</div>
+      <p class="section-desc">Exploring what persistent memory and personality bring to AI interactions.</p>
+      <div class="project-grid">
+
+        <a href="https://github.com/lbruton/MyMelo" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--mymelo)"></div>
+            <div class="card-name">MyMelo</div>
+          </div>
+          <div class="card-desc">AI companion chat app with persistent cross-session memory. Built on Gemini with a character-driven personality system and PWA support.</div>
+          <div class="card-tags">
+            <span class="tag">Gemini</span>
+            <span class="tag">PWA</span>
+            <span class="tag">mem0</span>
+            <span class="tag">Character AI</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects: Developer Tools -->
+  <section>
+    <div class="container">
+      <div class="section-label">Developer Tools</div>
+      <div class="section-title">Claude Code Plugins &amp; MCP Servers</div>
+      <p class="section-desc">Forks and tools that extend AI-assisted development with structured workflows and semantic code intelligence.</p>
+      <div class="project-grid">
+
+        <a href="https://github.com/lbruton/specflow" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--specflow)"></div>
+            <div class="card-name">specflow</div>
+          </div>
+          <div class="card-desc">Spec-driven development with persistent project memory and code intelligence. A structured, human-in-the-loop workflow that ships as an MCP server plugin with a real-time dashboard.</div>
+          <div class="card-tags">
+            <span class="tag">MCP Server</span>
+            <span class="tag">Claude Code</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">Fork</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/lbruton/claude-context" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--claude-ctx)"></div>
+            <div class="card-name">claude-context</div>
+          </div>
+          <div class="card-desc">Semantic code search via self-hosted Milvus vector database. Fork focused on MCP-only operation with local infrastructure — no cloud dependencies.</div>
+          <div class="card-tags">
+            <span class="tag">MCP Server</span>
+            <span class="tag">Milvus</span>
+            <span class="tag">Python</span>
+            <span class="tag">Fork</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about">
+    <div class="container">
+      <div class="section-label">About</div>
+      <div class="section-title">Lonnie Bruton</div>
+      <div class="about-content">
+        <div class="about-text">
+          <p>I'm a network engineer who has spent a career building and managing enterprise infrastructure — switches, firewalls, monitoring, the whole stack. When I'm not at work, I'm either behind a camera or behind a terminal, usually solving a problem that bugged me enough to build something about it.</p>
+          <p>Every project here started the same way: I needed a tool that didn't exist, or the ones that did were too expensive, too locked-down, or too complicated for what should be simple. So I built my own. They're all free. They're all open source.</p>
+          <p>When I'm not writing code or configuring networks, I'm a photographer. Landscapes, architecture, the occasional portrait — you can find that work at <a href="https://lonniebruton.com" target="_blank" rel="noopener">lonniebruton.com</a>.</p>
+        </div>
+        <div class="about-sidebar">
+          <h3>Quick Facts</h3>
+          <div class="sidebar-item">
+            <span class="sidebar-label">Day Job</span>
+            <span class="sidebar-value">Network Engineer</span>
+          </div>
+          <div class="sidebar-item">
+            <span class="sidebar-label">Focus</span>
+            <span class="sidebar-value">Infrastructure &amp; Security</span>
+          </div>
+          <div class="sidebar-item">
+            <span class="sidebar-label">Hobby</span>
+            <span class="sidebar-value">Photography</span>
+          </div>
+          <div class="sidebar-item">
+            <span class="sidebar-label">Stack</span>
+            <span class="sidebar-value">JS, Node, Python</span>
+          </div>
+          <div class="sidebar-item">
+            <span class="sidebar-label">Home Lab</span>
+            <span class="sidebar-value">Proxmox + TrueNAS</span>
+          </div>
+          <div class="sidebar-item">
+            <span class="sidebar-label">License</span>
+            <span class="sidebar-value">MIT / Open Source</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy -->
+  <section id="philosophy">
+    <div class="container">
+      <div class="section-label">Philosophy</div>
+      <div class="section-title">How I Build</div>
+      <div class="philosophy-content">
+        <p>I build with Claude Code — an AI-assisted development tool. I'm not a software engineer by training, but after two decades in networking and infrastructure, I've learned that the ability to articulate <em>what needs to be built and why</em> matters more than memorizing syntax. If you can think in structured logic and describe what you need clearly, the language is just a detail.</p>
+        <p>That said, I don't take this lightly. My workflow is built around a year of iteration on <em>human-in-the-loop</em> gates — structured specs, design reviews, and quality checks that ensure every piece of code is intentional and reviewed before it ships. The goal isn't to generate code fast. It's to build tools that are <em>reliable, secure, and actually useful</em>.</p>
+        <p>Everything here is free and open source because I believe these tools should solve real problems for real people — not generate noise for a quick buck. If something I've built helps you, use it. If you want to improve it, the repo is right there.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://lonniebruton.com" target="_blank" rel="noopener">Photography</a>
+        <a href="https://www.staktrakr.com" target="_blank" rel="noopener">StakTrakr</a>
+        <a href="https://lbruton.github.io/TRMCompare/" target="_blank" rel="noopener">TRMCompare</a>
+      </div>
+      <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. All projects MIT licensed unless noted otherwise.</div>
+    </div>
+  </footer>
+
+</body>
+</html>
