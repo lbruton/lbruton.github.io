@@ -392,60 +392,68 @@
     <div class="container">
       <div class="section-label">Architecture</div>
       <div class="section-title">The Session Memory Pipeline</div>
-      <p class="section-desc">The pipeline has three phases: capture at session end, store in durable formats, and recall at session start. Each phase is handled by a dedicated component.</p>
+      <p class="section-desc">The pipeline has four layers: automatic context injection via hooks, manual deep-load via skills, on-demand search via the oracle, and batch catch-up for missed sessions. Each layer builds on the previous one.</p>
 
       <div class="arch-flow"><span class="phase">SESSION START</span>                          <span class="phase">SESSION END</span>
      <span class="arrow">│</span>                                        <span class="arrow">│</span>
      <span class="arrow">▼</span>                                        <span class="arrow">▼</span>
-<span class="tool">/prime</span> loads context:                  <span class="tool">/wrap</span> captures knowledge:
-  <span class="arrow">├─</span> <span class="store">mem0</span> recent memories               <span class="arrow">├─</span> Retrospective lessons <span class="arrow">→</span> <span class="store">mem0</span>
-  <span class="arrow">├─</span> <span class="store">DocVault</span> project pages             <span class="arrow">├─</span> Session digest <span class="arrow">→</span> <span class="store">DocVault</span>
-  <span class="arrow">├─</span> Git status + open issues            <span class="arrow">├─</span> Curated summary <span class="arrow">→</span> <span class="store">mem0</span>
-  <span class="arrow">└─</span> Code index health                   <span class="arrow">└─</span> Worktree + branch cleanup
-
-     <span class="phase">DURING SESSION</span>
-     <span class="arrow">│</span>
-     <span class="arrow">▼</span>
-<span class="tool">session-oracle</span> agent:
+<span class="store">Hook</span> injects mem0 automatically        <span class="tool">/wrap</span> captures knowledge:
+  <span class="arrow">└─</span> 5 recent memories, silent            <span class="arrow">├─</span> Retrospective lessons <span class="arrow">→</span> <span class="store">mem0</span>
+     <span class="arrow">│</span>                                     <span class="arrow">├─</span> Session digest <span class="arrow">→</span> <span class="store">DocVault</span>
+     <span class="arrow">▼</span>                                     <span class="arrow">├─</span> Curated summary <span class="arrow">→</span> <span class="store">mem0</span>
+<span class="tool">/prime</span> deep-loads context (optional)    <span class="arrow">└─</span> Worktree + branch cleanup
+  <span class="arrow">├─</span> <span class="store">DocVault</span> project pages
+  <span class="arrow">├─</span> Git status + open issues         <span class="phase">MISSED SESSION?</span>
+  <span class="arrow">└─</span> Code index health                     <span class="arrow">│</span>
+                                              <span class="arrow">▼</span>
+     <span class="phase">DURING SESSION</span>                    Batch digest scans for
+     <span class="arrow">│</span>                                 unprocessed JSONL files
+     <span class="arrow">▼</span>                                 and dispatches <span class="tool">session-digest</span>
+<span class="tool">session-oracle</span> agent:               agents to catch up
   Semantic search across all past
   session logs via <span class="store">Milvus</span> vector DB
-  <span class="arrow">→</span> "When did we decide X?"
-  <span class="arrow">→</span> "How did we fix Y last time?"</div>
+     <span class="arrow">│</span>
+<span class="phase">COMPACTION?</span>
+     <span class="arrow">│</span>
+<span class="store">Hook</span> fires again in <span class="phase">HEAVY MODE</span>
+  <span class="arrow">└─</span> Recovers handoff state + 10 memories</div>
 
       <div class="pipeline-grid">
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--red); opacity: 0.9"></div>
+            <div class="pipe-card-name">SessionStart hook</div>
+          </div>
+          <p>Automatic. Silently injects mem0 memories at every session start. Switches to heavy mode after compaction to recover lost context. <a href="/guides/hooks/">Full guide &rarr;</a></p>
+        </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--green)"></div>
             <div class="pipe-card-name">/prime</div>
           </div>
-          <p>Session start skill. Loads recent mem0 memories, checks project status, indexes code, and presents a briefing so Claude knows where you left off.</p>
+          <p>Manual. Deep project briefing — vault pages, git status, open issues, code index health. Use when you need the full picture.</p>
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--amber)"></div>
             <div class="pipe-card-name">/wrap</div>
           </div>
-          <p>Session end skill. Captures retro lessons, writes a digest to the vault, saves a curated summary to mem0, and cleans up branches.</p>
+          <p>Manual. Captures retro lessons, writes digest to vault + mem0, cleans up branches. Run at session end.</p>
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--cyan)"></div>
             <div class="pipe-card-name">session-oracle</div>
           </div>
-          <p>Search agent. Indexes iTerm2 logs with Milvus and runs semantic search to find past conversations, decisions, and solutions.</p>
+          <p>On demand. Semantic search across past iTerm2 session logs. "When did we decide X?" "How did we fix Y?"</p>
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--pink)"></div>
             <div class="pipe-card-name">session-digest</div>
           </div>
-          <p>Processing agent. Parses JSONL transcripts into structured summaries for the Obsidian vault and mem0 cloud memory.</p>
+          <p>Batch agent. Parses JSONL transcripts into vault + mem0 summaries. Dispatched by /wrap or run manually for missed sessions.</p>
         </div>
-      </div>
-
-      <div class="callout" style="border-left-color: var(--green);">
-        <div class="callout-title" style="color: var(--green);">There's a Layer 0: Automatic hooks</div>
-        Before any of this, <strong>hooks</strong> silently inject mem0 context at every session start — no user action needed. The SessionStart hook is what makes Claude "just know" what you did yesterday. See the <a href="/guides/hooks/">Hooks &amp; Automation</a> guide for the full hook system, including automatic compaction recovery and retro-lesson injection before skills.
       </div>
     </div>
   </section>
@@ -820,6 +828,54 @@ if __name__ == "__main__":
         <strong>/wrap (session end):</strong> Check for uncommitted work, capture retrospective lessons to mem0 (mistakes, successful approaches, preferences), write a session digest to my Obsidian vault and mem0, clean up merged branches, and print a session recap.
         <br><br>
         Both skills should be saved as <code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> files. They should ask me before taking destructive actions (deleting branches, discarding changes).
+      </div>
+    </div>
+  </section>
+
+  <!-- Batch Digest -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Layer 5</div>
+      <div class="section-title">Batch Digest: Catching Missed Sessions</div>
+      <p class="section-desc">Not every session ends with <code>/wrap</code>. Sometimes you close a terminal, your Mac sleeps, or you just forget. Those sessions still have JSONL transcripts sitting in <code>~/.claude/projects/</code> — they just haven't been digested yet.</p>
+
+      <h3>How it works</h3>
+      <p>Claude Code writes one <code>.jsonl</code> file per session in <code>~/.claude/projects/&lt;encoded-path&gt;/</code>. The batch digest scans all project directories, finds unprocessed files (tracked via a <code>.jsonl-processed</code> ledger), runs the extraction script to check if the session has enough content to be worth digesting, and dispatches <code>session-digest</code> agents in parallel — one per session.</p>
+
+<pre><code># Scan for unprocessed sessions
+PROCESSED="$HOME/.claude/scripts/.jsonl-processed"
+touch "$PROCESSED"
+
+for dir in "$HOME/.claude/projects"/*/; do
+  ls -t "$dir"*.jsonl 2>/dev/null | while read f; do
+    key="jsonl:$(basename "$dir")/$(basename "$f")"
+    if ! grep -qF "$key" "$PROCESSED"; then
+      lines=$(wc -l &lt; "$f" | tr -d ' ')
+      if [ "$lines" -gt 20 ]; then
+        echo "UNPROCESSED: $f ($lines lines)"
+      fi
+    fi
+  done
+done
+
+# For each unprocessed file:
+# 1. Run extract-jsonl-session.py to check content depth
+# 2. Skip sessions under 30 extracted lines (boots, aborts)
+# 3. Dispatch session-digest agent for substantial sessions
+# 4. Mark as processed in the ledger</code></pre>
+
+      <p>This catches everything <code>/wrap</code> misses. Run it at the end of the day, or set up a launchd/cron job to run it hourly. The <code>session-digest</code> agent is the same one <code>/wrap</code> uses — same output format, same dual storage (vault + mem0).</p>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build a batch digest scanner</div>
+        I have Claude Code JSONL session transcripts in <code>~/.claude/projects/</code> that don't always get digested when I close sessions. Build me a script that:
+        <br><br>
+        1. Scans all <code>~/.claude/projects/*/</code> directories for <code>.jsonl</code> files<br>
+        2. Tracks which files have already been processed using a ledger file<br>
+        3. Runs the extraction script on unprocessed files to check if they have enough content (skip sessions under 30 lines)<br>
+        4. For qualifying sessions, dispatches the <code>session-digest</code> agent with the file path, project name, and mem0 tag<br>
+        5. Marks processed files in the ledger so they aren't re-digested<br><br>
+        This should be runnable as a cron job or manually at end of day.
       </div>
     </div>
   </section>
