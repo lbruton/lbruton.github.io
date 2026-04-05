@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hooks &amp; Automation — Automatic Context Injection for Claude Code | lbruton.cc</title>
+  <meta name="description" content="Claude Code hooks that automatically inject mem0 memories at session start, surface retro lessons before skills, and recover context after compaction — no user action required.">
+  <meta property="og:title" content="Hooks & Automation — Automatic Context Injection for Claude Code">
+  <meta property="og:description" content="Python hooks that silently inject context at session start, recover after compaction, and surface past mistakes before skill execution.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/hooks/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-primary: #0a0e17;
+      --bg-card: #111a2e;
+      --bg-card-hover: #162040;
+      --border: #1e2a3a;
+      --border-hover: #2d3f5a;
+      --text: #b8c4d4;
+      --text-dim: #6b7d93;
+      --text-bright: #e6edf5;
+      --accent: #818cf8;
+      --accent-dim: #818cf820;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --cyan: #00b4d8;
+      --pink: #f472b6;
+      --red: #ef4444;
+      --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg-deep); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--text-bright); }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #070b14e8; border-bottom: 1px solid var(--border); padding: 14px 0; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    nav .container { display: flex; align-items: center; justify-content: space-between; max-width: 800px; }
+    .nav-brand { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; color: var(--text-bright); letter-spacing: -0.02em; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.85rem; color: var(--text-dim); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text-bright); }
+
+    .hero { padding: 80px 0 60px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-deep) 100%); }
+    .hero-label { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; color: var(--text-bright); line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 16px; }
+    .hero p { font-size: 1.1rem; color: var(--text); max-width: 600px; line-height: 1.8; }
+
+    .content { padding: 48px 0; }
+    .content + .content { border-top: 1px solid var(--border); }
+    .section-label { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .section-title { font-size: 1.6rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 12px; }
+    .section-desc { color: var(--text); margin-bottom: 32px; line-height: 1.8; }
+    h3 { font-size: 1.15rem; font-weight: 600; color: var(--text-bright); margin: 32px 0 12px; }
+    h3:first-child { margin-top: 0; }
+    p { margin-bottom: 16px; line-height: 1.8; }
+    ul, ol { margin: 0 0 16px 24px; line-height: 1.8; }
+    li { margin-bottom: 4px; }
+
+    pre { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0 24px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.7; color: var(--text-bright); }
+    code { font-family: var(--mono); font-size: 0.85em; background: var(--bg-card); padding: 2px 6px; border-radius: 4px; color: var(--text-bright); }
+    pre code { background: none; padding: 0; }
+
+    .file-header { display: flex; align-items: center; gap: 8px; margin-top: 24px; margin-bottom: 0; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); padding: 10px 16px; background: var(--bg-card-hover); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; }
+    .file-header + pre { margin-top: 0; border-radius: 0 0 10px 10px; }
+    .file-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .flow-diagram { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px; margin: 24px 0; font-family: var(--mono); font-size: 0.82rem; line-height: 2; color: var(--text); overflow-x: auto; white-space: pre; }
+    .flow-diagram .phase { color: var(--accent); font-weight: 600; }
+    .flow-diagram .hook { color: var(--green); font-weight: 600; }
+    .flow-diagram .skill { color: var(--amber); }
+    .flow-diagram .arrow { color: var(--text-dim); }
+    .flow-diagram .note { color: var(--text-dim); font-style: italic; }
+
+    .pipeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
+    .pipe-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .pipe-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .pipe-card-name { font-family: var(--mono); font-weight: 600; font-size: 0.9rem; color: var(--text-bright); }
+    .pipe-card p { font-size: 0.85rem; color: var(--text); margin: 0; line-height: 1.6; }
+
+    .compare-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.88rem; }
+    .compare-table th { text-align: left; padding: 12px 16px; background: var(--bg-card); color: var(--accent); font-family: var(--mono); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .compare-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table .label { color: var(--text-dim); white-space: nowrap; }
+
+    .prompt-block { background: linear-gradient(135deg, #111a2e 0%, #162040 100%); border: 1px solid var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 20px 24px; margin: 16px 0 24px; font-size: 0.9rem; line-height: 1.8; }
+    .prompt-label { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+    .callout { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 10px 10px 0; padding: 16px 20px; margin: 20px 0; font-size: 0.9rem; }
+    .callout-title { font-family: var(--mono); font-size: 0.78rem; color: var(--amber); font-weight: 600; margin-bottom: 6px; }
+    .callout-green { border-left-color: var(--green); }
+    .callout-green .callout-title { color: var(--green); }
+    .callout-red { border-left-color: var(--red); }
+    .callout-red .callout-title { color: var(--red); }
+
+    footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-dim); }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero { padding: 60px 0 40px; }
+      .content { padding: 36px 0; }
+      .pipeline-grid { grid-template-columns: 1fr; }
+      .flow-diagram { font-size: 0.72rem; padding: 20px; }
+      pre { font-size: 0.75rem; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a>
+      <div class="nav-links">
+        <a href="https://www.lbruton.cc#projects">Projects</a>
+        <a href="https://www.lbruton.cc#guides">Guides</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-label">Claude Code Guide</div>
+      <h1>Hooks &amp; Automation</h1>
+      <p>Automatic context injection that fires without user action. mem0 memories at session start, retro lessons before skills, and context recovery after compaction.</p>
+    </div>
+  </section>
+
+  <!-- What Are Hooks -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Concept</div>
+      <div class="section-title">Skills Are Manual. Hooks Are Automatic.</div>
+      <p class="section-desc">Skills like <a href="/guides/session-memory/">/prime</a> require you to type a command. Hooks fire silently in the background at specific lifecycle events — session start, before tool use, after edits. The user never sees them run, but Claude receives the injected context.</p>
+
+      <p>This is the difference between "tell Claude what happened last session" (manual, via <code>/prime</code>) and "Claude already knows what happened last session" (automatic, via hooks). Hooks provide the <strong>baseline context layer</strong>; skills provide the <strong>deep dive</strong> when you need it.</p>
+
+      <div class="flow-diagram"><span class="phase">SESSION LIFECYCLE</span>
+
+<span class="hook">SessionStart hook</span> fires <span class="arrow">→</span> mem0 memories injected silently
+     <span class="arrow">│</span>                       <span class="note">(Claude sees recent context without asking)</span>
+     <span class="arrow">▼</span>
+  User types <span class="skill">/prime</span> <span class="arrow">→</span> Deep project briefing (git, issues, indexes)
+     <span class="arrow">│</span>                    <span class="note">(optional — for when you need the full picture)</span>
+     <span class="arrow">▼</span>
+  User invokes a skill
+     <span class="arrow">│</span>
+<span class="hook">PreToolUse hook</span> fires <span class="arrow">→</span> retro lessons injected before skill runs
+     <span class="arrow">│</span>                      <span class="note">("last time you ran /spec, you forgot X")</span>
+     <span class="arrow">▼</span>
+  ... work continues ...
+     <span class="arrow">│</span>
+  Context window fills up <span class="arrow">→</span> Claude compacts conversation
+     <span class="arrow">│</span>
+<span class="hook">SessionStart hook</span> fires again <span class="arrow">→</span> <span class="phase">HEAVY MODE</span>
+     <span class="arrow">│</span>                                recovers handoff state + recent context
+     <span class="arrow">▼</span>
+  Session continues with restored memory</div>
+
+      <div class="pipeline-grid">
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--green)"></div>
+            <div class="pipe-card-name">SessionStart</div>
+          </div>
+          <p>Fires at session launch and after compaction. Two modes: lightweight (5 memories) on startup, heavy (10 memories + handoff state) after compact.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--amber)"></div>
+            <div class="pipe-card-name">PreToolUse</div>
+          </div>
+          <p>Fires before a tool executes. Matcher filters to specific tools (e.g., only before Skill invocations). Injects retro lessons relevant to the skill being called.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--cyan)"></div>
+            <div class="pipe-card-name">UserPromptSubmit</div>
+          </div>
+          <p>Fires when the user submits a prompt. Used for status bar updates, input validation, or prompt preprocessing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hook Protocol -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Protocol</div>
+      <div class="section-title">How Hooks Work</div>
+      <p class="section-desc">A hook is a command that Claude Code runs at a lifecycle event. It receives context on stdin and returns instructions on stdout as JSON.</p>
+
+      <h3>Input (stdin)</h3>
+      <p>Claude Code sends a JSON payload with event-specific fields:</p>
+<pre><code>// SessionStart — source tells you why it fired
+{"source": "startup"}     // fresh session
+{"source": "resume"}      // reconnected
+{"source": "compact"}     // context was compacted
+
+// PreToolUse — tool_input has the tool's parameters
+{
+  "tool_name": "Skill",
+  "tool_input": {"skill": "spec", "args": "STAK-498"}
+}
+
+// UserPromptSubmit — the user's message
+{"message": "fix the price scraper bug"}</code></pre>
+
+      <h3>Output (stdout)</h3>
+      <p>The hook prints JSON to stdout. The key field is <code>additionalContext</code> — a string that gets silently injected into Claude's context.</p>
+<pre><code>// Inject context — Claude sees this but the user doesn't
+{
+  "additionalContext": "Recent context: you worked on STAK-498 yesterday..."
+}
+
+// SessionStart has a special wrapper format
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "Recent mem0 context for StakTrakr..."
+  }
+}
+
+// Empty output = hook ran but has nothing to inject
+{}</code></pre>
+
+      <div class="callout">
+        <div class="callout-title">Performance matters</div>
+        Hooks block the event they're attached to. A slow SessionStart hook delays the entire session boot. Keep hooks under 4 seconds — use timeouts on all network calls, fail silently on errors, and return <code>{}</code> when there's nothing useful to inject.
+      </div>
+    </div>
+  </section>
+
+  <!-- settings.json Config -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Configuration</div>
+      <div class="section-title">settings.json Hook Config</div>
+      <p class="section-desc">Hooks are registered in <code>~/.claude/settings.json</code> under the <code>hooks</code> key. Each event maps to an array of hook commands.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--accent)"></div>
+        ~/.claude/settings.json
+      </div>
+<pre><code>{
+  "hooks": {
+    "SessionStart": {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 ~/.claude/hooks/mem0-session-start.py"
+        }
+      ]
+    },
+    "PreToolUse": {
+      "matcher": "Skill",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 ~/.claude/hooks/retro-recall.py"
+        }
+      ]
+    }
+  }
+}</code></pre>
+
+      <h3>Matcher field</h3>
+      <p>The <code>matcher</code> filters when the hook fires:</p>
+      <table class="compare-table">
+        <tr><th>Event</th><th>Matcher</th><th>Effect</th></tr>
+        <tr><td class="label">SessionStart</td><td><code>""</code> (empty)</td><td>Fires on every session start and compaction</td></tr>
+        <tr><td class="label">PreToolUse</td><td><code>"Skill"</code></td><td>Only fires before Skill tool invocations</td></tr>
+        <tr><td class="label">PreToolUse</td><td><code>"Edit"</code></td><td>Only fires before file edits</td></tr>
+        <tr><td class="label">PreToolUse</td><td><code>""</code> (empty)</td><td>Fires before every tool call (use carefully)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- Hook 1: mem0 Session Start -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Hook 1</div>
+      <div class="section-title">mem0 Session Start</div>
+      <p class="section-desc">The core hook. Searches <a href="https://mem0.ai" target="_blank" rel="noopener">mem0</a> for recent project memories and injects them as context so Claude knows where you left off — without you typing anything.</p>
+
+      <h3>Two modes</h3>
+      <table class="compare-table">
+        <tr><th>Mode</th><th>When</th><th>Behavior</th></tr>
+        <tr>
+          <td class="label">Normal</td>
+          <td><code>source: "startup"</code> or <code>"resume"</code></td>
+          <td>Lightweight — 5 recent memories, last 7 days, brief format</td>
+        </tr>
+        <tr>
+          <td class="label">Compact recovery</td>
+          <td><code>source: "compact"</code></td>
+          <td>Heavy — searches for pre-compact handoff state + 10 context memories, formatted with recovery header</td>
+        </tr>
+      </table>
+
+      <p>The compact recovery mode is critical. When Claude's context window fills up and compacts, it loses the conversation history. This hook detects compaction and injects a heavier context block with a <code>## Context restored after compaction</code> header, including any handoff state that was saved before the compact event.</p>
+
+      <h3>Project detection</h3>
+      <p>The hook detects which project you're in by reading the git root directory name and mapping it to a mem0 <code>agent_id</code> tag. This ensures you only get memories relevant to the current project, not cross-contamination from other work.</p>
+
+<pre><code># Project mapping — git directory name → mem0 agent_id
+PROJECT_MAP = {
+    "StakTrakr": "staktrakr",
+    "HexTrackr": "hextrackr",
+    "MyMelo": "mymelo",
+    "Forge": "forge",
+    # ... add your projects
+}
+
+# The hook reads the git root:
+#   git rev-parse --show-toplevel → /path/to/StakTrakr
+#   basename → StakTrakr
+#   PROJECT_MAP["StakTrakr"] → "staktrakr"
+# Then searches mem0 with agent_id="staktrakr"</code></pre>
+
+      <h3>Source filtering</h3>
+      <p>Not all mem0 memories are equal. The hook prefers memories from high-signal sources (session hooks, compaction hooks) over bulk-imported or migrated memories. If preferred-source memories exist, lower-quality ones are filtered out.</p>
+
+<pre><code># High-signal sources — prefer these
+PREFERRED_SOURCES = {"stop-hook", "pre-compact-hook", "post-tool-use-hook"}
+
+# If any preferred-source memories exist, only show those
+# Otherwise, fall back to showing everything</code></pre>
+
+      <h3>What Claude sees</h3>
+      <p>On a normal startup, Claude receives something like:</p>
+<pre><code>Recent mem0 context for StakTrakr (last 7 days):
+  1. [2026-04-03] (session-digest) Fixed JM Bullion price scraper —
+     eCheck column was being read as Card/PayPal. PR #903 merged.
+  2. [2026-04-02] (retro-learning) Always check column order in
+     vendor-specific parsers before assuming index positions.
+  3. [2026-04-01] (session-digest) Deployed poller v3.33.83 to
+     Portainer Stack 7 and Fly.io. All prices verified.</code></pre>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--green)"></div>
+        mem0-session-start.py
+      </div>
+<pre><code>#!/usr/bin/env python3
+"""
+mem0 SessionStart hook for Claude Code.
+
+Two modes:
+- startup/resume: Lightweight — 5 recent memories
+- compact: Heavy — handoff state + 10 context memories
+
+Reads MEM0_API_KEY from ~/.claude/.mcp.json.
+Detects project from git root directory name.
+"""
+
+import json, os, re, subprocess, sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
+
+MEM0_API_URL = "https://api.mem0.ai/v1/memories/search/"
+MCP_CONFIG = Path.home() / ".claude" / ".mcp.json"
+MAX_NORMAL = 5
+MAX_COMPACT = 10
+LOOKBACK_DAYS = 7
+EMPTY = json.dumps({})
+
+# Map git directory names to mem0 agent_id tags
+PROJECT_MAP = {
+    "StakTrakr": "staktrakr",
+    "HexTrackr": "hextrackr",
+    "MyMelo": "mymelo",
+    "Forge": "forge",
+    # Add your projects here
+}
+
+PREFERRED_SOURCES = {"stop-hook", "pre-compact-hook", "post-tool-use-hook"}
+
+
+def get_api_key():
+    """Read MEM0_API_KEY from .mcp.json."""
+    try:
+        with open(MCP_CONFIG) as f:
+            text = re.sub(r",\s*([}\]])", r"\1", f.read())
+        config = json.loads(text)
+        servers = config.get("mcpServers", config)
+        return servers.get("mem0", {}).get("env", {}).get("MEM0_API_KEY")
+    except Exception:
+        return None
+
+
+def get_project():
+    """Detect project from git root."""
+    try:
+        r = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                           capture_output=True, text=True, timeout=5)
+        if r.returncode == 0:
+            name = os.path.basename(r.stdout.strip())
+            return name, PROJECT_MAP.get(name)
+    except Exception:
+        pass
+    name = os.path.basename(os.getcwd())
+    return name, PROJECT_MAP.get(name)
+
+
+def search_mem0(api_key, query, limit, agent_id=None):
+    """Search mem0 API, post-filter by project and date."""
+    since = (datetime.now(timezone.utc)
+             - timedelta(days=LOOKBACK_DAYS)).strftime("%Y-%m-%d")
+    payload = {"query": query, "user_id": "lbruton",
+               "limit": limit * 4 if agent_id else limit * 2}
+    req = Request(MEM0_API_URL, data=json.dumps(payload).encode(),
+                  headers={"Authorization": f"Token {api_key}",
+                           "Content-Type": "application/json"},
+                  method="POST")
+    try:
+        with urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+    except Exception:
+        return []
+    if not isinstance(data, list):
+        data = data.get("results", [])
+
+    filtered = []
+    for mem in data:
+        if mem.get("created_at", "")[:10] &lt; since:
+            continue
+        if agent_id:
+            proj = mem.get("metadata", {}).get("project", "").lower()
+            if proj and proj != agent_id:
+                continue
+        filtered.append(mem)
+    return filtered[:limit]
+
+
+def filter_preferred(memories):
+    preferred = [m for m in memories
+                 if m.get("metadata", {}).get("source") in PREFERRED_SOURCES]
+    return preferred if preferred else memories
+
+
+def format_normal(memories, project_name):
+    if not memories:
+        return None
+    memories = filter_preferred(memories)
+    lines = [f"Recent mem0 context for {project_name} "
+             f"(last {LOOKBACK_DAYS} days):"]
+    for i, mem in enumerate(memories, 1):
+        text = mem.get("memory", "").strip()
+        if not text:
+            continue
+        if len(text) > 200:
+            text = text[:197] + "..."
+        date = mem.get("created_at", "")[:10]
+        mtype = mem.get("metadata", {}).get("type", "")
+        tag = f" ({mtype})" if mtype else ""
+        lines.append(f"  {i}. [{date}]{tag} {text}")
+    return "\n".join(lines) if len(lines) > 1 else None
+
+
+def format_compact(handoff, context, project_name):
+    sections = ["## Context restored after compaction\n"]
+    context = filter_preferred(context)
+    if handoff:
+        sections.append("### Session state before compaction")
+        for mem in handoff[:2]:
+            text = mem.get("memory", "").strip()
+            if text:
+                sections.append(text[:500])
+        sections.append("")
+    if context:
+        sections.append("### Recent project context")
+        for i, mem in enumerate(context, 1):
+            text = mem.get("memory", "").strip()
+            if not text:
+                continue
+            if len(text) > 200:
+                text = text[:197] + "..."
+            date = mem.get("created_at", "")[:10]
+            mtype = mem.get("metadata", {}).get("type", "")
+            tag = f" ({mtype})" if mtype else ""
+            sections.append(f"  {i}. [{date}]{tag} {text}")
+    return "\n".join(sections) if len(sections) > 2 else None
+
+
+def main():
+    source = "startup"
+    try:
+        raw = sys.stdin.read()
+        if raw:
+            source = json.loads(raw).get("source", "startup")
+    except Exception:
+        pass
+
+    api_key = get_api_key()
+    project_name, agent_id = get_project()
+    if not api_key or not agent_id:
+        print(EMPTY)
+        return
+
+    if source == "compact":
+        handoff = search_mem0(api_key,
+            "pre-compact handoff session state", 3, agent_id)
+        context = search_mem0(api_key,
+            "recent decision pattern insight task", MAX_COMPACT, agent_id)
+        result = format_compact(handoff, context, project_name)
+    else:
+        memories = search_mem0(api_key,
+            "recent session decision in-progress pattern", MAX_NORMAL,
+            agent_id)
+        result = format_normal(memories, project_name)
+
+    if not result:
+        print(EMPTY)
+        return
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": result}}))
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+    </div>
+  </section>
+
+  <!-- Hook 2: Retro Recall -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Hook 2</div>
+      <div class="section-title">Retro Recall</div>
+      <p class="section-desc">Before any skill runs, this hook searches mem0 for past <strong>retro-learning</strong> memories — mistakes, patterns, and preferences — and injects them so Claude doesn't repeat the same errors.</p>
+
+      <h3>How it works</h3>
+      <p>When you type <code>/spec</code>, Claude Code fires the PreToolUse hook before executing the Skill tool. The hook reads the skill name from stdin, searches mem0 for retro learnings tagged to the current project, and injects categorized lessons:</p>
+
+<pre><code># What Claude sees before running /spec:
+Retro learnings relevant to `spec` — check before proceeding:
+  🔴 Always read the user-template, not the default template —
+     last time you used the wrong one and had to redo Phase 3
+  🟡 Run codebase-search before writing requirements — skipping
+     it caused duplicate API endpoints in STAK-456
+  🟢 Single bundled PR worked well for the last refactor —
+     user prefers this over many small PRs for related changes</code></pre>
+
+      <h3>Categories</h3>
+      <table class="compare-table">
+        <tr><th>Icon</th><th>Category</th><th>What it captures</th></tr>
+        <tr><td class="label">🔴</td><td>error</td><td>Mistakes that cost time — don't repeat these</td></tr>
+        <tr><td class="label">🟡</td><td>warning</td><td>Risky patterns to watch for</td></tr>
+        <tr><td class="label">🔵</td><td>pattern</td><td>Recurring approaches that work</td></tr>
+        <tr><td class="label">⚙️</td><td>improvement</td><td>Process optimizations discovered</td></tr>
+        <tr><td class="label">💜</td><td>preference</td><td>User preferences and working style</td></tr>
+        <tr><td class="label">🟢</td><td>win</td><td>Approaches that worked well — keep doing these</td></tr>
+      </table>
+
+      <h3>Smart filtering</h3>
+      <p>The hook skips noisy low-value skills (<code>/save</code>, <code>/remember</code>, <code>/retro</code> itself) to avoid circular injection. It also filters by project — you only see retro learnings from the project you're currently working in, unless a cross-project lesson scored highly enough to be universal.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--amber)"></div>
+        retro-recall.py
+      </div>
+<pre><code>#!/usr/bin/env python3
+"""
+PreToolUse hook: surfaces past retro learnings before a skill executes.
+
+Searches mem0 for retro-learning memories tagged to the current project
+and injects them as additionalContext before the skill runs.
+Timeout: 4 seconds. Silent on error.
+"""
+
+import json, os, re, subprocess, sys
+from pathlib import Path
+from urllib.request import Request, urlopen
+
+MEM0_API_URL = "https://api.mem0.ai/v1/memories/search/"
+MCP_CONFIG = Path.home() / ".claude" / ".mcp.json"
+TIMEOUT = 4
+EMPTY = json.dumps({})
+
+# Skills that don't benefit from retro injection
+SKIP = {"save", "remember", "handoff", "digest-session", "retro"}
+
+ICONS = {"error": "🔴", "warning": "🟡", "pattern": "🔵",
+         "improvement": "⚙️", "preference": "💜", "win": "🟢"}
+
+
+def get_api_key():
+    try:
+        with open(MCP_CONFIG) as f:
+            text = re.sub(r",\s*([}\]])", r"\1", f.read())
+        servers = json.loads(text).get("mcpServers", {})
+        return servers.get("mem0", {}).get("env", {}).get("MEM0_API_KEY")
+    except Exception:
+        return None
+
+
+def get_project_tag():
+    try:
+        r = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                           capture_output=True, text=True, timeout=3)
+        if r.returncode == 0:
+            return os.path.basename(r.stdout.strip()).lower()
+    except Exception:
+        return None
+
+
+def search_retro(api_key, skill_name, project_tag):
+    payload = {
+        "query": f"retro learning lesson mistake pattern {skill_name}",
+        "user_id": "lbruton",
+        "limit": 10,
+        "filters": {"AND": [
+            {"user_id": "lbruton"},
+            {"metadata": {"type": "retro-learning"}}
+        ]}
+    }
+    req = Request(MEM0_API_URL, data=json.dumps(payload).encode(),
+                  headers={"Authorization": f"Token {api_key}",
+                           "Content-Type": "application/json"},
+                  method="POST")
+    try:
+        with urlopen(req, timeout=TIMEOUT) as resp:
+            data = json.loads(resp.read().decode())
+    except Exception:
+        return []
+
+    results = data if isinstance(data, list) else data.get("results", [])
+    relevant = []
+    for mem in results:
+        proj = mem.get("metadata", {}).get("project", "")
+        score = mem.get("score", 0)
+        if proj == project_tag or score > 0.75:
+            relevant.append(mem)
+    return relevant[:5]
+
+
+def main():
+    skill_name = "unknown"
+    try:
+        raw = sys.stdin.read()
+        if raw:
+            skill_name = json.loads(raw).get("tool_input", {}) \
+                .get("skill", "unknown")
+    except Exception:
+        pass
+
+    if skill_name in SKIP:
+        print(EMPTY); return
+
+    api_key = get_api_key()
+    project_tag = get_project_tag()
+    if not api_key or not project_tag:
+        print(EMPTY); return
+
+    memories = search_retro(api_key, skill_name, project_tag)
+    if not memories:
+        print(EMPTY); return
+
+    lines = [f"Retro learnings relevant to `{skill_name}`:"]
+    for mem in memories:
+        text = mem.get("memory", "").strip()
+        if not text: continue
+        cat = mem.get("metadata", {}).get("category", "")
+        icon = ICONS.get(cat, "•")
+        lines.append(f"  {icon} {text[:180]}")
+
+    if len(lines) > 1:
+        print(json.dumps({"additionalContext": "\n".join(lines)}))
+    else:
+        print(EMPTY)
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+    </div>
+  </section>
+
+  <!-- Hooks + Skills: The Layered Approach -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Architecture</div>
+      <div class="section-title">The Layered Context Model</div>
+      <p class="section-desc">Hooks and skills work together as layers. Each layer adds more context, but only when needed. The session starts fast with just hook-injected memories, and the user can go deeper with manual skills.</p>
+
+      <table class="compare-table">
+        <tr><th>Layer</th><th>Mechanism</th><th>Cost</th><th>When</th></tr>
+        <tr>
+          <td class="label">1. Hook baseline</td>
+          <td>SessionStart hook injects 5 recent mem0 memories</td>
+          <td>~500 tokens, 2-3 seconds</td>
+          <td>Every session, automatic</td>
+        </tr>
+        <tr>
+          <td class="label">2. Retro guard</td>
+          <td>PreToolUse hook injects relevant retro lessons</td>
+          <td>~300 tokens, 1-2 seconds</td>
+          <td>Before each skill, automatic</td>
+        </tr>
+        <tr>
+          <td class="label">3. /prime deep load</td>
+          <td>Reads vault, checks git, indexes, gathers issues</td>
+          <td>~2000 tokens, 15-30 seconds</td>
+          <td>On demand, when you need full context</td>
+        </tr>
+        <tr>
+          <td class="label">4. /session-oracle</td>
+          <td>Semantic search across all past session logs</td>
+          <td>Variable, runs as subagent</td>
+          <td>On demand, when you need to find something specific</td>
+        </tr>
+      </table>
+
+      <p>Most sessions only need layers 1-2. You start Claude, the hook silently reminds it of yesterday's work, and you pick up where you left off. <code>/prime</code> is for Monday mornings or context switches. <code>/session-oracle</code> is for "when did we decide X?" questions.</p>
+
+      <div class="callout callout-green">
+        <div class="callout-title">Compaction recovery is the killer feature</div>
+        Long sessions hit context limits and compact. Without the hook, Claude loses everything and you have to manually re-explain. With the hook, compaction fires a <code>source: "compact"</code> event, the hook searches mem0 for the pre-compact handoff state, and injects it with a <code>## Context restored after compaction</code> header. Claude picks up where it left off without the user even noticing the compaction happened.
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Quick Start</div>
+      <div class="section-title">Add Hooks to Your Setup</div>
+
+      <h3>1. Save the hook scripts</h3>
+<pre><code>mkdir -p ~/.claude/hooks
+# Save mem0-session-start.py and retro-recall.py
+chmod +x ~/.claude/hooks/mem0-session-start.py
+chmod +x ~/.claude/hooks/retro-recall.py</code></pre>
+
+      <h3>2. Get a mem0 API key</h3>
+      <p>Sign up at <a href="https://mem0.ai" target="_blank" rel="noopener">mem0.ai</a> and add the key to your MCP config at <code>~/.claude/.mcp.json</code>. The hooks read the key from the same config file your MCP server uses — single source of truth.</p>
+
+      <h3>3. Register the hooks</h3>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Register hooks in settings.json</div>
+        I want to register two hooks in my Claude Code settings:
+        <br><br>
+        1. <strong>SessionStart</strong>: Run <code>python3 ~/.claude/hooks/mem0-session-start.py</code> on every session start (empty matcher)<br>
+        2. <strong>PreToolUse</strong>: Run <code>python3 ~/.claude/hooks/retro-recall.py</code> before Skill tool invocations (matcher: "Skill")<br><br>
+        Add these to <code>~/.claude/settings.json</code> under the <code>hooks</code> key. Keep any existing settings intact.
+      </div>
+
+      <h3>4. Add your project mappings</h3>
+      <p>Edit the <code>PROJECT_MAP</code> dictionary in <code>mem0-session-start.py</code> to map your git directory names to mem0 agent_id tags. The hook only fires for mapped projects — unmapped directories get no context injection.</p>
+
+      <h3>5. Verify it works</h3>
+<pre><code># Start a new Claude Code session in a mapped project
+cd ~/MyProject
+claude
+
+# Claude should show injected context in its first response
+# You can also test the hook directly:
+echo '{"source": "startup"}' | python3 ~/.claude/hooks/mem0-session-start.py</code></pre>
+
+      <div class="callout">
+        <div class="callout-title">Minimum viable hook</div>
+        You don't need mem0 to start. The simplest useful hook reads a local file and injects it:
+        <pre style="margin: 12px 0 0; border: none; padding: 12px;"><code>#!/usr/bin/env python3
+import json
+from pathlib import Path
+notes = Path.home() / ".claude" / "session-notes.md"
+if notes.exists():
+    text = notes.read_text()[:1000]
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": text}}))
+else:
+    print("{}")</code></pre>
+        Write your notes to <code>~/.claude/session-notes.md</code> at session end, and they'll be injected at the next session start. No API needed.
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Guides -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Related</div>
+      <div class="section-title">Part of the Session Memory Pipeline</div>
+      <p>Hooks are one layer of the broader <a href="/guides/session-memory/">Session Memory Pipeline</a>. Together with skills, agents, and the knowledge vault, they form a complete system for cross-session continuity.</p>
+      <div class="pipeline-grid">
+        <a href="/guides/session-memory/" style="text-decoration:none">
+          <div class="pipe-card">
+            <div class="pipe-card-header">
+              <div class="file-dot" style="background: var(--accent)"></div>
+              <div class="pipe-card-name">Session Memory</div>
+            </div>
+            <p>The full pipeline: log cleaning, digest agents, /prime, /wrap, and session oracle search.</p>
+          </div>
+        </a>
+        <a href="/guides/docvault/" style="text-decoration:none">
+          <div class="pipe-card">
+            <div class="pipe-card-header">
+              <div class="file-dot" style="background: var(--amber)"></div>
+              <div class="pipe-card-name">DocVault</div>
+            </div>
+            <p>The Obsidian knowledge base where digests, issues, and project docs are stored.</p>
+          </div>
+        </a>
+        <a href="/guides/issue-pipeline/" style="text-decoration:none">
+          <div class="pipe-card">
+            <div class="pipe-card-header">
+              <div class="file-dot" style="background: var(--cyan)"></div>
+              <div class="pipe-card-name">Issue Pipeline</div>
+            </div>
+            <p>Vault-based issue tracking with Obsidian Bases views and spec-driven development.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://www.lbruton.cc">lbruton.cc</a>
+        <a href="/guides/session-memory/">Session Memory</a>
+        <a href="/guides/docvault/">DocVault</a>
+        <a href="/guides/issue-pipeline/">Issue Pipeline</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+    </div>
+  </footer>
+
+</body>
+</html>
