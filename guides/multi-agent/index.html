@@ -220,6 +220,93 @@ EOF</code></pre>
     </div>
   </div></section>
 
+  <!-- Codex Plugin -->
+  <section class="content"><div class="container">
+    <div class="section-label">Codex Plugin</div>
+    <div class="section-title">Codex Reviews Inside Claude Code</div>
+    <p class="section-desc">The <a href="https://github.com/openai/codex-plugin-cc" target="_blank" rel="noopener">openai/codex-plugin-cc</a> plugin lets you dispatch work to GPT-5.4 (Codex) directly from Claude Code. It shares your auth, config, and repo checkout — no separate terminal needed for reviews.</p>
+
+    <h3>Three review modes</h3>
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">/codex:review</div></div><p>Standard code review of uncommitted or branch changes. Reads the diff, returns findings. Review-only — never applies fixes.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">/codex:adversarial-review</div></div><p>Challenges the <em>approach itself</em>. Questions design choices, assumptions, tradeoffs, and where the design could fail under real-world conditions.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--pink)"></div><div class="pipe-card-name">/codex:rescue</div></div><p>Delegates investigation or a fix to Codex. Runs as a background task — fire and forget, check back with <code>/codex:status</code>.</p></div>
+    </div>
+
+    <h3>How it fits into the workflow</h3>
+<pre><code># After implementing a feature, get a second opinion:
+> /codex:review --background
+
+# Before merging, pressure-test the design:
+> /codex:adversarial-review --background
+# "Is this the right approach? What assumptions could break?"
+
+# Stuck on a bug? Hand it off:
+> /codex:rescue investigate why the price poller returns stale data
+# Codex runs in background, you keep working
+# Check back: /codex:status → /codex:result</code></pre>
+
+    <p>The key insight: <strong>Codex reviews Claude's work, not the other way around.</strong> Claude writes the code (it has the full spec context), Codex reviews it with fresh eyes. Two different models catching different classes of issues — Claude tends to over-engineer, Codex catches unnecessary complexity. Codex misses architectural context, Claude catches integration risks.</p>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Install</div>
+      <code>claude plugin add openai/codex-plugin-cc</code> — then <code>/codex:setup</code> to verify auth and connectivity. Requires the Codex CLI installed locally (<code>npm i -g @anthropic-ai/codex</code>).
+    </div>
+  </div></section>
+
+  <!-- Cross-Agent Spec Handoff -->
+  <section class="content"><div class="container">
+    <div class="section-label">Advanced</div>
+    <div class="section-title">Cross-Agent Spec Handoff</div>
+    <p class="section-desc">The spec documents are the handoff protocol. Any agent that can read markdown and call MCP tools can pick up a spec at any phase. This enables a workflow where different models handle different phases based on their strengths.</p>
+
+    <div class="flow-diagram"><span class="phase">Cross-Agent Spec Lifecycle</span>
+
+<span class="opus">Claude (Opus)</span>          <span class="note">— creates issue, writes requirements</span>
+     <span class="arrow">│</span>                     <span class="note">   (best at: understanding user intent)</span>
+     <span class="arrow">▼</span>
+<span class="note">Switch iTerm tab →</span>
+<span class="sonnet">Gemini (3.1 Pro)</span>        <span class="note">— loads spec, writes design document</span>
+     <span class="arrow">│</span>                     <span class="note">   (good at: API design, documentation)</span>
+     <span class="arrow">▼</span>
+<span class="note">Switch iTerm tab →</span>
+<span class="opus">Claude (Opus)</span>           <span class="note">— reviews design, writes tasks.md</span>
+     <span class="arrow">│</span>                     <span class="note">   (best at: breaking down complexity)</span>
+     <span class="arrow">▼</span>
+<span class="note">Switch iTerm tab →</span>
+<span class="haiku">Codex (GPT-5.4)</span>         <span class="note">— implements tasks (mechanical, fast)</span>
+     <span class="arrow">│</span>                     <span class="note">   (best at: bounded code changes)</span>
+     <span class="arrow">▼</span>
+<span class="opus">Claude (Opus)</span>           <span class="note">— /codex:review, merge, /wrap</span></div>
+
+    <h3>How handoff works</h3>
+    <p>There's no custom IPC or message passing. The spec files (<code>requirements.md</code>, <code>design.md</code>, <code>tasks.md</code>) sit in the repo's <code>.spec-workflow/</code> directory. When you switch terminals:</p>
+<pre><code># In Codex terminal:
+codex "@spec STAK-498"
+# Codex reads .spec-workflow/specs/STAK-498-*/tasks.md
+# Sees which tasks are [ ] (pending) vs [x] (done)
+# Implements the next pending task, logs artifacts
+
+# In Gemini terminal:
+gemini "@spec STAK-498"
+# Same thing — reads the spec, picks up where the last agent left off
+
+# In Claude terminal:
+/spec STAK-498
+# Reads spec status, sees what was completed, continues</code></pre>
+
+    <h3>Implementation logging prevents conflicts</h3>
+    <p>Every agent calls <code>log-implementation</code> after completing a task. The log records which files were modified, which API endpoints were created, and which components were built. The next agent reads these logs before starting — so it won't create a duplicate endpoint or reimplement a utility that another agent already built.</p>
+
+    <h3>Session memory bridges the gap</h3>
+    <p>The <a href="/guides/session-memory/">session memory pipeline</a> ensures context transfers between agents. When Claude runs <code>/wrap</code>, it saves a digest to mem0 and the Obsidian vault. When Codex runs <code>@prime</code>, the <a href="/guides/hooks/">session-start hook</a> injects recent memories. Same project tag, same mem0 account — cross-agent continuity.</p>
+
+    <div class="callout">
+      <div class="callout-title">Start simple</div>
+      You don't need all three agents on day one. Start with Claude + <code>/codex:review</code> for second-opinion code reviews. Add Codex rescue when you're stuck. Add Gemini or cross-agent spec handoff when you're comfortable with the spec workflow.
+    </div>
+  </div></section>
+
   <footer><div class="container">
     <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
     <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
