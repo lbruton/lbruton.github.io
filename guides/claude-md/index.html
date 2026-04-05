@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLAUDE.md Architecture — Instruction Design for AI Agents | lbruton.cc</title>
+  <meta name="description" content="How to structure CLAUDE.md as a routing layer — skill trigger matrices, mandatory gates, three-layer plugin architecture, and project-level pointers instead of prose.">
+  <meta property="og:title" content="CLAUDE.md Architecture — Instruction Design for AI Agents">
+  <meta property="og:description" content="Stop writing flat instruction lists. Build a routing layer with skill triggers, mandatory gates, and a three-layer plugin architecture.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/claude-md/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root{--bg-deep:#070b14;--bg-primary:#0a0e17;--bg-card:#111a2e;--bg-card-hover:#162040;--border:#1e2a3a;--border-hover:#2d3f5a;--text:#b8c4d4;--text-dim:#6b7d93;--text-bright:#e6edf5;--accent:#818cf8;--accent-dim:#818cf820;--green:#22c55e;--amber:#f59e0b;--cyan:#00b4d8;--pink:#f472b6;--red:#ef4444;--mono:'SF Mono','JetBrains Mono','Fira Code','Cascadia Code',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg-deep);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--text-bright)}.container{max-width:800px;margin:0 auto;padding:0 24px}
+    nav{position:sticky;top:0;z-index:100;background:#070b14e8;border-bottom:1px solid var(--border);padding:14px 0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}nav .container{display:flex;align-items:center;justify-content:space-between;max-width:800px}.nav-brand{font-family:var(--mono);font-weight:700;font-size:1.1rem;color:var(--text-bright);letter-spacing:-.02em}.nav-brand span{color:var(--accent)}.nav-links{display:flex;gap:24px}.nav-links a{font-size:.85rem;color:var(--text-dim);transition:color .2s}.nav-links a:hover{color:var(--text-bright)}
+    .hero{padding:80px 0 60px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--bg-primary) 0%,var(--bg-deep) 100%)}.hero-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}.hero h1{font-size:2.4rem;font-weight:700;color:var(--text-bright);line-height:1.2;letter-spacing:-.03em;margin-bottom:16px}.hero p{font-size:1.1rem;color:var(--text);max-width:600px;line-height:1.8}
+    .content{padding:48px 0}.content+.content{border-top:1px solid var(--border)}.section-label{font-family:var(--mono);font-size:.75rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}.section-title{font-size:1.6rem;font-weight:700;color:var(--text-bright);letter-spacing:-.02em;margin-bottom:12px}.section-desc{color:var(--text);margin-bottom:32px;line-height:1.8}h3{font-size:1.15rem;font-weight:600;color:var(--text-bright);margin:32px 0 12px}h3:first-child{margin-top:0}p{margin-bottom:16px;line-height:1.8}ul,ol{margin:0 0 16px 24px;line-height:1.8}li{margin-bottom:4px}
+    pre{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:16px 0 24px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--text-bright)}code{font-family:var(--mono);font-size:.85em;background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--text-bright)}pre code{background:none;padding:0}
+    .file-header{display:flex;align-items:center;gap:8px;margin-top:24px;margin-bottom:0;font-family:var(--mono);font-size:.78rem;color:var(--text-dim);padding:10px 16px;background:var(--bg-card-hover);border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0}.file-header+pre{margin-top:0;border-radius:0 0 10px 10px}.file-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .flow-diagram{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:32px;margin:24px 0;font-family:var(--mono);font-size:.82rem;line-height:2;color:var(--text);overflow-x:auto;white-space:pre}.flow-diagram .phase{color:var(--accent);font-weight:600}.flow-diagram .layer{color:var(--green);font-weight:600}.flow-diagram .arrow{color:var(--text-dim)}.flow-diagram .note{color:var(--text-dim)}
+    .compare-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.88rem}.compare-table th{text-align:left;padding:12px 16px;background:var(--bg-card);color:var(--accent);font-family:var(--mono);font-size:.78rem;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}.compare-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}.compare-table tr:last-child td{border-bottom:none}.compare-table .label{color:var(--text-dim);white-space:nowrap}
+    .prompt-block{background:linear-gradient(135deg,#111a2e 0%,#162040 100%);border:1px solid var(--accent-dim);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:20px 24px;margin:16px 0 24px;font-size:.9rem;line-height:1.8}.prompt-label{font-family:var(--mono);font-size:.72rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+    .callout{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:16px 20px;margin:20px 0;font-size:.9rem}.callout-title{font-family:var(--mono);font-size:.78rem;color:var(--amber);font-weight:600;margin-bottom:6px}.callout-green{border-left-color:var(--green)}.callout-green .callout-title{color:var(--green)}.callout-red{border-left-color:var(--red)}.callout-red .callout-title{color:var(--red)}
+    .pipeline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:24px 0}.pipe-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}.pipe-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pipe-card-name{font-family:var(--mono);font-weight:600;font-size:.9rem;color:var(--text-bright)}.pipe-card p{font-size:.85rem;color:var(--text);margin:0;line-height:1.6}
+    footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}.footer-links a{font-size:.85rem;color:var(--text-dim)}.footer-links a:hover{color:var(--accent)}.footer-copy{font-size:.8rem;color:var(--text-dim)}
+    @media(max-width:700px){.hero h1{font-size:1.8rem}.hero{padding:60px 0 40px}.content{padding:36px 0}.pipeline-grid{grid-template-columns:1fr}.flow-diagram{font-size:.72rem;padding:20px}pre{font-size:.75rem;padding:16px}}
+  </style>
+</head>
+<body>
+  <nav><div class="container"><a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a><div class="nav-links"><a href="https://www.lbruton.cc#projects">Projects</a><a href="https://www.lbruton.cc#guides">Guides</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div></div></nav>
+
+  <section class="hero"><div class="container">
+    <div class="hero-label">Claude Code Guide</div>
+    <h1>CLAUDE.md Architecture</h1>
+    <p>Stop writing flat instruction lists. Build CLAUDE.md as a routing layer — skill triggers, mandatory gates, and a three-layer plugin architecture that scales across projects.</p>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">The Problem</div>
+    <div class="section-title">Most CLAUDE.md Files Are Too Flat</div>
+    <p class="section-desc">A typical CLAUDE.md is a dump of rules: "use TypeScript", "run tests before committing", "prefer small PRs." This works for small projects, but it doesn't scale. Claude re-reads the whole file every session, rules contradict each other, and there's no way to route Claude to the right workflow for the task at hand.</p>
+    <p>The better approach: treat CLAUDE.md as a <strong>routing layer</strong>. It maps trigger words to skills, enforces mandatory gates before code gets written, and points to external documentation instead of duplicating it. The actual workflow logic lives in skills and plugins — CLAUDE.md just directs traffic.</p>
+
+    <div class="flow-diagram"><span class="phase">CLAUDE.md</span> <span class="note">(the router)</span>
+     <span class="arrow">│</span>
+     <span class="arrow">├──</span> User says "fix this bug"
+     <span class="arrow">│   └──</span> Routes to <span class="layer">/systematic-debugging</span> skill
+     <span class="arrow">│</span>
+     <span class="arrow">├──</span> User says "new feature"
+     <span class="arrow">│   └──</span> Routes to <span class="layer">/spec</span> skill (Requirements → Design → Tasks)
+     <span class="arrow">│</span>
+     <span class="arrow">├──</span> User says "deploy to portainer"
+     <span class="arrow">│   └──</span> Routes to <span class="layer">/home-infrastructure</span> skill
+     <span class="arrow">│</span>
+     <span class="arrow">└──</span> User starts writing code
+         <span class="arrow">└──</span> <span class="phase">MANDATORY GATES</span> fire:
+             Issue? Worktree? Spec? Context7? Version bump?</div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Architecture</div>
+    <div class="section-title">The Hierarchy</div>
+    <p class="section-desc">CLAUDE.md operates at three levels. Global rules apply everywhere. Project rules override for specific repos. Skills contain the actual workflow logic.</p>
+
+    <table class="compare-table">
+      <tr><th>Level</th><th>Location</th><th>Purpose</th><th>Size</th></tr>
+      <tr><td class="label">Global</td><td><code>~/.claude/CLAUDE.md</code></td><td>Universal rules, skill trigger matrix, mandatory gates, MCP servers, repo boundaries</td><td>~200 lines</td></tr>
+      <tr><td class="label">Project</td><td><code>{repo}/CLAUDE.md</code></td><td>Project-specific pointers — DocVault refs, API tables, version lock info, local skills</td><td>~70-100 lines</td></tr>
+      <tr><td class="label">Skills</td><td><code>~/.claude/skills/{name}/SKILL.md</code></td><td>Actual workflow logic that Claude reads and follows when a skill is invoked</td><td>Variable</td></tr>
+    </table>
+
+    <div class="callout callout-green">
+      <div class="callout-title">The golden rule</div>
+      If your project CLAUDE.md exceeds 150 lines, you're duplicating documentation. Move the content to a knowledge base (like <a href="/guides/docvault/">DocVault</a>) and replace it with a pointer: <code>Read DocVault/Projects/MyProject/Architecture.md for system design details.</code>
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Core Pattern</div>
+    <div class="section-title">The Skill Trigger Matrix</div>
+    <p class="section-desc">The most powerful section of a global CLAUDE.md is the trigger matrix — a lookup table that maps natural language to skill invocations. When a user says something that matches a trigger, Claude invokes the skill instead of improvising.</p>
+
+    <div class="file-header"><div class="file-dot" style="background: var(--accent)"></div>~/.claude/CLAUDE.md (excerpt)</div>
+<pre><code>## Skill Trigger Matrix
+
+| Trigger Words | Skill |
+|---|---|
+| prime, boot, status, catch me up | /prime |
+| chat, talk, explore, idea | /chat |
+| spec, requirements, design, tasks | /spec |
+| issue, bug, track this, new bug | /issue |
+| debug, test failure, unexpected | /systematic-debugging |
+| wrap, done for now, end of session | /wrap |
+| portainer, docker, stack, proxy | /home-infrastructure |
+| deploy verify, smoke test | /deploy-verify |
+| release, version bump, patch | /release |
+| pr resolve, review threads | /pr-resolve |
+| remember, save, recall, forget | /remember |
+| vault update, update docs | /vault-update |</code></pre>
+
+    <p>This is a routing table, not a rule list. Claude sees the trigger words, matches them against the user's message, and invokes the skill via the Skill tool. The skill file contains the full workflow — CLAUDE.md doesn't need to describe the steps.</p>
+
+    <h3>Why this works</h3>
+    <ul>
+      <li><strong>No duplication</strong> — workflow logic lives in one place (the skill), not scattered across CLAUDE.md</li>
+      <li><strong>Easy to extend</strong> — adding a new workflow means creating a skill file and adding one row to the matrix</li>
+      <li><strong>Discoverable</strong> — Claude can scan the table to find the right skill for any task</li>
+      <li><strong>Versioned</strong> — skills can be updated independently without touching CLAUDE.md</li>
+    </ul>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Safety</div>
+    <div class="section-title">Mandatory Gates</div>
+    <p class="section-desc">Gates are pre-conditions that must be satisfied before Claude writes any code. They prevent common mistakes: coding without an issue, committing to main, skipping documentation, forgetting version bumps.</p>
+
+    <div class="file-header"><div class="file-dot" style="background: var(--red)"></div>~/.claude/CLAUDE.md (excerpt)</div>
+<pre><code>## Mandatory Gates — Before Writing Any Code
+
+| # | Gate | Detail |
+|---|------|--------|
+| 1 | Skill check | If a task matches a skill, invoke it first |
+| 2 | Context7 | Query library docs before writing code |
+| 3 | Issue required | Every code change needs a tracked issue |
+| 4 | Worktree required | All changes in isolated branches |
+| 5 | Spec for features | Non-trivial features need specs |
+| 6 | Log implementation | HARD GATE — call before marking task done |
+| 7 | Version bump | For version-locked projects |
+| 8 | DocVault before PR | Update docs THEN push — HARD GATE |
+| 9 | PR completion | Resolve all review threads before done |</code></pre>
+
+    <p>Two gates are marked <strong>HARD GATE</strong> — Claude must never skip them, even if the user doesn't mention them. Gate 6 (log implementation before marking a task complete) and Gate 8 (update documentation before pushing a PR) are the most commonly violated without explicit enforcement.</p>
+
+    <div class="callout callout-red">
+      <div class="callout-title">Red Flags section</div>
+      Pair your gates with a "Red Flags — STOP and Rethink" section that lists the most common violations: "Coding without an issue? <code>/issue</code> first. Pushing to main? Worktree + PR. Marking task done without logging? Log NOW."
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Extensibility</div>
+    <div class="section-title">Three-Layer Skill Architecture</div>
+    <p class="section-desc">Skills live in three layers. This separation lets you iterate on workflows quickly (layer 1), share them as plugins (layer 3), and add project-specific wrapper logic without touching the core (layer 1 shims).</p>
+
+    <table class="compare-table">
+      <tr><th>Layer</th><th>Location</th><th>Purpose</th><th>Edit when</th></tr>
+      <tr><td class="label">1. Skill shim</td><td><code>~/.claude/skills/{name}/SKILL.md</code></td><td>Thin pointer that appears in <code>/</code> autocomplete. Can add pre/post checks.</td><td>Adding wrapper logic, pre-flight validation</td></tr>
+      <tr><td class="label">2. Plugin command</td><td>MCP prompt (e.g., <code>specflow:spec</code>)</td><td>The full workflow logic, registered as an MCP prompt.</td><td>Core workflow changes for all users</td></tr>
+      <tr><td class="label">3. Plugin source</td><td>TypeScript source in plugin repo</td><td>Compiled into the plugin. Requires build + reinstall.</td><td>Major architecture changes</td></tr>
+    </table>
+
+    <h3>The shim pattern</h3>
+    <p>A skill shim is a thin SKILL.md that adds wrapper logic around a plugin command. For example, adding a git sync check before running <code>/spec</code>:</p>
+
+    <div class="file-header"><div class="file-dot" style="background: var(--green)"></div>~/.claude/skills/spec/SKILL.md</div>
+<pre><code># Spec — Spec-Driven Development
+
+## Pre-flight: Git Sync
+Before starting, verify the working directory is clean:
+- Run `git status --short`
+- If there are uncommitted changes, ask: commit, stash, or discard?
+
+## Pre-flight: Issue Check
+Verify an issue exists for this work:
+- Check if the user provided an issue ID
+- If not, ask for one or offer to create via /issue
+
+## Then: Invoke specflow:spec
+Invoke `specflow:spec` via the Skill tool, passing the issue ID.</code></pre>
+
+    <p>The shim is natural language — Claude reads and follows it. No compilation needed. If the plugin's core logic changes, the shim stays the same. If you need project-specific pre-checks, edit the shim without touching the plugin.</p>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Project Level</div>
+    <div class="section-title">Writing a Project CLAUDE.md</div>
+    <p class="section-desc">Project-level CLAUDE.md files should be short and specific. Point to documentation, don't duplicate it. List project-specific skills, not global ones.</p>
+
+    <div class="file-header"><div class="file-dot" style="background: var(--cyan)"></div>StakTrakr/CLAUDE.md (example — 72 lines)</div>
+<pre><code># StakTrakr
+
+Free, privacy-first precious metals portfolio tracker.
+
+## Documentation
+Read DocVault/Projects/StakTrakr/ for architecture, API design,
+and deployment docs. Start at the Overview page.
+
+## API Infrastructure
+| Feed | Staleness | Provider |
+|------|-----------|----------|
+| Spot prices | 5 min | metals-api.com |
+| Retail prices | 30 min | Custom pollers |
+| Historical | 24 hr | Cache layer |
+
+## Critical Patterns
+- All DOM manipulation via innerHTML with DOMPurify sanitization
+- Storage keys prefixed with `stak_` in localStorage
+- Version locked in devops/version.lock
+
+## Issue Tracking
+Prefix: STAK | Tag: staktrakr
+Path: DocVault/Projects/StakTrakr/Issues/
+
+## Project Skills
+- /api-infrastructure — feed health, staleness checks
+- /release — version bump workflow (6 phases)
+- /ui-mockup — Stitch visual mockups</code></pre>
+
+    <h3>What NOT to put in project CLAUDE.md</h3>
+    <ul>
+      <li>Architecture explanations (put in DocVault, link to it)</li>
+      <li>Deployment procedures (put in a skill or runbook)</li>
+      <li>Global rules (they're in <code>~/.claude/CLAUDE.md</code>)</li>
+      <li>Full API documentation (put in-repo at <code>docs/</code>)</li>
+      <li>Historical decisions (put in mem0 or DocVault)</li>
+    </ul>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Supporting Sections</div>
+    <div class="section-title">Other Essential CLAUDE.md Sections</div>
+
+    <h3>Knowledge Lookup Order</h3>
+    <p>Tell Claude where to find information, in priority order:</p>
+<pre><code>## Knowledge Lookup Order
+1. DocVault first — read ~/DocVault/ for architecture questions
+2. mem0 second — search for past decisions and session context
+3. Code third — read source files for current implementation
+Never answer from training knowledge alone.</code></pre>
+
+    <h3>Code Search Order</h3>
+    <p>If you have multiple code search tools, rank them cheapest-first:</p>
+<pre><code>## Code Search — Cheapest First
+1. code-graph-context — structural: callers, imports, dead code
+2. claude-context — semantic: "find code related to X"
+3. Grep / Glob — literal strings, exact identifiers
+4. code-oracle agent — only when tiers 1-3 leave gaps</code></pre>
+
+    <h3>Repo Boundaries</h3>
+    <p>If you manage multiple projects, define PR targets and version locking:</p>
+<pre><code>## Repo Boundaries
+| Repo | PR Target | Version Lock |
+|------|-----------|-------------|
+| StakTrakr | dev | devops/version.lock |
+| HexTrackr | dev | devops/version.lock |
+| Forge | main | devops/version.lock |
+| MyMelo | main | — |
+
+- NEVER push directly to main — always worktree + PR
+- NEVER merge dev to main unless user says "release"</code></pre>
+
+    <h3>MCP Servers</h3>
+    <p>List your MCP servers so Claude knows what tools are available:</p>
+<pre><code>## MCP Servers
+| Server | Use For |
+|--------|---------|
+| mem0 | Cross-session memory |
+| claude-context | Semantic code search (Milvus) |
+| context7 | Library documentation lookup |
+| codacy | Code quality analysis |
+| infisical | Secrets management |</code></pre>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Quick Start</div>
+    <div class="section-title">Build Your CLAUDE.md</div>
+
+    <h3>1. Start with the global file</h3>
+<pre><code>mkdir -p ~/.claude
+# Create ~/.claude/CLAUDE.md with:
+# - User profile (role, preferences)
+# - Skill trigger matrix (start with 5-10 triggers)
+# - Mandatory gates (start with: issue, worktree, docs-before-PR)
+# - Knowledge lookup order
+# - Red flags section</code></pre>
+
+    <h3>2. Create your first skills</h3>
+<pre><code>mkdir -p ~/.claude/skills/issue
+mkdir -p ~/.claude/skills/wrap
+# Write SKILL.md files with the workflow logic
+# CLAUDE.md routes to them — it doesn't contain them</code></pre>
+
+    <h3>3. Add project-level files</h3>
+<pre><code># In each project repo
+# Keep it under 100 lines
+# Point to docs, list project skills, define boundaries</code></pre>
+
+    <div class="prompt-block">
+      <div class="prompt-label">Prompt for Claude: Build your CLAUDE.md</div>
+      I want to restructure my CLAUDE.md as a routing layer instead of a flat rule list. Help me build:
+      <br><br>
+      1. A <strong>skill trigger matrix</strong> — map my common tasks to skill names (I'll create the skills later)<br>
+      2. <strong>Mandatory gates</strong> — what must be true before I write code (issue tracking, branch isolation, docs)<br>
+      3. A <strong>knowledge lookup order</strong> — where Claude should look for answers first<br>
+      4. A <strong>red flags section</strong> — common mistakes to catch and correct<br>
+      5. <strong>Repo boundaries</strong> — which branches to target, version locking rules<br><br>
+      The CLAUDE.md should route to skills, not contain workflow steps. Keep it under 200 lines. Save as <code>~/.claude/CLAUDE.md</code>.
+    </div>
+  </div></section>
+
+  <footer><div class="container">
+    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+  </div></footer>
+</body>
+</html>

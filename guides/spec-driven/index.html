@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spec-Driven Development — 4-Phase Workflow for Claude Code | lbruton.cc</title>
+  <meta name="description" content="A structured development methodology: Requirements, Design, Tasks, Implementation with approval gates, codebase analysis, and implementation logging. No code without a spec.">
+  <meta property="og:title" content="Spec-Driven Development — 4-Phase Workflow for Claude Code">
+  <meta property="og:description" content="Requirements → Design → Tasks → Implementation. Approval gates, codebase analysis, implementation logging. Battle-tested across 100+ specs.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/spec-driven/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root{--bg-deep:#070b14;--bg-primary:#0a0e17;--bg-card:#111a2e;--bg-card-hover:#162040;--border:#1e2a3a;--border-hover:#2d3f5a;--text:#b8c4d4;--text-dim:#6b7d93;--text-bright:#e6edf5;--accent:#818cf8;--accent-dim:#818cf820;--green:#22c55e;--amber:#f59e0b;--cyan:#00b4d8;--pink:#f472b6;--red:#ef4444;--mono:'SF Mono','JetBrains Mono','Fira Code','Cascadia Code',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg-deep);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--text-bright)}.container{max-width:800px;margin:0 auto;padding:0 24px}
+    nav{position:sticky;top:0;z-index:100;background:#070b14e8;border-bottom:1px solid var(--border);padding:14px 0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}nav .container{display:flex;align-items:center;justify-content:space-between;max-width:800px}.nav-brand{font-family:var(--mono);font-weight:700;font-size:1.1rem;color:var(--text-bright);letter-spacing:-.02em}.nav-brand span{color:var(--accent)}.nav-links{display:flex;gap:24px}.nav-links a{font-size:.85rem;color:var(--text-dim);transition:color .2s}.nav-links a:hover{color:var(--text-bright)}
+    .hero{padding:80px 0 60px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--bg-primary) 0%,var(--bg-deep) 100%)}.hero-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}.hero h1{font-size:2.4rem;font-weight:700;color:var(--text-bright);line-height:1.2;letter-spacing:-.03em;margin-bottom:16px}.hero p{font-size:1.1rem;color:var(--text);max-width:600px;line-height:1.8}
+    .content{padding:48px 0}.content+.content{border-top:1px solid var(--border)}.section-label{font-family:var(--mono);font-size:.75rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}.section-title{font-size:1.6rem;font-weight:700;color:var(--text-bright);letter-spacing:-.02em;margin-bottom:12px}.section-desc{color:var(--text);margin-bottom:32px;line-height:1.8}h3{font-size:1.15rem;font-weight:600;color:var(--text-bright);margin:32px 0 12px}h3:first-child{margin-top:0}p{margin-bottom:16px;line-height:1.8}ul,ol{margin:0 0 16px 24px;line-height:1.8}li{margin-bottom:4px}
+    pre{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:16px 0 24px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--text-bright)}code{font-family:var(--mono);font-size:.85em;background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--text-bright)}pre code{background:none;padding:0}
+    .file-header{display:flex;align-items:center;gap:8px;margin-top:24px;margin-bottom:0;font-family:var(--mono);font-size:.78rem;color:var(--text-dim);padding:10px 16px;background:var(--bg-card-hover);border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0}.file-header+pre{margin-top:0;border-radius:0 0 10px 10px}.file-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .flow-diagram{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:32px;margin:24px 0;font-family:var(--mono);font-size:.82rem;line-height:2;color:var(--text);overflow-x:auto;white-space:pre}.flow-diagram .phase{color:var(--accent);font-weight:600}.flow-diagram .gate{color:var(--red);font-weight:600}.flow-diagram .arrow{color:var(--text-dim)}.flow-diagram .tool{color:var(--green)}
+    .compare-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.88rem}.compare-table th{text-align:left;padding:12px 16px;background:var(--bg-card);color:var(--accent);font-family:var(--mono);font-size:.78rem;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}.compare-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}.compare-table tr:last-child td{border-bottom:none}.compare-table .label{color:var(--text-dim);white-space:nowrap}
+    .prompt-block{background:linear-gradient(135deg,#111a2e 0%,#162040 100%);border:1px solid var(--accent-dim);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:20px 24px;margin:16px 0 24px;font-size:.9rem;line-height:1.8}.prompt-label{font-family:var(--mono);font-size:.72rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+    .callout{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:16px 20px;margin:20px 0;font-size:.9rem}.callout-title{font-family:var(--mono);font-size:.78rem;color:var(--amber);font-weight:600;margin-bottom:6px}.callout-green{border-left-color:var(--green)}.callout-green .callout-title{color:var(--green)}.callout-red{border-left-color:var(--red)}.callout-red .callout-title{color:var(--red)}
+    .pipeline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin:24px 0}.pipe-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}.pipe-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pipe-card-name{font-family:var(--mono);font-weight:600;font-size:.9rem;color:var(--text-bright)}.pipe-card p{font-size:.85rem;color:var(--text);margin:0;line-height:1.6}
+    footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}.footer-links a{font-size:.85rem;color:var(--text-dim)}.footer-links a:hover{color:var(--accent)}.footer-copy{font-size:.8rem;color:var(--text-dim)}
+    @media(max-width:700px){.hero h1{font-size:1.8rem}.hero{padding:60px 0 40px}.content{padding:36px 0}.pipeline-grid{grid-template-columns:1fr 1fr}.flow-diagram{font-size:.72rem;padding:20px}pre{font-size:.75rem;padding:16px}}
+  </style>
+</head>
+<body>
+  <nav><div class="container"><a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a><div class="nav-links"><a href="https://www.lbruton.cc#projects">Projects</a><a href="https://www.lbruton.cc#guides">Guides</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div></div></nav>
+
+  <section class="hero"><div class="container">
+    <div class="hero-label">Claude Code Guide</div>
+    <h1>Spec-Driven Development</h1>
+    <p>A 4-phase methodology: Requirements, Design, Tasks, Implementation. Every phase is documented, approval-gated, and grounded in codebase analysis. No code without a spec.</p>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Overview</div>
+    <div class="section-title">The Four Phases</div>
+    <p class="section-desc">Every non-trivial feature follows the same path. Each phase produces a document, gets approved through a dashboard, and builds on the previous phase. Claude never improvises architecture — it works from specs.</p>
+
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">1. Requirements</div></div><p>WHAT are we building? User stories, acceptance criteria, non-functional requirements.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">2. Design</div></div><p>HOW will it work? Architecture, components, data models, error handling.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">3. Tasks</div></div><p>What are the atomic steps? Each task has a _Prompt, _Leverage, and file touch map.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">4. Implementation</div></div><p>Build it. Subagent dispatch, code review, implementation logging, then ship.</p></div>
+    </div>
+
+    <div class="flow-diagram"><span class="phase">Phase 1: Requirements</span> <span class="arrow">──</span> <span class="gate">APPROVAL</span> <span class="arrow">──▶</span> <span class="phase">Phase 2: Design</span>
+         <span class="arrow">│</span>                                       <span class="arrow">│</span>
+   <span class="tool">codebase-search</span>                           <span class="gate">APPROVAL</span>
+   <span class="tool">Impact Report</span>                                <span class="arrow">│</span>
+                                                  <span class="arrow">▼</span>
+                      <span class="phase">Phase 3: Tasks</span> <span class="arrow">──</span> <span class="gate">APPROVAL</span> <span class="arrow">──▶</span> <span class="phase">Phase 4: Implementation</span>
+                                                            <span class="arrow">│</span>
+                                                     For each task:
+                                                      <span class="arrow">├──</span> Implement
+                                                      <span class="arrow">├──</span> Review (spec + quality)
+                                                      <span class="arrow">├──</span> <span class="gate">log-implementation</span>
+                                                      <span class="arrow">└──</span> Mark <span class="tool">[x]</span></div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Phase 1</div>
+    <div class="section-title">Requirements</div>
+    <p class="section-desc">Before writing requirements, Claude must run a codebase search to understand what already exists. This produces an Impact Report showing files likely to be touched, existing patterns to reuse, and potential ripple effects.</p>
+
+    <h3>Codebase search is a hard gate</h3>
+    <p>No requirements get written without the Impact Report. This prevents Claude from designing features that duplicate existing code or conflict with established patterns. The search uses structural (graph DB) and semantic (vector DB) tools to find related code.</p>
+
+    <h3>Requirements document structure</h3>
+<pre><code>.spec-workflow/specs/STAK-498-price-scraper-fix/requirements.md
+
+## References
+- Issue: [[STAK-498]]
+- Spec path: .spec-workflow/specs/STAK-498-price-scraper-fix/
+
+## Requirements
+
+### Requirement 1: eCheck Price Accuracy
+**User Story:** As a user viewing JM Bullion prices, I want to see
+the eCheck/Wire price, so that I can compare actual purchase costs.
+
+**Acceptance Criteria:**
+1. WHEN displaying JM Bullion prices THEN the eCheck/Wire column
+   SHALL be read, not Card/PayPal
+2. WHEN other vendors are displayed THEN their prices SHALL be
+   unaffected by this change
+
+## Non-Functional Requirements
+- Performance: Price extraction under 200ms per vendor
+- Reliability: Graceful fallback if column structure changes</code></pre>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Acceptance criteria must be testable</div>
+      Write criteria as "WHEN X THEN Y SHALL happen" — behavioral statements that can be verified in tests. Avoid vague criteria like "prices should be correct."
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Phase 2</div>
+    <div class="section-title">Design</div>
+    <p class="section-desc">The design phase proposes 2-3 implementation approaches, references patterns found in the codebase search, and gets user feedback section by section. The output is a design document covering architecture, components, data models, and error handling.</p>
+
+    <p>Key sections: architecture overview, component interfaces (props/state/events for frontend, endpoints/schemas for backend), code reuse analysis (what existing utilities to leverage), and a testing strategy (framework, test directory, what to test).</p>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Phase 3</div>
+    <div class="section-title">Tasks</div>
+    <p class="section-desc">Tasks break the design into atomic, implementable units. Each task touches 1-3 files and includes structured guidance that Claude uses during implementation.</p>
+
+    <h3>The _Prompt pattern</h3>
+    <p>Every task includes a <code>_Prompt</code> field with four components: Role, Task, Restrictions, and Success criteria. This is the instruction block that a subagent receives when implementing the task.</p>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--amber)"></div>tasks.md (example task)</div>
+<pre><code>## Task 1.1: Fix Price Column Selection
+- [ ] Update column-aware parser to check eCheck first
+- [ ] Add regression test for JM Bullion parsing
+
+_Prompt: Role: Backend Developer specializing in web scraping |
+  Task: Fix price-extract.js to read eCheck/Wire column before
+  Card/PayPal column in JM Bullion parser |
+  Restrictions: Don't change other vendor parsers. Don't modify
+  the DOM query selectors — only change the column selection
+  order. |
+  Success: eCheck prices within $5 of website values for all
+  JM Bullion products.
+
+_Leverage: devops/pollers/shared/price-extract.js (existing parser)
+_Leverage: devops/pollers/shared/vendor-config.js (column mappings)
+
+_Requirements: Requirement #1, Acceptance Criteria #1, #2</code></pre>
+
+    <h3>File touch map</h3>
+    <p>Each task lists which files it creates, modifies, or tests. The orchestrator uses this to determine which tasks can run in parallel (no overlapping files) and which must run sequentially.</p>
+
+<pre><code># Tasks with no file overlap → dispatch in parallel
+Task 1: MODIFY price-extract.js, TEST price-extract.test.js
+Task 2: MODIFY retail-display.js, TEST retail-display.test.js
+         ↑ No overlap → parallel safe
+
+# Tasks sharing files → run sequentially
+Task 3: MODIFY price-extract.js ← conflicts with Task 1
+         ↑ Overlap → must wait for Task 1</code></pre>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Phase 4</div>
+    <div class="section-title">Implementation</div>
+    <p class="section-desc">Implementation dispatches subagents with the task's <code>_Prompt</code> guidance. Each task goes through implementation, two rounds of code review, and mandatory logging before being marked complete.</p>
+
+    <h3>The implementation loop</h3>
+<pre><code>For each task:
+
+1. Mark in-progress    → [ ] becomes [-] in tasks.md
+2. Check existing logs → avoid duplicating prior work
+3. Dispatch subagent   → full _Prompt + _Leverage context
+4. Spec compliance review → does code match the task spec?
+   └─ FAIL? → fix and re-review
+5. Code quality review → architecture, error handling, tests
+   └─ FAIL? → fix critical/important issues
+6. Log implementation  → MANDATORY before marking done
+7. Mark complete       → [-] becomes [x] in tasks.md</code></pre>
+
+    <h3>Implementation logging</h3>
+    <p>The <code>log-implementation</code> tool creates a searchable record of what was built: files modified, API endpoints created, components added, test results. Future specs check these logs to avoid creating duplicate endpoints or reimplementing existing components.</p>
+
+<pre><code>log-implementation
+  specName: "STAK-498-price-scraper-fix"
+  taskId: "1.1"
+  summary: "Fixed column selection order in JM Bullion parser"
+  filesModified: ["devops/pollers/shared/price-extract.js"]
+  artifacts:
+    functions:
+      - name: jmPriceFromProseTable
+        location: "price-extract.js:142"
+    tests:
+      - name: "JM Bullion eCheck prices"
+        status: "passed"
+        count: "4 passed, 0 failed"</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-title">This is a hard gate</div>
+      Never mark a task <code>[x]</code> without calling <code>log-implementation</code> first. The logs are what make the system self-aware — without them, the next spec might create duplicate API endpoints or reimplement a utility that already exists.
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">When to Skip</div>
+    <div class="section-title">Not Everything Needs a Spec</div>
+
+    <table class="compare-table">
+      <tr><th>Situation</th><th>Approach</th><th>What to use</th></tr>
+      <tr><td class="label">Simple bug fix</td><td>Bug fast path — debug, issue, fix, PR</td><td><code>/systematic-debugging</code> &rarr; <code>/issue</code> &rarr; fix</td></tr>
+      <tr><td class="label">Trivial chore</td><td>No issue, no spec, just a <code>chore:</code> PR</td><td><code>/gsd</code> (Get Stuff Done)</td></tr>
+      <tr><td class="label">CSS tweak, typo fix</td><td>Direct fix in a worktree</td><td><code>/gsd</code></td></tr>
+      <tr><td class="label">New feature</td><td>Full 4-phase spec</td><td><code>/spec ISSUE-ID</code></td></tr>
+      <tr><td class="label">Complex refactor</td><td>Full spec — need design review</td><td><code>/spec ISSUE-ID</code></td></tr>
+      <tr><td class="label">Multi-component feature</td><td>Full spec with parallel task dispatch</td><td><code>/spec</code> + <code>/dispatching-parallel-agents</code></td></tr>
+    </table>
+
+    <div class="prompt-block">
+      <div class="prompt-label">Prompt for Claude: Build a spec workflow</div>
+      I want to implement spec-driven development for my projects. Help me set up:
+      <br><br>
+      1. A <strong>spec directory structure</strong> at <code>.spec-workflow/specs/</code> with templates for requirements, design, and tasks<br>
+      2. A <strong>requirements template</strong> with user stories, acceptance criteria (WHEN/THEN/SHALL format), and non-functional requirements<br>
+      3. A <strong>tasks template</strong> with <code>_Prompt</code> (Role/Task/Restrictions/Success), <code>_Leverage</code>, <code>_Requirements</code>, and file touch maps<br>
+      4. A <strong>/spec skill</strong> that orchestrates the 4-phase workflow with approval checkpoints at each phase<br>
+      5. An <strong>implementation logging</strong> system that records what each task built (files, endpoints, components) so future specs can check for duplicates<br><br>
+      Start simple — I can add the dashboard approval system later. For now, just ask me "approve?" before proceeding to the next phase.
+    </div>
+  </div></section>
+
+  <footer><div class="container">
+    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+  </div></footer>
+</body>
+</html>

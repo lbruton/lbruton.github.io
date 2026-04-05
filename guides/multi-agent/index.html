@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent Dispatch — Right Model for the Right Job | lbruton.cc</title>
+  <meta name="description" content="How to use different AI models for different cognitive tasks — Haiku for summarization, Sonnet for synthesis, Opus for architecture — with parallel dispatch and isolated execution.">
+  <meta property="og:title" content="Multi-Agent Dispatch — Right Model for the Right Job">
+  <meta property="og:description" content="Stop using one model for everything. Dispatch Haiku for digests, Sonnet for search, Opus for architecture. Save tokens, get better results.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/multi-agent/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root{--bg-deep:#070b14;--bg-primary:#0a0e17;--bg-card:#111a2e;--bg-card-hover:#162040;--border:#1e2a3a;--border-hover:#2d3f5a;--text:#b8c4d4;--text-dim:#6b7d93;--text-bright:#e6edf5;--accent:#818cf8;--accent-dim:#818cf820;--green:#22c55e;--amber:#f59e0b;--cyan:#00b4d8;--pink:#f472b6;--red:#ef4444;--mono:'SF Mono','JetBrains Mono','Fira Code','Cascadia Code',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg-deep);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--text-bright)}.container{max-width:800px;margin:0 auto;padding:0 24px}
+    nav{position:sticky;top:0;z-index:100;background:#070b14e8;border-bottom:1px solid var(--border);padding:14px 0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}nav .container{display:flex;align-items:center;justify-content:space-between;max-width:800px}.nav-brand{font-family:var(--mono);font-weight:700;font-size:1.1rem;color:var(--text-bright);letter-spacing:-.02em}.nav-brand span{color:var(--accent)}.nav-links{display:flex;gap:24px}.nav-links a{font-size:.85rem;color:var(--text-dim);transition:color .2s}.nav-links a:hover{color:var(--text-bright)}
+    .hero{padding:80px 0 60px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--bg-primary) 0%,var(--bg-deep) 100%)}.hero-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}.hero h1{font-size:2.4rem;font-weight:700;color:var(--text-bright);line-height:1.2;letter-spacing:-.03em;margin-bottom:16px}.hero p{font-size:1.1rem;color:var(--text);max-width:600px;line-height:1.8}
+    .content{padding:48px 0}.content+.content{border-top:1px solid var(--border)}.section-label{font-family:var(--mono);font-size:.75rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}.section-title{font-size:1.6rem;font-weight:700;color:var(--text-bright);letter-spacing:-.02em;margin-bottom:12px}.section-desc{color:var(--text);margin-bottom:32px;line-height:1.8}h3{font-size:1.15rem;font-weight:600;color:var(--text-bright);margin:32px 0 12px}h3:first-child{margin-top:0}p{margin-bottom:16px;line-height:1.8}ul,ol{margin:0 0 16px 24px;line-height:1.8}li{margin-bottom:4px}
+    pre{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:16px 0 24px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--text-bright)}code{font-family:var(--mono);font-size:.85em;background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--text-bright)}pre code{background:none;padding:0}
+    .file-header{display:flex;align-items:center;gap:8px;margin-top:24px;margin-bottom:0;font-family:var(--mono);font-size:.78rem;color:var(--text-dim);padding:10px 16px;background:var(--bg-card-hover);border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0}.file-header+pre{margin-top:0;border-radius:0 0 10px 10px}.file-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .flow-diagram{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:32px;margin:24px 0;font-family:var(--mono);font-size:.82rem;line-height:2;color:var(--text);overflow-x:auto;white-space:pre}.flow-diagram .phase{color:var(--accent);font-weight:600}.flow-diagram .haiku{color:var(--green)}.flow-diagram .sonnet{color:var(--cyan)}.flow-diagram .opus{color:var(--pink);font-weight:600}.flow-diagram .arrow{color:var(--text-dim)}.flow-diagram .note{color:var(--text-dim)}
+    .compare-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.88rem}.compare-table th{text-align:left;padding:12px 16px;background:var(--bg-card);color:var(--accent);font-family:var(--mono);font-size:.78rem;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}.compare-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}.compare-table tr:last-child td{border-bottom:none}.compare-table .label{color:var(--text-dim);white-space:nowrap}
+    .prompt-block{background:linear-gradient(135deg,#111a2e 0%,#162040 100%);border:1px solid var(--accent-dim);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:20px 24px;margin:16px 0 24px;font-size:.9rem;line-height:1.8}.prompt-label{font-family:var(--mono);font-size:.72rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+    .callout{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:16px 20px;margin:20px 0;font-size:.9rem}.callout-title{font-family:var(--mono);font-size:.78rem;color:var(--amber);font-weight:600;margin-bottom:6px}.callout-green{border-left-color:var(--green)}.callout-green .callout-title{color:var(--green)}
+    .pipeline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:24px 0}.pipe-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}.pipe-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pipe-card-name{font-family:var(--mono);font-weight:600;font-size:.9rem;color:var(--text-bright)}.pipe-card p{font-size:.85rem;color:var(--text);margin:0;line-height:1.6}
+    footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}.footer-links a{font-size:.85rem;color:var(--text-dim)}.footer-links a:hover{color:var(--accent)}.footer-copy{font-size:.8rem;color:var(--text-dim)}
+    @media(max-width:700px){.hero h1{font-size:1.8rem}.hero{padding:60px 0 40px}.content{padding:36px 0}.pipeline-grid{grid-template-columns:1fr}.flow-diagram{font-size:.72rem;padding:20px}pre{font-size:.75rem;padding:16px}}
+  </style>
+</head>
+<body>
+  <nav><div class="container"><a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a><div class="nav-links"><a href="https://www.lbruton.cc#projects">Projects</a><a href="https://www.lbruton.cc#guides">Guides</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div></div></nav>
+
+  <section class="hero"><div class="container">
+    <div class="hero-label">Claude Code Guide</div>
+    <h1>Multi-Agent Dispatch</h1>
+    <p>Stop using one model for everything. Dispatch cheap models for mechanical work, smart models for architecture, and run them in parallel. Right model, right job, right cost.</p>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">The Idea</div>
+    <div class="section-title">Three Tiers of Cognition</div>
+    <p class="section-desc">Not every task needs your most expensive model. Session digests don't need architectural reasoning. Code search doesn't need creative synthesis. Matching the model to the cognitive demand saves tokens and often produces better results — specialized agents with narrow focus outperform generalists.</p>
+
+    <div class="flow-diagram"><span class="phase">DISPATCHER</span> <span class="note">(your main Claude session — Opus)</span>
+     <span class="arrow">│</span>
+     <span class="arrow">├──</span> "Digest this session log"
+     <span class="arrow">│   └──</span> <span class="haiku">Haiku agent</span> <span class="note">— mechanical, fast, cheap</span>
+     <span class="arrow">│</span>
+     <span class="arrow">├──</span> "Search past sessions for X"
+     <span class="arrow">│   └──</span> <span class="sonnet">Sonnet agent</span> <span class="note">— synthesis, judgment, cross-referencing</span>
+     <span class="arrow">│</span>
+     <span class="arrow">├──</span> "Review this PR for security issues"
+     <span class="arrow">│   └──</span> <span class="opus">Opus agent</span> <span class="note">— deep reasoning, multi-module analysis</span>
+     <span class="arrow">│</span>
+     <span class="arrow">└──</span> "Index this codebase" + "Check infra health"
+         <span class="arrow">├──</span> <span class="haiku">Haiku agent 1</span> <span class="note">— indexing (parallel)</span>
+         <span class="arrow">└──</span> <span class="haiku">Haiku agent 2</span> <span class="note">— health checks (parallel)</span></div>
+
+    <table class="compare-table">
+      <tr><th>Tier</th><th>Model</th><th>Best for</th><th>Examples</th></tr>
+      <tr><td class="label" style="color:var(--green)">Execution</td><td>Haiku</td><td>Mechanical, fast, single-purpose tasks</td><td>Session digests, log indexing, health checks, wiki page updates, implementation logging</td></tr>
+      <tr><td class="label" style="color:var(--cyan)">Synthesis</td><td>Sonnet</td><td>Cross-referencing, judgment, moderate complexity</td><td>Issue triage, PR review, session oracle search, project status reports, debugging investigation</td></tr>
+      <tr><td class="label" style="color:var(--pink)">Complexity</td><td>Opus</td><td>Deep reasoning, multi-module architecture, security</td><td>Spec design, security audit, complex refactors, architectural decisions</td></tr>
+    </table>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Agent Definitions</div>
+    <div class="section-title">Defining Agents</div>
+    <p class="section-desc">Agents are markdown files in <code>~/.claude/agents/</code>. Each file defines the agent's name, model, description, and instructions. Claude Code auto-discovers them.</p>
+
+    <div class="file-header"><div class="file-dot" style="background: var(--green)"></div>~/.claude/agents/session-digest.md</div>
+<pre><code>---
+name: session-digest
+description: "Reads JSONL transcripts, writes summaries to vault and mem0."
+model: haiku
+---
+
+# Session Digest Agent
+
+You process Claude Code JSONL session transcripts into DocVault
+daily digest entries and mem0 memories. You run in isolation
+because session logs can be large.
+
+## Step 1: Extract conversation
+Run: python3 ~/.claude/scripts/extract-jsonl-session.py "$JSONL_FILE"
+
+## Step 2: Write summary
+200-300 word prose summary with actor attribution and wikilinks.
+
+## Step 3: Save to DocVault + mem0
+...</code></pre>
+
+    <p>The <code>model: haiku</code> frontmatter tells Claude Code to run this agent on Haiku instead of the current session's model. The agent runs in <strong>isolation</strong> — its context is separate from your main session, so large search results or log content don't eat your primary context window.</p>
+
+    <h3>The agent matrix</h3>
+    <table class="compare-table">
+      <tr><th>Agent</th><th>Model</th><th>Dispatched by</th></tr>
+      <tr><td class="label">session-digest</td><td style="color:var(--green)">Haiku</td><td><code>/wrap</code> at session end</td></tr>
+      <tr><td class="label">health-monitor</td><td style="color:var(--green)">Haiku</td><td><code>/prime</code> at session start (background)</td></tr>
+      <tr><td class="label">index-monitor</td><td style="color:var(--green)">Haiku</td><td><code>/prime</code> at session start (background)</td></tr>
+      <tr><td class="label">implementation-logger</td><td style="color:var(--green)">Haiku</td><td><code>/spec</code> Phase 4 after each task</td></tr>
+      <tr><td class="label">wiki-page-updater</td><td style="color:var(--green)">Haiku</td><td><code>/wiki-update</code> — one per page, parallel</td></tr>
+      <tr><td class="label">firecrawl-scraper</td><td style="color:var(--green)">Haiku</td><td><code>/web-search</code>, <code>/discover</code></td></tr>
+      <tr><td class="label">vault-linker</td><td style="color:var(--green)">Haiku</td><td>After issue creation</td></tr>
+      <tr><td class="label">session-oracle</td><td style="color:var(--cyan)">Sonnet</td><td><code>/session-oracle</code> for history search</td></tr>
+      <tr><td class="label">code-oracle</td><td style="color:var(--cyan)">Sonnet</td><td><code>/code-oracle</code> for codebase questions</td></tr>
+      <tr><td class="label">issue-triage</td><td style="color:var(--cyan)">Sonnet</td><td><code>/issue-triage</code></td></tr>
+      <tr><td class="label">project-manager</td><td style="color:var(--cyan)">Sonnet</td><td><code>/weekly-standup</code>, <code>/after-action</code>, <code>/update-roadmap</code></td></tr>
+      <tr><td class="label">pr-discover</td><td style="color:var(--cyan)">Sonnet</td><td><code>/pr-resolve</code> (gather phase)</td></tr>
+      <tr><td class="label">pr-thread-resolver</td><td style="color:var(--cyan)">Sonnet</td><td><code>/pr-resolve</code> (one per thread, parallel)</td></tr>
+      <tr><td class="label">systematic-debugger</td><td style="color:var(--cyan)">Sonnet</td><td><code>/systematic-debugging</code></td></tr>
+      <tr><td class="label">prime-status</td><td style="color:var(--cyan)">Sonnet</td><td><code>/prime</code> (status gathering)</td></tr>
+    </table>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Patterns</div>
+    <div class="section-title">Dispatch Patterns</div>
+
+    <h3>1. Parallel dispatch</h3>
+    <p>When tasks are independent (no shared state, no file overlap), dispatch multiple agents simultaneously. Claude Code runs them concurrently and returns results as they complete.</p>
+<pre><code># /prime dispatches TWO agents in parallel at session start:
+Agent 1 (Haiku): index-monitor — re-index code in vector DB
+Agent 2 (Haiku): health-monitor — check all API/infra endpoints
+
+# Both run in background while you read the status report
+# Results arrive independently — no blocking</code></pre>
+
+    <h3>2. Gather-then-fan-out</h3>
+    <p>One agent gathers context, then multiple agents resolve individual items in parallel. Used for PR review where one agent reads all threads, then N agents fix each thread independently.</p>
+<pre><code># /pr-resolve uses gather-then-fan-out:
+Phase 1: pr-discover (Sonnet) — reads all review threads, Codacy findings
+Phase 2: N × pr-thread-resolver (Sonnet) — one per thread, in parallel
+         Each fixes code or drafts a reply independently</code></pre>
+
+    <h3>3. Isolation for context protection</h3>
+    <p>Agents run in their own context windows. This is the key architectural insight — when a code-oracle agent searches through 50 files, those file contents stay in the agent's context, not yours. The agent returns a synthesized 200-word report instead of 50K tokens of raw search results.</p>
+<pre><code># Without isolation:
+You: "search for price extraction code"
+Claude: [reads 50 files into YOUR context → burns 40K tokens]
+
+# With isolation:
+You: "search for price extraction code"
+Claude: [dispatches code-oracle agent → agent reads 50 files
+         in ITS context → returns 200-word summary to you]</code></pre>
+
+    <div class="callout callout-green">
+      <div class="callout-title">The isolation principle</div>
+      Every agent that touches large datasets (search results, log files, API responses) should run in isolation. The main session's context is precious — don't contaminate it with raw data that can be summarized by a cheaper model.
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Multi-Model</div>
+    <div class="section-title">Beyond Subagents: Multi-Model Ecosystem</div>
+    <p class="section-desc">The dispatch pattern extends beyond Claude's model tiers. You can run Claude, Codex (GPT), and Gemini as peer agents sharing the same workspace — same git repos, same spec documents, same MCP servers.</p>
+
+    <table class="compare-table">
+      <tr><th>Agent</th><th>Model</th><th>Strengths</th><th>Use for</th></tr>
+      <tr><td class="label">Claude Code</td><td>Opus 4.6</td><td>Complex reasoning, multi-module, all tasks</td><td>Architecture, spec design, orchestration</td></tr>
+      <tr><td class="label">Codex CLI</td><td>GPT-5.4</td><td>Fast mechanical work, clear unambiguous specs</td><td>Single-file patches, bulk fixes, repetitive tasks</td></tr>
+      <tr><td class="label">Gemini CLI</td><td>3.1 Pro</td><td>Good all-rounder, 1M context</td><td>Documentation, API work, medium complexity</td></tr>
+    </table>
+
+    <h3>Shared workspace, separate instructions</h3>
+    <p>All three agents read from the same git repos and MCP servers. The spec documents (<code>tasks.md</code>) serve as the shared protocol — any agent can pick up a task, implement it, and log the result. Implementation logs prevent duplicate work.</p>
+
+<pre><code># Claude plans, Codex implements:
+1. Claude creates issue + spec, gets approval
+2. User switches to Codex terminal: codex "@spec STAK-498"
+3. Codex implements tasks, logs artifacts
+4. User switches back to Claude for code review
+
+# Parallel implementation:
+1. Claude implements Tasks 1-3 in worktree-a
+2. Codex implements Tasks 4-6 in worktree-b
+3. Both log artifacts — no duplicate work</code></pre>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Getting Started</div>
+    <div class="section-title">Create Your First Agent</div>
+
+    <h3>1. Create the agents directory</h3>
+<pre><code>mkdir -p ~/.claude/agents</code></pre>
+
+    <h3>2. Define an agent</h3>
+<pre><code># Create a simple summarization agent on Haiku
+cat &gt; ~/.claude/agents/summarizer.md &lt;&lt; 'EOF'
+---
+name: summarizer
+description: "Summarizes files or search results into concise reports."
+model: haiku
+---
+
+# Summarizer Agent
+
+You receive a topic and a list of files or search results.
+Produce a 200-word summary covering: key findings, decisions
+made, and open questions. Return structured output.
+
+## Rules
+- Maximum 200 words
+- No raw data — only synthesized insights
+- Include file paths for key findings
+EOF</code></pre>
+
+    <h3>3. Dispatch it</h3>
+    <p>Claude Code auto-discovers agents in <code>~/.claude/agents/</code>. You can dispatch them via the Agent tool or through skills that reference them.</p>
+
+    <div class="prompt-block">
+      <div class="prompt-label">Prompt for Claude: Build an agent system</div>
+      I want to create a multi-agent system for my Claude Code workflow. Help me define agents for:
+      <br><br>
+      1. <strong>Session digest</strong> (Haiku) — processes session transcripts into summaries<br>
+      2. <strong>Code search</strong> (Sonnet) — searches codebase and returns synthesized findings<br>
+      3. <strong>Health check</strong> (Haiku) — pings my infrastructure endpoints and reports status<br><br>
+      Each agent should run in <strong>isolation</strong> (so large results don't eat my main context). Define them as <code>~/.claude/agents/{name}.md</code> files with frontmatter specifying the model tier. Include clear instructions for what the agent receives, what it does, and what it returns.
+    </div>
+  </div></section>
+
+  <footer><div class="container">
+    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+  </div></footer>
+</body>
+</html>
