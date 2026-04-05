@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Memory Pipeline — Claude Code Guide | lbruton.cc</title>
+  <meta name="description" content="A complete guide to building persistent session memory for Claude Code — scripts, skills, agents, and architecture for cross-session continuity.">
+  <meta property="og:title" content="Session Memory Pipeline — Claude Code Guide">
+  <meta property="og:description" content="Scripts, skills, and architecture for persistent Claude Code session memory. Open source, battle-tested, ready to use.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/session-memory/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-primary: #0a0e17;
+      --bg-card: #111a2e;
+      --bg-card-hover: #162040;
+      --border: #1e2a3a;
+      --border-hover: #2d3f5a;
+      --text: #b8c4d4;
+      --text-dim: #6b7d93;
+      --text-bright: #e6edf5;
+      --accent: #818cf8;
+      --accent-dim: #818cf820;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --cyan: #00b4d8;
+      --pink: #f472b6;
+      --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg-deep);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--text-bright); }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    /* ─── Nav ─── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #070b14e8;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 800px;
+    }
+    .nav-brand {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-bright); }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding: 80px 0 60px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-deep) 100%);
+    }
+    .hero-label {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text);
+      max-width: 600px;
+      line-height: 1.8;
+    }
+
+    /* ─── Content ─── */
+    .content { padding: 48px 0; }
+    .content + .content { border-top: 1px solid var(--border); }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      color: var(--text);
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 32px 0 12px;
+    }
+    h3:first-child { margin-top: 0; }
+
+    p { margin-bottom: 16px; line-height: 1.8; }
+
+    /* ─── Architecture Diagram ─── */
+    .arch-flow {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin: 24px 0;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 2;
+      color: var(--text);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .arch-flow .phase { color: var(--accent); font-weight: 600; }
+    .arch-flow .tool { color: var(--green); }
+    .arch-flow .store { color: var(--amber); }
+    .arch-flow .arrow { color: var(--text-dim); }
+
+    /* ─── Code Blocks ─── */
+    pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0 24px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text-bright);
+    }
+    code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    /* ─── File Header ─── */
+    .file-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      margin-bottom: 0;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      padding: 10px 16px;
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+    }
+    .file-header + pre {
+      margin-top: 0;
+      border-radius: 0 0 10px 10px;
+    }
+    .file-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─── Pipeline Cards ─── */
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .pipe-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .pipe-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .pipe-card-name {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-bright);
+    }
+    .pipe-card p {
+      font-size: 0.85rem;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ─── Comparison Table ─── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 0.88rem;
+    }
+    .compare-table th {
+      text-align: left;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .compare-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table .label { color: var(--text-dim); white-space: nowrap; }
+
+    /* ─── Prompt Blocks ─── */
+    .prompt-block {
+      background: linear-gradient(135deg, #111a2e 0%, #162040 100%);
+      border: 1px solid var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 20px 24px;
+      margin: 16px 0 24px;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+    .prompt-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ─── Tags ─── */
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-deep);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    /* ─── Callout ─── */
+    .callout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+    }
+    .callout-title {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--amber);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    .footer-links a { font-size: 0.85rem; color: var(--text-dim); }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero { padding: 60px 0 40px; }
+      .content { padding: 36px 0; }
+      .pipeline-grid { grid-template-columns: 1fr; }
+      .arch-flow { font-size: 0.72rem; padding: 20px; }
+      pre { font-size: 0.75rem; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="container">
+      <a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a>
+      <div class="nav-links">
+        <a href="https://www.lbruton.cc#projects">Projects</a>
+        <a href="https://www.lbruton.cc#about">About</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-label">Claude Code Guide</div>
+      <h1>Session Memory Pipeline</h1>
+      <p>How to give Claude Code persistent memory across sessions using scripts, skills, agents, and an Obsidian knowledge vault. Battle-tested across 400+ sessions.</p>
+    </div>
+  </section>
+
+  <!-- The Problem -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">The Problem</div>
+      <div class="section-title">Sessions Are Ephemeral</div>
+      <p class="section-desc">Every time you start a new Claude Code session, Claude has no memory of what happened before. Your CLAUDE.md provides static instructions, but it doesn't know what you worked on yesterday, what decisions you made, or what's left unfinished. You're constantly re-explaining context.</p>
+      <p>The typical workaround is to manually paste notes or dump entire conversation logs into the next session. This is noisy, burns tokens on irrelevant context, and doesn't scale.</p>
+      <p>What you actually want is a <strong>pipeline</strong> that automatically captures the important parts of each session, stores them in a searchable format, and loads relevant context when you start the next one.</p>
+    </div>
+  </section>
+
+  <!-- Architecture Overview -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Architecture</div>
+      <div class="section-title">The Session Memory Pipeline</div>
+      <p class="section-desc">The pipeline has three phases: capture at session end, store in durable formats, and recall at session start. Each phase is handled by a dedicated component.</p>
+
+      <div class="arch-flow"><span class="phase">SESSION START</span>                          <span class="phase">SESSION END</span>
+     <span class="arrow">│</span>                                        <span class="arrow">│</span>
+     <span class="arrow">▼</span>                                        <span class="arrow">▼</span>
+<span class="tool">/prime</span> loads context:                  <span class="tool">/wrap</span> captures knowledge:
+  <span class="arrow">├─</span> <span class="store">mem0</span> recent memories               <span class="arrow">├─</span> Retrospective lessons <span class="arrow">→</span> <span class="store">mem0</span>
+  <span class="arrow">├─</span> <span class="store">DocVault</span> project pages             <span class="arrow">├─</span> Session digest <span class="arrow">→</span> <span class="store">DocVault</span>
+  <span class="arrow">├─</span> Git status + open issues            <span class="arrow">├─</span> Curated summary <span class="arrow">→</span> <span class="store">mem0</span>
+  <span class="arrow">└─</span> Code index health                   <span class="arrow">└─</span> Worktree + branch cleanup
+
+     <span class="phase">DURING SESSION</span>
+     <span class="arrow">│</span>
+     <span class="arrow">▼</span>
+<span class="tool">session-oracle</span> agent:
+  Semantic search across all past
+  session logs via <span class="store">Milvus</span> vector DB
+  <span class="arrow">→</span> "When did we decide X?"
+  <span class="arrow">→</span> "How did we fix Y last time?"</div>
+
+      <div class="pipeline-grid">
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--green)"></div>
+            <div class="pipe-card-name">/prime</div>
+          </div>
+          <p>Session start skill. Loads recent mem0 memories, checks project status, indexes code, and presents a briefing so Claude knows where you left off.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--amber)"></div>
+            <div class="pipe-card-name">/wrap</div>
+          </div>
+          <p>Session end skill. Captures retro lessons, writes a digest to the vault, saves a curated summary to mem0, and cleans up branches.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--cyan)"></div>
+            <div class="pipe-card-name">session-oracle</div>
+          </div>
+          <p>Search agent. Indexes iTerm2 logs with Milvus and runs semantic search to find past conversations, decisions, and solutions.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--pink)"></div>
+            <div class="pipe-card-name">session-digest</div>
+          </div>
+          <p>Processing agent. Parses JSONL transcripts into structured summaries for the Obsidian vault and mem0 cloud memory.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Layer 1: Log Cleaning Scripts -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Layer 1</div>
+      <div class="section-title">Log Cleaning Scripts</div>
+      <p class="section-desc">Raw session logs are noisy — full of ANSI escape codes, TUI spinner text, and control characters. These Python scripts clean them into digestible conversation text.</p>
+
+      <h3>iTerm2 Session Log Cleaner</h3>
+      <p>If you use iTerm2's "Automatically log session input/output" feature, your logs will be full of terminal noise. This script strips timestamps, ANSI codes, TUI elements (spinners, status bars), and reassembles single-character keystrokes back into typed words.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--green)"></div>
+        clean-session-log.py
+      </div>
+<pre><code>#!/usr/bin/env python3
+"""
+iTerm2 session log cleaner for Claude Code digest pipeline.
+
+Strategy: strip timestamps and control chars, then KEEP only lines that
+look like real conversational content. Everything else is TUI noise.
+
+Usage:
+    python3 clean-session-log.py &lt;input.log&gt; [output.txt]
+    python3 clean-session-log.py &lt;input.log&gt;  # prints to stdout
+"""
+
+import re, sys
+from pathlib import Path
+
+# --- Timestamp prefix ---
+TS_RE = re.compile(r"^\[[\d/]+,\s*[\d:.]+ [AP]M\]\s*")
+
+# --- Control character stripping ---
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]|\x1b\].*?(\x07|\x1b\\)")
+CTRL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+TUI_FILLER_RE = re.compile(r"[\u2500-\u257f\u2580-\u259f\u25a0-\u25ff]{2,}")
+
+# --- Noise patterns (lines to DROP) ---
+NOISE_PATTERNS = [
+    # TUI spinner verbs (Claude Code rotates these)
+    re.compile(r"^[·✢✳✶✻✽❯⏺\s]*(Embellishing|Grooving|Orbiting|Composing|"
+               r"Thinking|Reflecting|Musing|Pondering|Weaving|Crafting|"
+               r"Sculpting|Harmonizing|Polishing|Illuminating|Reasoning|"
+               r"Brainstorming|Synthesizing|Considering|Generating|"
+               r"Processing|Analyzing|Exploring|Initializing|Loading)"),
+    re.compile(r"--\s*(INSERT|NORMAL|VISUAL|REPLACE)\s*--"),
+    re.compile(r"(Opus\s*4\.\d|Sonnet\s*4\.\d|Haiku\s*4\.\d)"),
+    re.compile(r"^lbruton@\S+.*%"),  # shell prompts
+    re.compile(r"^(Last login:|You have mail)"),
+    re.compile(r"claude\.ai/code/session_"),
+    re.compile(r"Do you want to proceed\?|Esc\s*to\s*cancel"),
+    re.compile(r"^(Read|Edit|Write|Bash|Glob|Grep)\s*(file)?\s*$"),
+]
+
+WORD_RE = re.compile(r"\b[a-zA-Z]{2,}\b")
+
+def strip_line(line):
+    """Remove timestamp, ANSI codes, and control chars."""
+    line = TS_RE.sub("", line)
+    line = ANSI_RE.sub("", line)
+    line = CTRL_CHARS_RE.sub("", line)
+    line = TUI_FILLER_RE.sub("", line)
+    return re.sub(r"  {3,}", "  ", line).rstrip()
+
+def is_noise(line):
+    stripped = line.strip()
+    if not stripped or len(stripped) &lt; 4:
+        return True
+    return any(pat.search(stripped) for pat in NOISE_PATTERNS)
+
+def has_content(line):
+    stripped = line.strip()
+    if "`" in stripped or "/" in stripped:
+        return len(WORD_RE.findall(stripped)) >= 2
+    return len(WORD_RE.findall(stripped)) >= 3
+
+def reassemble_keystrokes(lines):
+    """Collapse single-char keystroke lines into assembled text."""
+    result, buf = [], []
+    for line in lines:
+        stripped = line.strip()
+        if len(stripped) == 1 and stripped.isprintable() and ord(stripped) &lt; 128:
+            buf.append(stripped)
+        else:
+            if buf:
+                word = "".join(buf)
+                if len(word) > 2:
+                    result.append(f"[user typed: {word}]")
+                buf = []
+            result.append(line)
+    if buf and len("".join(buf)) > 2:
+        result.append(f"[user typed: {''.join(buf)}]")
+    return result
+
+def clean_log(raw_text):
+    lines = [strip_line(l) for l in raw_text.splitlines()]
+    lines = reassemble_keystrokes(lines)
+    cleaned = [l for l in lines if not is_noise(l) and has_content(l)]
+    # Collapse blank runs
+    result, blanks = [], 0
+    for line in cleaned:
+        if not line.strip():
+            blanks += 1
+            if blanks &lt;= 1: result.append("")
+        else:
+            blanks = 0
+            result.append(line)
+    return "\n".join(result).strip()
+
+if __name__ == "__main__":
+    if len(sys.argv) &lt; 2:
+        print(f"Usage: {sys.argv[0]} &lt;input.log&gt; [output.txt]", file=sys.stderr)
+        sys.exit(1)
+    raw = Path(sys.argv[1]).read_text(errors="replace")
+    cleaned = clean_log(raw)
+    if len(sys.argv) >= 3:
+        Path(sys.argv[2]).write_text(cleaned)
+        r, c = len(raw.splitlines()), len(cleaned.splitlines())
+        print(f"Cleaned: {r} -> {c} lines ({(r-c)/r*100:.0f}% reduction)", file=sys.stderr)
+    else:
+        print(cleaned)</code></pre>
+
+      <h3>JSONL Transcript Extractor</h3>
+      <p>Claude Code stores session transcripts as JSONL files in <code>~/.claude/projects/</code>. This script extracts clean conversation text with actor attribution, tool call summaries (not full output), and session metadata. It filters out thinking blocks, tool results (which contain entire file contents), and system injections.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--cyan)"></div>
+        extract-jsonl-session.py
+      </div>
+<pre><code>#!/usr/bin/env python3
+"""
+Extract clean conversation text from Claude Code JSONL transcripts.
+
+Output format:
+    ### User
+    &lt;user message text&gt;
+
+    ### Assistant
+    &lt;assistant response text&gt;
+
+    ### Tool: &lt;tool_name&gt;
+    &lt;brief tool context — name + key input, NOT full output&gt;
+
+Filters out: thinking blocks, tool_result payloads, system messages.
+"""
+
+import json, sys
+from datetime import datetime
+from pathlib import Path
+
+def extract_session_metadata(entries):
+    meta = {"project": "unknown", "branch": "", "cwd": "",
+            "start_time": "", "end_time": "",
+            "tool_count": 0, "tools_used": set()}
+    for entry in entries:
+        if not meta["cwd"] and entry.get("cwd"):
+            meta["cwd"] = entry["cwd"]
+        if not meta["branch"] and entry.get("gitBranch"):
+            meta["branch"] = entry["gitBranch"]
+        ts = entry.get("timestamp", "")
+        if ts:
+            if not meta["start_time"] or ts &lt; meta["start_time"]:
+                meta["start_time"] = ts
+            if not meta["end_time"] or ts > meta["end_time"]:
+                meta["end_time"] = ts
+        msg = entry.get("message", {})
+        if isinstance(msg, dict):
+            for block in (msg.get("content") or []):
+                if isinstance(block, dict) and block.get("type") == "tool_use":
+                    meta["tool_count"] += 1
+                    meta["tools_used"].add(block.get("name", ""))
+    # Derive project from cwd
+    cwd = meta["cwd"]
+    if cwd:
+        parts = cwd.rstrip("/").split("/")
+        meta["project"] = parts[-1] if parts else "unknown"
+    meta["tools_used"] = sorted(meta["tools_used"])
+    return meta
+
+def extract_conversation(jsonl_path):
+    entries = []
+    for line in jsonl_path.read_text(errors="replace").splitlines():
+        line = line.strip()
+        if not line: continue
+        try: entries.append(json.loads(line))
+        except json.JSONDecodeError: continue
+    if not entries: return "", {}
+
+    meta = extract_session_metadata(entries)
+    parts = [f"--- Session: {meta['project']} | "
+             f"branch={meta['branch']} | "
+             f"tools={','.join(meta['tools_used'][:10])} ---\n"]
+
+    for entry in entries:
+        etype = entry.get("type", "")
+        if etype == "user":
+            content = entry.get("message", {}).get("content", "")
+            if isinstance(content, str):
+                text = content.strip()
+            elif isinstance(content, list):
+                text = "\n".join(
+                    b["text"] for b in content
+                    if isinstance(b, dict) and b.get("type") == "text"
+                ).strip()
+            else: continue
+            if text: parts.append(f"### User\n{text}\n")
+
+        elif etype == "assistant":
+            content = entry.get("message", {}).get("content", [])
+            if not isinstance(content, list): continue
+            texts, tools = [], []
+            for block in content:
+                if not isinstance(block, dict): continue
+                if block.get("type") == "text":
+                    t = block.get("text", "").strip()
+                    if t: texts.append(t)
+                elif block.get("type") == "tool_use":
+                    name = block.get("name", "?")
+                    inp = block.get("input", {})
+                    ctx = ""
+                    if name in ("Read","Write","Edit"):
+                        ctx = inp.get("file_path", "")
+                    elif name == "Bash":
+                        cmd = inp.get("command", "")
+                        ctx = cmd[:120] + ("..." if len(cmd) > 120 else "")
+                    elif name == "Grep":
+                        ctx = f'pattern="{inp.get("pattern","")}"'
+                    elif name == "Agent":
+                        ctx = inp.get("description", "")[:80]
+                    tools.append(f"[Tool: {name} -> {ctx}]" if ctx
+                                 else f"[Tool: {name}]")
+            if texts: parts.append("### Assistant\n" + "\n".join(texts) + "\n")
+            if tools: parts.append("  " + "  ".join(tools) + "\n")
+    return "\n".join(parts), meta
+
+if __name__ == "__main__":
+    if len(sys.argv) &lt; 2:
+        print(f"Usage: {sys.argv[0]} &lt;session.jsonl&gt; [output.txt]",
+              file=sys.stderr)
+        sys.exit(1)
+    text, meta = extract_conversation(Path(sys.argv[1]))
+    if len(sys.argv) >= 3:
+        Path(sys.argv[2]).write_text(text)
+    else:
+        print(text)</code></pre>
+
+      <div class="callout">
+        <div class="callout-title">Where are the logs?</div>
+        <strong>iTerm2 logs:</strong> Enable in iTerm2 Preferences &rarr; Profiles &rarr; Session &rarr; "Automatically log session input/output." Logs land in your configured directory (e.g., <code>~/.claude/iterm2/</code>).<br><br>
+        <strong>JSONL transcripts:</strong> Claude Code stores these automatically at <code>~/.claude/projects/&lt;project-hash&gt;/*.jsonl</code>. Each session is one file.
+      </div>
+    </div>
+  </section>
+
+  <!-- Layer 2: The Digest Agent -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Layer 2</div>
+      <div class="section-title">The Session Digest Agent</div>
+      <p class="section-desc">The digest agent runs as an isolated subagent (so large logs don't eat your main context window). It reads the extracted conversation, writes a structured summary to an Obsidian vault, and saves it to mem0 cloud memory.</p>
+
+      <h3>What the digest captures</h3>
+      <p>Each digest is a dense 200-300 word prose summary covering: what was the goal, what was accomplished, what problems were hit, what decisions were made, and what's left unfinished. Concrete anchors (commit hashes, issue IDs, version numbers) are mandatory.</p>
+
+      <h3>Dual storage</h3>
+      <p>The digest is written to two places:</p>
+      <table class="compare-table">
+        <tr>
+          <th>Store</th>
+          <th>Format</th>
+          <th>Purpose</th>
+        </tr>
+        <tr>
+          <td class="label">Obsidian Vault</td>
+          <td>Markdown daily digest with <code>[[wikilinks]]</code></td>
+          <td>Human-browsable, shows up in vault graph view, backlinks panel. Organized by project and date.</td>
+        </tr>
+        <tr>
+          <td class="label">mem0</td>
+          <td>Single memory entry with metadata tags</td>
+          <td>Searchable by future sessions via <code>/prime</code>. mem0 automatically decomposes the summary into granular facts.</td>
+        </tr>
+      </table>
+
+      <h3>Agent definition</h3>
+      <p>Save this as <code>~/.claude/agents/session-digest.md</code>. The agent is dispatched by the <code>/wrap</code> skill at session end.</p>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build the digest agent</div>
+        I want to create a session digest agent that processes my Claude Code JSONL transcripts into structured summaries. The agent should:
+        <br><br>
+        1. Run <code>extract-jsonl-session.py</code> to get clean conversation text<br>
+        2. Write a 200-300 word prose summary with actor attribution ("I" for user actions, "Claude" for agent actions)<br>
+        3. Save to an Obsidian vault as a daily digest file (append if file exists)<br>
+        4. Save to mem0 with project-specific agent_id tags<br>
+        5. Return a structured report showing what was captured<br><br>
+        The agent should run in isolation (as a subagent) to keep large logs out of my main context. Use the Haiku model for cost efficiency.
+      </div>
+    </div>
+  </section>
+
+  <!-- Layer 3: Session Oracle -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Layer 3</div>
+      <div class="section-title">The Session Oracle</div>
+      <p class="section-desc">The oracle is a search agent that lets you ask questions about past sessions: "When did we decide to use SQLite instead of Postgres?" or "How did we fix that CORS issue last week?" It uses semantic vector search, not keyword grep.</p>
+
+      <h3>How it works</h3>
+      <p>The oracle indexes your cleaned iTerm2 session logs (or JSONL transcripts) into a Milvus vector database using the <a href="https://github.com/lbruton/claude-context" target="_blank" rel="noopener">claude-context</a> MCP server. When you search, it returns contextualized excerpts categorized as decisions, solutions, discussions, or commands.</p>
+
+      <h3>Example queries</h3>
+<pre><code># Ask Claude to search past sessions
+/session-oracle "when did we set up the Portainer stack for the poller?"
+/session-oracle "how did we fix the webpack build error in StakTrakr?"
+/session-oracle "what was the decision about using mem0 vs local files?"</code></pre>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build a session search agent</div>
+        I want an agent that can search my past Claude Code sessions semantically. I have iTerm2 session logs in <code>~/.claude/iterm2/</code>. The agent should:
+        <br><br>
+        1. Check if the log directory is indexed in a vector database (I use claude-context with Milvus, but any embedding store works)<br>
+        2. Run semantic search against the query<br>
+        3. Read surrounding context for each hit to understand the full conversation<br>
+        4. Classify each result as a decision, solution, discussion, or command<br>
+        5. Return clean excerpts with dates and project attribution<br><br>
+        The agent should strip ANSI codes from excerpts and limit results to 10 most relevant. Run it as a subagent to keep search results out of main context.
+      </div>
+    </div>
+  </section>
+
+  <!-- Layer 4: Lifecycle Skills -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Layer 4</div>
+      <div class="section-title">Lifecycle Skills: /prime and /wrap</div>
+      <p class="section-desc">The real power comes from wiring the pipeline into your session lifecycle. Two skills handle this: <code>/prime</code> at session start and <code>/wrap</code> at session end.</p>
+
+      <h3>/prime — Session Boot</h3>
+      <p>When you start a session and type <code>/prime</code>, Claude:</p>
+<pre><code>1. Searches mem0 for recent memories about this project
+2. Reads project status from the Obsidian vault
+3. Checks git status, open PRs, and unfinished issues
+4. Verifies code indexes are fresh (vector DB + graph DB)
+5. Presents a unified startup briefing:
+
+   "Last session you were working on STAK-498 (price scraper bug).
+    PR #903 was merged. Tasks 4-5 are still open. The poller was
+    redeployed to both Portainer and Fly.io. Code indexes are fresh."</code></pre>
+
+      <h3>/wrap — Session End</h3>
+      <p>When you're done and type <code>/wrap</code>, Claude:</p>
+<pre><code>1. Checks for uncommitted changes, open PRs, in-progress tasks
+2. Asks what to do with any loose ends (commit? stash? discard?)
+3. Updates documentation in the Obsidian vault
+4. Captures retrospective lessons to mem0 (prescriptive: what to
+   do differently, not just what happened)
+5. Writes a session digest to the vault + mem0
+6. Cleans up merged worktree branches
+7. Prints a session recap with shipped/pending/next-session summary</code></pre>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build session lifecycle skills</div>
+        I want two Claude Code skills for session lifecycle management:
+        <br><br>
+        <strong>/prime (session start):</strong> Search mem0 for recent project memories, check git status and open issues, verify code indexes are healthy, and present a briefing that tells me where I left off and what needs attention.
+        <br><br>
+        <strong>/wrap (session end):</strong> Check for uncommitted work, capture retrospective lessons to mem0 (mistakes, successful approaches, preferences), write a session digest to my Obsidian vault and mem0, clean up merged branches, and print a session recap.
+        <br><br>
+        Both skills should be saved as <code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> files. They should ask me before taking destructive actions (deleting branches, discarding changes).
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Compares -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Comparison</div>
+      <div class="section-title">Approaches to Session Continuity</div>
+      <p class="section-desc">There are multiple valid approaches to solving the session memory problem. Here's how the lifecycle approach compares to other strategies.</p>
+
+      <table class="compare-table">
+        <tr>
+          <th>Aspect</th>
+          <th>Lifecycle Pipeline</th>
+          <th>Universal Indexer</th>
+        </tr>
+        <tr>
+          <td class="label">Philosophy</td>
+          <td>Capture at session boundaries with structured skills</td>
+          <td>Post-process logs into a symbolic ontology of primitives</td>
+        </tr>
+        <tr>
+          <td class="label">When it runs</td>
+          <td>Integrated into workflow: <code>/prime</code> at start, <code>/wrap</code> at end</td>
+          <td>Batch processing — can run anytime against log corpus</td>
+        </tr>
+        <tr>
+          <td class="label">What it stores</td>
+          <td>Prose summaries + tagged memories + vault entries</td>
+          <td>Structured primitives: terms, decisions, patterns, operators</td>
+        </tr>
+        <tr>
+          <td class="label">Search method</td>
+          <td>Semantic vector search (Milvus) + mem0 recall</td>
+          <td>Index lookup + differential tracking</td>
+        </tr>
+        <tr>
+          <td class="label">Multi-agent</td>
+          <td>Same pipeline works across Claude, Codex, Gemini sessions</td>
+          <td>Designed for Claude + Codex with synced index copies</td>
+        </tr>
+        <tr>
+          <td class="label">Survives compaction</td>
+          <td>Yes — lives in memory files and vault, not conversation window</td>
+          <td>Yes — loaded from index files into CLAUDE.md/AGENTS.md</td>
+        </tr>
+        <tr>
+          <td class="label">Best for</td>
+          <td>Workflow-integrated teams who want session bookends</td>
+          <td>Heavy research/exploration sessions needing deep corpus analysis</td>
+        </tr>
+      </table>
+
+      <p>These approaches are complementary. You could run both — use lifecycle skills for day-to-day session management and a universal indexer for periodic deep analysis of your conversation corpus.</p>
+    </div>
+  </section>
+
+  <!-- iTerm2 Setup -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Setup</div>
+      <div class="section-title">iTerm2 Session Logging</div>
+      <p class="section-desc">The session oracle depends on having raw session logs to index. Here's how to set up automatic logging in iTerm2.</p>
+
+      <h3>Enable automatic logging</h3>
+<pre><code># iTerm2 → Preferences → Profiles → Session
+# Check: "Automatically log session input/output"
+# Log directory: ~/.claude/iterm2/
+# Log format: Raw (not plain text — we clean it ourselves)</code></pre>
+
+      <h3>Log cleanup cron</h3>
+      <p>Session logs grow fast. This cleanup script removes logs older than 30 days and re-indexes the remaining ones.</p>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build a log maintenance script</div>
+        I have iTerm2 session logs in <code>~/.claude/iterm2/</code> that grow over time. Build me a Python script that:
+        <br><br>
+        1. Finds all <code>.log</code> files older than 30 days and deletes them<br>
+        2. Runs <code>clean-session-log.py</code> on any new/unprocessed logs<br>
+        3. Triggers a re-index of the log directory via the claude-context MCP server<br>
+        4. Logs what it did to a maintenance log file<br><br>
+        Set it up as a weekly launchd job on macOS (or cron on Linux).
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Quick Start</div>
+      <div class="section-title">Get Started in 15 Minutes</div>
+
+      <h3>1. Save the scripts</h3>
+<pre><code>mkdir -p ~/.claude/scripts
+# Save clean-session-log.py and extract-jsonl-session.py
+# to ~/.claude/scripts/</code></pre>
+
+      <h3>2. Set up mem0 (optional but recommended)</h3>
+      <p>mem0 provides cloud-hosted cross-session memory with automatic fact decomposition. Sign up at <a href="https://mem0.ai" target="_blank" rel="noopener">mem0.ai</a> and add it as an MCP server in your Claude Code config.</p>
+
+      <h3>3. Create the skills</h3>
+<pre><code>mkdir -p ~/.claude/skills/prime
+mkdir -p ~/.claude/skills/wrap
+# Create SKILL.md in each directory with the lifecycle logic</code></pre>
+
+      <h3>4. Create the agents</h3>
+<pre><code>mkdir -p ~/.claude/agents
+# Save session-digest.md and session-oracle.md
+# Claude Code auto-discovers agents in this directory</code></pre>
+
+      <h3>5. Try it</h3>
+<pre><code># Start a new Claude Code session
+claude
+
+# Load context from past sessions
+> /prime
+
+# ... do your work ...
+
+# Capture everything before closing
+> /wrap</code></pre>
+
+      <div class="callout">
+        <div class="callout-title">Minimum viable version</div>
+        You don't need all of this at once. Start with just the scripts + a simple <code>/wrap</code> skill that writes a digest. Add the oracle, mem0, and <code>/prime</code> as you see the value. The scripts alone are worth having — they turn unusable raw logs into searchable conversation text.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://www.lbruton.cc">lbruton.cc</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://lonniebruton.com" target="_blank" rel="noopener">lonniebruton.com</a>
+      </div>
+      <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+    </div>
+  </footer>
+
+</body>
+</html>
