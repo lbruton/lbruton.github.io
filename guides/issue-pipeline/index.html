@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Issue &amp; Task Pipeline — Vault-Based Project Management | lbruton.cc</title>
+  <meta name="description" content="Replace Linear, Jira, and GitHub Issues with markdown files in an Obsidian vault. Full issue lifecycle — create, track, spec, implement, close — all in plain text.">
+  <meta property="og:title" content="Issue & Task Pipeline — Vault-Based Project Management">
+  <meta property="og:description" content="Ditch the SaaS. Track issues as markdown files with frontmatter, Obsidian Bases views, and Claude Code skills for the full lifecycle.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/issue-pipeline/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-primary: #0a0e17;
+      --bg-card: #111a2e;
+      --bg-card-hover: #162040;
+      --border: #1e2a3a;
+      --border-hover: #2d3f5a;
+      --text: #b8c4d4;
+      --text-dim: #6b7d93;
+      --text-bright: #e6edf5;
+      --accent: #818cf8;
+      --accent-dim: #818cf820;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --cyan: #00b4d8;
+      --pink: #f472b6;
+      --red: #ef4444;
+      --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg-deep); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--text-bright); }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #070b14e8; border-bottom: 1px solid var(--border); padding: 14px 0; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    nav .container { display: flex; align-items: center; justify-content: space-between; max-width: 800px; }
+    .nav-brand { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; color: var(--text-bright); letter-spacing: -0.02em; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.85rem; color: var(--text-dim); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text-bright); }
+
+    .hero { padding: 80px 0 60px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-deep) 100%); }
+    .hero-label { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; color: var(--text-bright); line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 16px; }
+    .hero p { font-size: 1.1rem; color: var(--text); max-width: 600px; line-height: 1.8; }
+
+    .content { padding: 48px 0; }
+    .content + .content { border-top: 1px solid var(--border); }
+    .section-label { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .section-title { font-size: 1.6rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 12px; }
+    .section-desc { color: var(--text); margin-bottom: 32px; line-height: 1.8; }
+    h3 { font-size: 1.15rem; font-weight: 600; color: var(--text-bright); margin: 32px 0 12px; }
+    h3:first-child { margin-top: 0; }
+    p { margin-bottom: 16px; line-height: 1.8; }
+    ul, ol { margin: 0 0 16px 24px; line-height: 1.8; }
+    li { margin-bottom: 4px; }
+
+    pre { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0 24px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.7; color: var(--text-bright); }
+    code { font-family: var(--mono); font-size: 0.85em; background: var(--bg-card); padding: 2px 6px; border-radius: 4px; color: var(--text-bright); }
+    pre code { background: none; padding: 0; }
+
+    .file-header { display: flex; align-items: center; gap: 8px; margin-top: 24px; margin-bottom: 0; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); padding: 10px 16px; background: var(--bg-card-hover); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; }
+    .file-header + pre { margin-top: 0; border-radius: 0 0 10px 10px; }
+    .file-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .flow-diagram { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px; margin: 24px 0; font-family: var(--mono); font-size: 0.82rem; line-height: 2; color: var(--text); overflow-x: auto; white-space: pre; }
+    .flow-diagram .phase { color: var(--accent); font-weight: 600; }
+    .flow-diagram .skill { color: var(--green); }
+    .flow-diagram .store { color: var(--amber); }
+    .flow-diagram .arrow { color: var(--text-dim); }
+    .flow-diagram .status { color: var(--cyan); }
+
+    .pipeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
+    .pipe-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .pipe-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .pipe-card-name { font-family: var(--mono); font-weight: 600; font-size: 0.9rem; color: var(--text-bright); }
+    .pipe-card p { font-size: 0.85rem; color: var(--text); margin: 0; line-height: 1.6; }
+
+    .compare-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.88rem; }
+    .compare-table th { text-align: left; padding: 12px 16px; background: var(--bg-card); color: var(--accent); font-family: var(--mono); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .compare-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table .label { color: var(--text-dim); white-space: nowrap; }
+
+    .prompt-block { background: linear-gradient(135deg, #111a2e 0%, #162040 100%); border: 1px solid var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 20px 24px; margin: 16px 0 24px; font-size: 0.9rem; line-height: 1.8; }
+    .prompt-label { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+    .callout { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 10px 10px 0; padding: 16px 20px; margin: 20px 0; font-size: 0.9rem; }
+    .callout-title { font-family: var(--mono); font-size: 0.78rem; color: var(--amber); font-weight: 600; margin-bottom: 6px; }
+    .callout-green { border-left-color: var(--green); }
+    .callout-green .callout-title { color: var(--green); }
+    .callout-red { border-left-color: var(--red); }
+    .callout-red .callout-title { color: var(--red); }
+
+    .status-flow { display: flex; align-items: center; gap: 0; margin: 24px 0; flex-wrap: wrap; }
+    .status-pill { font-family: var(--mono); font-size: 0.78rem; padding: 8px 16px; border: 1px solid var(--border); color: var(--text-dim); }
+    .status-pill:first-child { border-radius: 8px 0 0 8px; }
+    .status-pill:last-child { border-radius: 0 8px 8px 0; }
+    .status-pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .status-arrow { font-family: var(--mono); font-size: 0.9rem; color: var(--text-dim); padding: 0 2px; }
+
+    .tag { font-family: var(--mono); font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: var(--bg-deep); color: var(--text-dim); border: 1px solid var(--border); display: inline-block; }
+
+    footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-dim); }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero { padding: 60px 0 40px; }
+      .content { padding: 36px 0; }
+      .pipeline-grid { grid-template-columns: 1fr; }
+      .flow-diagram { font-size: 0.72rem; padding: 20px; }
+      pre { font-size: 0.75rem; padding: 16px; }
+      .status-flow { gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a>
+      <div class="nav-links">
+        <a href="https://www.lbruton.cc#projects">Projects</a>
+        <a href="https://www.lbruton.cc#guides">Guides</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-label">Claude Code Guide</div>
+      <h1>Issue &amp; Task Pipeline</h1>
+      <p>Replace Linear, Jira, and GitHub Issues with markdown files in an Obsidian vault. Full lifecycle from creation to close — no SaaS, no vendor lock-in, $0/month.</p>
+    </div>
+  </section>
+
+  <!-- Why -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Why This Exists</div>
+      <div class="section-title">The $0 Issue Tracker</div>
+      <p class="section-desc">I used Linear for a year ($20/month). It was great, but Claude Code couldn't read or write to it without a custom integration. GitHub Issues is free but has the same problem — it's a separate system that Claude has to API into.</p>
+      <p>Then I realized: <strong>if issues are just markdown files with YAML frontmatter, Claude can create, read, update, and close them with the tools it already has.</strong> Obsidian's Bases feature turns that frontmatter into queryable database views — filtered, sorted, and grouped like any issue tracker. No API, no subscription, no vendor lock-in.</p>
+
+      <table class="compare-table">
+        <tr>
+          <th>Feature</th>
+          <th>Linear / Jira</th>
+          <th>Vault Issues</th>
+        </tr>
+        <tr>
+          <td class="label">Cost</td>
+          <td>$8-20/user/month</td>
+          <td>$0 (Obsidian is free for personal use)</td>
+        </tr>
+        <tr>
+          <td class="label">Claude integration</td>
+          <td>Custom API wrapper needed</td>
+          <td>Native — Read/Write/Grep work directly</td>
+        </tr>
+        <tr>
+          <td class="label">Offline access</td>
+          <td>Limited or none</td>
+          <td>Full — it's local files</td>
+        </tr>
+        <tr>
+          <td class="label">Version history</td>
+          <td>Proprietary changelog</td>
+          <td>Git — full diff, blame, bisect</td>
+        </tr>
+        <tr>
+          <td class="label">Cross-references</td>
+          <td>ID links within the tool</td>
+          <td><code>[[wikilinks]]</code> to any vault page — docs, infra, digests</td>
+        </tr>
+        <tr>
+          <td class="label">Data export</td>
+          <td>JSON/CSV export (maybe)</td>
+          <td>Already markdown — no export needed</td>
+        </tr>
+        <tr>
+          <td class="label">Database views</td>
+          <td>Built-in boards, tables</td>
+          <td>Obsidian Bases — filter, sort, group on frontmatter</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- Lifecycle -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Lifecycle</div>
+      <div class="section-title">Issue Lifecycle</div>
+      <p class="section-desc">Every code change starts with an issue. The issue flows through a status pipeline, optionally through a spec workflow for non-trivial features, and ends with a close sweep.</p>
+
+      <div class="flow-diagram"><span class="phase">CREATION</span>                    <span class="phase">PLANNING</span>                     <span class="phase">EXECUTION</span>
+   <span class="arrow">│</span>                            <span class="arrow">│</span>                             <span class="arrow">│</span>
+   <span class="arrow">▼</span>                            <span class="arrow">▼</span>                             <span class="arrow">▼</span>
+<span class="skill">/issue</span> creates             <span class="skill">/spec</span> (if non-trivial)       Implement in worktree
+markdown file with        Requirements <span class="arrow">→</span> Design        Commit, PR, merge
+YAML frontmatter          <span class="arrow">→</span> Tasks <span class="arrow">→</span> Implementation
+   <span class="arrow">│</span>                            <span class="arrow">│</span>                             <span class="arrow">│</span>
+   <span class="arrow">▼</span>                            <span class="arrow">▼</span>                             <span class="arrow">▼</span>
+<span class="store">DocVault/Projects/</span>        Dashboard approvals         <span class="skill">/after-action</span>
+<span class="store">{Project}/Issues/</span>         at each phase gate          plan vs reality
+   <span class="arrow">│</span>                                                          <span class="arrow">│</span>
+   <span class="arrow">▼</span>                                                          <span class="arrow">▼</span>
+<span class="status">backlog → todo → in-progress → in-review → done</span>         <span class="skill">/issue-close-sweep</span></div>
+
+      <h3>Status Flow</h3>
+      <div class="status-flow">
+        <div class="status-pill">backlog</div>
+        <span class="status-arrow">&rarr;</span>
+        <div class="status-pill active">todo</div>
+        <span class="status-arrow">&rarr;</span>
+        <div class="status-pill">in-progress</div>
+        <span class="status-arrow">&rarr;</span>
+        <div class="status-pill">in-review</div>
+        <span class="status-arrow">&rarr;</span>
+        <div class="status-pill">done</div>
+      </div>
+      <p>Issues can also move to <code>canceled</code> or <code>superseded</code> if they're no longer relevant.</p>
+    </div>
+  </section>
+
+  <!-- Issue Format -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Format</div>
+      <div class="section-title">Issue File Structure</div>
+      <p class="section-desc">Each issue is a markdown file with YAML frontmatter. The frontmatter is what Obsidian Bases queries against — every field matters.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--cyan)"></div>
+        Projects/StakTrakr/Issues/STAK-498.md
+      </div>
+<pre><code>---
+id: "STAK-498"
+title: "Fix JM Bullion price scraper reading wrong column"
+type: bug
+scope: user-facing
+status: done
+priority: 1
+assignee: lbruton
+created: "2026-03-20"
+updated: "2026-03-22"
+completed: "2026-03-22"
+due: ""
+parent:
+tags:
+  - issue
+  - staktrakr
+  - bug
+---
+
+## Description
+
+JM Bullion eCheck prices are inflated by ~$200. The price extractor
+is reading the Card/PayPal column instead of the eCheck/Wire column.
+
+## Acceptance Criteria
+
+- [ ] eCheck prices match the website's eCheck/Wire column
+- [ ] Other vendors unaffected by the fix
+- [ ] Poller redeployed to both Portainer and Fly.io
+
+## Related Documentation
+
+- [[StakTrakr Overview]] — poller pipeline context
+- [[Remote Poller]] — Fly.io deployment
+- [[Portainer]] — home deployment target</code></pre>
+
+      <div class="callout callout-red">
+        <div class="callout-title">Critical: Frontmatter quoting</div>
+        Fields <code>id</code>, <code>title</code>, <code>created</code>, <code>updated</code>, and <code>completed</code> <strong>must be quoted</strong> in YAML. Unquoted values can be misinterpreted (e.g., <code>2026-03-20</code> without quotes becomes a date object, not a string). Missing or misquoted fields silently break Obsidian Bases — the issue won't appear in your views.
+      </div>
+
+      <h3>Field Reference</h3>
+      <table class="compare-table">
+        <tr><th>Field</th><th>Values</th><th>Notes</th></tr>
+        <tr><td class="label">id</td><td><code>"PREFIX-NUM"</code></td><td>Project prefix + auto-incremented number</td></tr>
+        <tr><td class="label">type</td><td><code>feature</code> <code>bug</code> <code>chore</code> <code>spike</code></td><td>Unquoted enum</td></tr>
+        <tr><td class="label">scope</td><td><code>user-facing</code> <code>internal</code></td><td>Controls GitHub sync (user-facing only)</td></tr>
+        <tr><td class="label">status</td><td><code>backlog</code> <code>todo</code> <code>in-progress</code> <code>in-review</code> <code>done</code></td><td>Also: <code>canceled</code>, <code>superseded</code></td></tr>
+        <tr><td class="label">priority</td><td><code>1</code> - <code>4</code></td><td>1 = critical, 4 = nice-to-have</td></tr>
+        <tr><td class="label">tags</td><td>Array</td><td>Must include <code>issue</code> + project tag</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- Counter System -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Automation</div>
+      <div class="section-title">Counter &amp; Prefix System</div>
+      <p class="section-desc">Each project has a counter file that auto-increments issue numbers. The <code>/issue</code> skill reads the counter, creates the file, and bumps the counter — all in one step.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--amber)"></div>
+        Projects/StakTrakr/Issues/_counter.md
+      </div>
+<pre><code>---
+prefix: STAK
+next: 532
+project: StakTrakr
+tags:
+  - system
+  - counter
+---</code></pre>
+
+      <h3>Project Prefixes</h3>
+      <table class="compare-table">
+        <tr><th>Prefix</th><th>Project</th><th>Issue Path</th></tr>
+        <tr><td class="label">STAK</td><td>StakTrakr</td><td><code>Projects/StakTrakr/Issues/</code></td></tr>
+        <tr><td class="label">HEX</td><td>HexTrackr</td><td><code>Projects/HexTrackr/Issues/</code></td></tr>
+        <tr><td class="label">FORGE</td><td>Forge</td><td><code>Projects/Forge/Issues/</code></td></tr>
+        <tr><td class="label">OPS</td><td>DevOps / Infrastructure</td><td><code>Projects/Devops/Issues/</code></td></tr>
+        <tr><td class="label">SWF</td><td>SpecFlow Plugin</td><td><code>Projects/SpecFlow/Issues/</code></td></tr>
+      </table>
+
+      <h3>Sub-Issues</h3>
+      <p>For work that breaks into sub-tasks under a parent issue, use letter suffixes: <code>STAK-498-A</code>, <code>STAK-498-B</code>. Sub-issues include a <code>parent: "[[STAK-498]]"</code> field in their frontmatter and don't increment the counter.</p>
+    </div>
+  </section>
+
+  <!-- Obsidian Bases -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Views</div>
+      <div class="section-title">Obsidian Bases: The Database Layer</div>
+      <p class="section-desc">Obsidian Bases turns your frontmatter into a queryable database. Create <code>.base</code> files that filter, sort, and group your issues — just like Linear or Jira boards, but powered by local markdown.</p>
+
+      <h3>Cross-Project View</h3>
+      <p>A single <code>Issues.base</code> at the vault root shows all open issues across every project, sorted by priority and grouped by status. Each project folder also has its own <code>Issues.base</code> for a focused view.</p>
+
+      <h3>What Bases Extracts</h3>
+      <p>Bases reads your frontmatter fields and renders them as sortable, filterable columns:</p>
+      <ul>
+        <li><strong>Issue ID</strong> — clickable link to the issue file</li>
+        <li><strong>Title</strong> — from frontmatter, not the filename</li>
+        <li><strong>Type</strong> — color-coded badge (bug = red, feature = blue)</li>
+        <li><strong>Priority</strong> — numeric sort (1 at top)</li>
+        <li><strong>Status</strong> — grouped by pipeline stage</li>
+        <li><strong>Days Open</strong> — computed from <code>created</code> date</li>
+      </ul>
+
+      <div class="callout callout-green">
+        <div class="callout-title">Why Bases instead of Dataview?</div>
+        Dataview is a popular Obsidian plugin for querying notes, but it uses a custom query language and renders tables at view time. Bases is a core feature (no plugin needed), stores the view definition as a <code>.base</code> file (version-controllable), and renders a proper database grid with sorting, filtering, and inline editing. It's also readable by Claude via the Obsidian CLI's <code>base:query</code> command.
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Skills</div>
+      <div class="section-title">Issue Lifecycle Skills</div>
+      <p class="section-desc">Five skills manage the full issue lifecycle. Each is a <code>SKILL.md</code> file that Claude reads and follows.</p>
+
+      <div class="pipeline-grid">
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--green)"></div>
+            <div class="pipe-card-name">/issue</div>
+          </div>
+          <p>Create a new issue. Reads the counter, writes the file with proper frontmatter, links related docs, increments the counter, and validates.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--cyan)"></div>
+            <div class="pipe-card-name">/spec</div>
+          </div>
+          <p>Spec-driven development. Takes an issue through Requirements, Design, Tasks, and Implementation with approval gates at each phase.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--amber)"></div>
+            <div class="pipe-card-name">/issue-triage</div>
+          </div>
+          <p>Organize the backlog. Groups issues into sprints, reprioritizes, identifies duplicates, and suggests consolidation.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--pink)"></div>
+            <div class="pipe-card-name">/issue-close-sweep</div>
+          </div>
+          <p>Find issues that should be closed. Matches merged PRs, checks acceptance criteria, flags stale issues, and moves closed files to Closed/ folder.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--accent)"></div>
+            <div class="pipe-card-name">/after-action</div>
+          </div>
+          <p>Plan vs. reality report. Compares what the issue planned against what was actually delivered — deferred criteria, scope changes, follow-ups.</p>
+        </div>
+      </div>
+
+      <h3>/issue Skill Workflow</h3>
+<pre><code>1. Read .claude/project.json for issuePrefix and issueTag
+2. Read _counter.md → get next number (e.g., 532)
+3. Write STAK-532.md with full frontmatter + description
+4. Identify and link related vault pages in ## Related Documentation
+5. Increment counter: next → 533
+6. Read file back and VALIDATE all frontmatter fields
+   (this is a hard gate — missing fields break Bases)
+7. Confirm: "Created STAK-532: [title] at [path]"</code></pre>
+
+      <h3>GitHub Issues Policy</h3>
+      <p>GitHub Issues are treated as an <strong>inbound-only public bug inbox</strong>. All internal planning, features, and specs stay in the vault. When a user reports a bug on GitHub:</p>
+      <ol>
+        <li>Create a vault issue with <code>scope: user-facing</code> and <code>type: bug</code></li>
+        <li>Reference the GH issue number in the body (not frontmatter)</li>
+        <li>Close the GH issue when the vault issue reaches <code>done</code></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Spec Workflow -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Spec Workflow</div>
+      <div class="section-title">Issue &rarr; Spec &rarr; Ship</div>
+      <p class="section-desc">Non-trivial features go through a four-phase spec workflow. Each phase produces a document, requires a dashboard approval, and feeds into the next phase.</p>
+
+      <h3>The Four Phases</h3>
+      <table class="compare-table">
+        <tr><th>Phase</th><th>Document</th><th>Question</th></tr>
+        <tr><td class="label">1. Requirements</td><td><code>requirements.md</code></td><td>WHAT are we building and for whom?</td></tr>
+        <tr><td class="label">2. Design</td><td><code>design.md</code></td><td>HOW will it work technically?</td></tr>
+        <tr><td class="label">3. Tasks</td><td><code>tasks.md</code></td><td>What are the atomic steps?</td></tr>
+        <tr><td class="label">4. Implementation</td><td>Code + logs</td><td>Build it, review it, ship it.</td></tr>
+      </table>
+
+<pre><code># Spec files live in the project's .spec-workflow directory
+.spec-workflow/specs/STAK-498-price-scraper-fix/
+  ├── requirements.md      # User stories, acceptance criteria
+  ├── design.md            # Architecture, API designs, components
+  ├── tasks.md             # Atomic tasks with _Prompt guidance
+  └── Implementation Logs/
+      ├── Task-1-log.md    # What was built, files changed
+      └── Task-2-log.md</code></pre>
+
+      <h3>Task Format</h3>
+      <p>Each task in <code>tasks.md</code> includes structured guidance that Claude uses during implementation:</p>
+
+<pre><code>## Task 1.1: Fix Price Column Selection
+- [ ] Update column-aware parser to check eCheck first
+- [ ] Add regression test for JM Bullion parsing
+
+_Prompt: Role: Backend | Task: Fix price-extract.js column
+  selection order | Restrictions: Don't change other vendors |
+  Success: eCheck prices within $5 of website values
+
+_Leverage: devops/pollers/shared/price-extract.js (existing parser)
+
+_Requirements: Requirement #1, Acceptance Criteria #1</code></pre>
+
+      <h3>Implementation Logging</h3>
+      <p>Before marking any task <code>[x]</code> (complete), the <code>log-implementation</code> tool must be called. This creates a searchable knowledge base of what was built, preventing duplicate API endpoints and components across future specs.</p>
+
+      <div class="callout">
+        <div class="callout-title">When to skip the spec</div>
+        Simple bug fixes and chores don't need a full spec. Use the <strong>bug fast path</strong>: <code>/systematic-debugging</code> &rarr; <code>/issue</code> &rarr; fix &rarr; PR. Or for trivial fixes, use <code>/gsd</code> (Get Stuff Done) — no issue, no spec, just a <code>chore:</code> PR.
+      </div>
+    </div>
+  </section>
+
+  <!-- Reporting -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Reporting</div>
+      <div class="section-title">Standups, Roadmaps &amp; Sweeps</div>
+      <p class="section-desc">Three skills produce reports from your issue data — weekly progress summaries, project roadmaps, and automated close sweeps.</p>
+
+      <div class="pipeline-grid">
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--green)"></div>
+            <div class="pipe-card-name">/weekly-standup</div>
+          </div>
+          <p>Generates a weekly progress report: commits, issues completed, PRs merged. Written to <code>Standups/YYYY-WNN.md</code> in the vault.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--amber)"></div>
+            <div class="pipe-card-name">/update-roadmap</div>
+          </div>
+          <p>Generates or updates <code>ROADMAP.md</code> in each project repo from current issue data. Groups by status: completed, active, backlog.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--pink)"></div>
+            <div class="pipe-card-name">/issue-close-sweep</div>
+          </div>
+          <p>Finds closeable issues: criteria complete, matching merged PR, stale (30+ days no activity), or superseded by newer work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Quick Start</div>
+      <div class="section-title">Set Up Vault-Based Issues</div>
+
+      <h3>1. Create the issue directory</h3>
+<pre><code># In your Obsidian vault
+mkdir -p Projects/MyProject/Issues</code></pre>
+
+      <h3>2. Create the counter</h3>
+<pre><code>cat &gt; Projects/MyProject/Issues/_counter.md &lt;&lt; 'EOF'
+---
+prefix: PROJ
+next: 1
+project: MyProject
+tags:
+  - system
+  - counter
+---
+EOF</code></pre>
+
+      <h3>3. Create an Obsidian Base view</h3>
+<pre><code># Create a .base file that queries your issues
+cat &gt; Projects/MyProject/Issues/Issues.base &lt;&lt; 'EOF'
+{
+  "name": "MyProject Issues",
+  "source": "folder:Projects/MyProject/Issues",
+  "filter": { "property": "tags", "operator": "contains", "value": "issue" },
+  "columns": ["id", "title", "type", "status", "priority", "created"],
+  "sort": [{ "property": "priority", "direction": "asc" }]
+}
+EOF</code></pre>
+
+      <h3>4. Tell Claude about your project</h3>
+      <p>Add issue routing to your project's <code>.claude/project.json</code>:</p>
+<pre><code>{
+  "issuePrefix": "PROJ",
+  "issueTag": "myproject",
+  "issuePath": "Projects/MyProject/Issues"
+}</code></pre>
+
+      <h3>5. Create your first issue</h3>
+<pre><code># In Claude Code
+> /issue "Add user authentication" --type feature --priority 2</code></pre>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build the issue skill</div>
+        I want a Claude Code skill called <code>/issue</code> that creates issues as markdown files in my Obsidian vault. The skill should:
+        <br><br>
+        1. Read my project config (<code>.claude/project.json</code>) for the issue prefix and vault path<br>
+        2. Read the <code>_counter.md</code> file to get the next issue number<br>
+        3. Create a markdown file with YAML frontmatter (id, title, type, scope, status, priority, assignee, created, updated, tags)<br>
+        4. Increment the counter after creating the file<br>
+        5. Read the file back to validate all frontmatter fields are present and quoted correctly<br>
+        6. Support sub-issues with letter suffixes (PROJ-1-A, PROJ-1-B) that reference a parent<br><br>
+        The frontmatter must be Obsidian Bases compatible — <code>id</code>, <code>title</code>, <code>created</code>, <code>updated</code> must be quoted strings. Save as <code>~/.claude/skills/issue/SKILL.md</code>.
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://www.lbruton.cc">lbruton.cc</a>
+        <a href="https://www.lbruton.cc/guides/docvault/">DocVault Guide</a>
+        <a href="https://www.lbruton.cc/guides/session-memory/">Session Memory Guide</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocVault — Knowledge Management with Obsidian | lbruton.cc</title>
+  <meta name="description" content="How to build a structured Obsidian vault as a knowledge base for AI-assisted development — index trees, wikilinks, frontmatter conventions, and CLI automation.">
+  <meta property="og:title" content="DocVault — Knowledge Management with Obsidian for Claude Code">
+  <meta property="og:description" content="Turn Obsidian into a structured knowledge base that Claude Code can navigate, update, and learn from. No vector DB required.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/docvault/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-primary: #0a0e17;
+      --bg-card: #111a2e;
+      --bg-card-hover: #162040;
+      --border: #1e2a3a;
+      --border-hover: #2d3f5a;
+      --text: #b8c4d4;
+      --text-dim: #6b7d93;
+      --text-bright: #e6edf5;
+      --accent: #818cf8;
+      --accent-dim: #818cf820;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --cyan: #00b4d8;
+      --pink: #f472b6;
+      --red: #ef4444;
+      --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg-deep); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--text-bright); }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #070b14e8; border-bottom: 1px solid var(--border); padding: 14px 0; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    nav .container { display: flex; align-items: center; justify-content: space-between; max-width: 800px; }
+    .nav-brand { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; color: var(--text-bright); letter-spacing: -0.02em; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 0.85rem; color: var(--text-dim); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text-bright); }
+
+    .hero { padding: 80px 0 60px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-deep) 100%); }
+    .hero-label { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; color: var(--text-bright); line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 16px; }
+    .hero p { font-size: 1.1rem; color: var(--text); max-width: 600px; line-height: 1.8; }
+
+    .content { padding: 48px 0; }
+    .content + .content { border-top: 1px solid var(--border); }
+    .section-label { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .section-title { font-size: 1.6rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 12px; }
+    .section-desc { color: var(--text); margin-bottom: 32px; line-height: 1.8; }
+    h3 { font-size: 1.15rem; font-weight: 600; color: var(--text-bright); margin: 32px 0 12px; }
+    h3:first-child { margin-top: 0; }
+    p { margin-bottom: 16px; line-height: 1.8; }
+
+    pre { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0 24px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.7; color: var(--text-bright); }
+    code { font-family: var(--mono); font-size: 0.85em; background: var(--bg-card); padding: 2px 6px; border-radius: 4px; color: var(--text-bright); }
+    pre code { background: none; padding: 0; }
+
+    .file-header { display: flex; align-items: center; gap: 8px; margin-top: 24px; margin-bottom: 0; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); padding: 10px 16px; background: var(--bg-card-hover); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; }
+    .file-header + pre { margin-top: 0; border-radius: 0 0 10px 10px; }
+    .file-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .tree { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin: 24px 0; font-family: var(--mono); font-size: 0.82rem; line-height: 1.9; color: var(--text); overflow-x: auto; white-space: pre; }
+    .tree .folder { color: var(--amber); font-weight: 600; }
+    .tree .file { color: var(--text); }
+    .tree .special { color: var(--accent); }
+    .tree .dim { color: var(--text-dim); }
+
+    .pipeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
+    .pipe-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .pipe-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .pipe-card-name { font-family: var(--mono); font-weight: 600; font-size: 0.9rem; color: var(--text-bright); }
+    .pipe-card p { font-size: 0.85rem; color: var(--text); margin: 0; line-height: 1.6; }
+
+    .compare-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.88rem; }
+    .compare-table th { text-align: left; padding: 12px 16px; background: var(--bg-card); color: var(--accent); font-family: var(--mono); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .compare-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table .label { color: var(--text-dim); white-space: nowrap; }
+
+    .prompt-block { background: linear-gradient(135deg, #111a2e 0%, #162040 100%); border: 1px solid var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 20px 24px; margin: 16px 0 24px; font-size: 0.9rem; line-height: 1.8; }
+    .prompt-label { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+    .callout { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 10px 10px 0; padding: 16px 20px; margin: 20px 0; font-size: 0.9rem; }
+    .callout-title { font-family: var(--mono); font-size: 0.78rem; color: var(--amber); font-weight: 600; margin-bottom: 6px; }
+    .callout-green { border-left-color: var(--green); }
+    .callout-green .callout-title { color: var(--green); }
+
+    .tag { font-family: var(--mono); font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: var(--bg-deep); color: var(--text-dim); border: 1px solid var(--border); display: inline-block; }
+
+    footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-dim); }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero { padding: 60px 0 40px; }
+      .content { padding: 36px 0; }
+      .pipeline-grid { grid-template-columns: 1fr; }
+      .tree { font-size: 0.72rem; padding: 20px; }
+      pre { font-size: 0.75rem; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a>
+      <div class="nav-links">
+        <a href="https://www.lbruton.cc#projects">Projects</a>
+        <a href="https://www.lbruton.cc#guides">Guides</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-label">Claude Code Guide</div>
+      <h1>DocVault: Obsidian as a<br>Knowledge Base for AI</h1>
+      <p>How to structure an Obsidian vault so Claude Code can navigate it, update it, and learn from it. No vector database needed — just markdown, wikilinks, and a simple index tree.</p>
+    </div>
+  </section>
+
+  <!-- Why Obsidian -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">The Idea</div>
+      <div class="section-title">Why Obsidian for AI Knowledge?</div>
+      <p class="section-desc">CLAUDE.md is great for instructions, but it's a single flat file. As your projects grow, you need architecture docs, infrastructure maps, decision records, daily digests, and issue tracking. That's a knowledge base problem.</p>
+      <p>Obsidian is a perfect fit because it stores everything as <strong>plain markdown files in a git repo</strong>. Claude Code can read, write, and search them with the tools it already has (Read, Write, Grep, Glob). No special API, no vector database, no cloud dependency. Just files.</p>
+      <p>The key insight: <strong>bidirectional wikilinks</strong> (<code>[[Page Name]]</code>) create a knowledge graph that Obsidian visualizes and Claude can traverse. When Claude writes a session digest with <code>[[StakTrakr]]</code> and <code>[[Portainer]]</code> in the text, those connections show up in Obsidian's graph view and backlinks panel — making it easy to see how everything relates.</p>
+
+      <div class="callout callout-green">
+        <div class="callout-title">What makes this different from a wiki?</div>
+        A wiki is read-mostly. DocVault is read-write — Claude actively updates it during every session via the <code>/vault-update</code> skill, writes daily digests into it, creates issues in it, and uses it as the first lookup source for any question about your projects or infrastructure.
+      </div>
+    </div>
+  </section>
+
+  <!-- Vault Structure -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Architecture</div>
+      <div class="section-title">Vault Structure</div>
+      <p class="section-desc">The vault uses a hierarchical index tree. Every folder has an <code>_Index.md</code> that lists its pages with one-line summaries. Claude reads the root <code>INDEX.md</code> first, then follows links into the relevant section.</p>
+
+      <div class="tree"><span class="folder">DocVault/</span>
+<span class="special">├── INDEX.md</span>                    <span class="dim">← Master entry point</span>
+<span class="special">├── CLAUDE.md</span>                   <span class="dim">← Vault-level instructions for Claude</span>
+<span class="folder">├── Infrastructure/</span>
+<span class="special">│   ├── _Index.md</span>              <span class="dim">← Lists all infra pages</span>
+<span class="file">│   ├── Portainer.md</span>
+<span class="file">│   ├── Proxmox Cluster.md</span>
+<span class="file">│   ├── Host Inventory.md</span>
+<span class="file">│   └── ... (35+ pages)</span>
+<span class="folder">├── Projects/</span>
+<span class="special">│   ├── _Index.md</span>              <span class="dim">← Lists all projects</span>
+<span class="folder">│   ├── StakTrakr/</span>
+<span class="special">│   │   ├── _Index.md</span>          <span class="dim">← 30+ pages for this project</span>
+<span class="file">│   │   ├── Overview.md</span>
+<span class="file">│   │   ├── Architecture.md</span>
+<span class="file">│   │   ├── Architecture.canvas</span> <span class="dim">← Visual diagram (JSON)</span>
+<span class="file">│   │   └── ...</span>
+<span class="folder">│   ├── HexTrackr/</span>
+<span class="folder">│   └── ... (15 projects)</span>
+<span class="folder">├── Architecture/</span>              <span class="dim">← Cross-project patterns</span>
+<span class="special">│   ├── _Index.md</span>
+<span class="file">│   ├── Methodology.md</span>
+<span class="file">│   ├── Agent Matrix.md</span>
+<span class="file">│   └── Skill Matrix.md</span>
+<span class="folder">├── Daily Digests/</span>             <span class="dim">← Session summaries by project</span>
+<span class="folder">├── Templates/</span>
+<span class="folder">├── Runbooks/</span>
+<span class="folder">└── Incidents/</span></div>
+
+      <h3>The _Index.md Pattern</h3>
+      <p>Every content folder has an <code>_Index.md</code> that serves as a table of contents. This is what makes the vault navigable by Claude — it reads the index, finds the relevant page, and reads just that page instead of scanning the whole directory.</p>
+
+      <div class="file-header">
+        <div class="file-dot" style="background: var(--amber)"></div>
+        Projects/_Index.md
+      </div>
+<pre><code>---
+tags: [index]
+updated: 2026-04-04
+---
+
+# Projects Index
+
+| Page | Summary |
+|------|---------|
+| [[StakTrakr]] | Precious metals portfolio tracker with live prices |
+| [[HexTrackr]] | Network vulnerability monitoring and device inventory |
+| [[Forge]] | Network configuration template generator |
+| [[MyMelo]] | AI companion chat app with persistent memory |
+| [[WhoseOnFirst]] | Network device first-seen tracking |</code></pre>
+    </div>
+  </section>
+
+  <!-- Frontmatter -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Conventions</div>
+      <div class="section-title">Frontmatter &amp; Wikilinks</div>
+      <p class="section-desc">Two conventions make the vault machine-readable: YAML frontmatter for metadata and wikilinks for cross-references.</p>
+
+      <h3>Frontmatter</h3>
+      <p>Every note has a YAML frontmatter block with at minimum <code>tags</code>, <code>created</code>, and <code>updated</code>. This enables Obsidian's Bases feature (structured database queries over your notes) and helps Claude understand when a page was last updated.</p>
+
+<pre><code>---
+tags: [infrastructure, docker]
+created: 2026-01-15
+updated: 2026-04-01
+---
+
+# Portainer
+
+Docker container management dashboard running on pve2.
+Stack registry, volume inventory, and deployment workflows.</code></pre>
+
+      <h3>Wikilinks</h3>
+      <p>Use <code>[[Page Name]]</code> syntax for all internal references. Obsidian resolves these by filename (not path), so <code>[[Portainer]]</code> works from any folder. This creates bidirectional links — when you mention <code>[[Portainer]]</code> in a daily digest, Portainer's backlinks panel shows that reference.</p>
+
+<pre><code># Good — wikilinks connect the knowledge graph
+Deployed the poller to [[Portainer]] Stack 7 and [[Fly.io]].
+See [[STAK-498]] for the parent issue.
+
+# Bad — plain text creates no connections
+Deployed the poller to Portainer Stack 7 and Fly.io.</code></pre>
+
+      <div class="callout">
+        <div class="callout-title">Why not a vector database?</div>
+        Vector databases are great for semantic search over code (we use Milvus for that via <a href="https://github.com/lbruton/claude-context" target="_blank" rel="noopener">claude-context</a>). But for documentation, the index tree + wikilinks approach is simpler, more maintainable, and gives you a visual graph in Obsidian. Claude can navigate the vault with Read and Grep — no embedding pipeline needed.
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Classification -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Decision Framework</div>
+      <div class="section-title">What Goes in the Vault?</div>
+      <p class="section-desc">Not everything belongs in the vault. The key question: <strong>"Does it change when the code changes?"</strong></p>
+
+      <table class="compare-table">
+        <tr>
+          <th>Content</th>
+          <th>Location</th>
+          <th>Why</th>
+        </tr>
+        <tr>
+          <td class="label">Architecture decisions</td>
+          <td>Vault</td>
+          <td>Stable knowledge — outlives any single code version</td>
+        </tr>
+        <tr>
+          <td class="label">Infrastructure docs (IPs, stacks, topology)</td>
+          <td>Vault</td>
+          <td>Cross-cutting — used by multiple projects</td>
+        </tr>
+        <tr>
+          <td class="label">Issue tracking</td>
+          <td>Vault</td>
+          <td>Planning lives outside the codebase</td>
+        </tr>
+        <tr>
+          <td class="label">Session digests &amp; standups</td>
+          <td>Vault</td>
+          <td>Human-browsable history with graph connections</td>
+        </tr>
+        <tr>
+          <td class="label">API reference (endpoints, params)</td>
+          <td>In-repo docs/</td>
+          <td>Tightly coupled to code — changes with every PR</td>
+        </tr>
+        <tr>
+          <td class="label">AI instructions (CLAUDE.md)</td>
+          <td>In-repo root</td>
+          <td>Auto-loaded by Claude Code, needs to be in the project</td>
+        </tr>
+        <tr>
+          <td class="label">Test plans &amp; runbooks</td>
+          <td>In-repo tests/</td>
+          <td>Executed from the repo, version-locked to code</td>
+        </tr>
+        <tr>
+          <td class="label">Session memory (episodic)</td>
+          <td>mem0</td>
+          <td>Ephemeral, auto-managed, searchable across sessions</td>
+        </tr>
+      </table>
+
+      <p><strong>Gray area test:</strong> If it partially changes with code, split it. Put the stable overview in the vault and the code-specific details in the repo. For example, a project's architecture overview goes in the vault; its API endpoint list stays in-repo.</p>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Automation</div>
+      <div class="section-title">Vault Skills &amp; CLI</div>
+      <p class="section-desc">Two skills automate vault operations, and the Obsidian CLI enables programmatic access.</p>
+
+      <div class="pipeline-grid">
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--green)"></div>
+            <div class="pipe-card-name">/vault-update</div>
+          </div>
+          <p>Update vault documentation after code changes. Identifies affected pages, reads them, updates with current state, maintains indexes, commits, and pushes.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--amber)"></div>
+            <div class="pipe-card-name">/docvault</div>
+          </div>
+          <p>Education and decision framework. Explains what belongs in the vault vs in-repo docs, how to structure new content, and how to navigate the index tree.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--cyan)"></div>
+            <div class="pipe-card-name">Obsidian CLI</div>
+          </div>
+          <p>Built-in CLI (v1.12+) for programmatic vault operations — search, property management, backlink queries, and vault health checks.</p>
+        </div>
+      </div>
+
+      <h3>/vault-update Workflow</h3>
+      <p>This is a <strong>hard gate</strong> in the development workflow — vault documentation must be updated and committed <em>before</em> pushing any project PR. The skill:</p>
+<pre><code>1. Identifies which vault pages are affected by the code changes
+2. Reads the current page content
+3. Updates with accurate, current information
+4. Maintains _Index.md tables (add/update/remove rows)
+5. Updates frontmatter timestamps
+6. Commits directly to main (vault uses direct commits, no PRs)
+7. Pushes to remote</code></pre>
+
+      <h3>Obsidian CLI Examples</h3>
+      <p>The Obsidian CLI ships with Obsidian Desktop (v1.12+). It communicates via IPC socket, so Obsidian must be running.</p>
+
+<pre><code># Set the CLI path
+OBS='/Applications/Obsidian.app/Contents/MacOS/obsidian'
+
+# Vault health
+$OBS vault="DocVault" orphans total        # Files with no incoming links
+$OBS vault="DocVault" unresolved verbose   # Broken wikilinks
+$OBS vault="DocVault" deadends total       # Files with no outgoing links
+
+# Search
+$OBS vault="DocVault" search query="portainer" format=json limit=10
+
+# Read and write notes
+$OBS vault="DocVault" read path="Infrastructure/Portainer.md"
+$OBS vault="DocVault" append path="Infrastructure/Portainer.md" \
+  content="\n## New Section\nContent here."
+
+# Property management (for issue tracking)
+$OBS vault="DocVault" property:set \
+  name="status" value="done" \
+  path="Projects/StakTrakr/Issues/STAK-498.md"
+
+# Backlinks — what references this page?
+$OBS vault="DocVault" backlinks file="Portainer" format=json
+
+# Vault stats
+$OBS vault="DocVault" vault   # name, path, files, folders, size</code></pre>
+    </div>
+  </section>
+
+  <!-- Generated Content -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Integration</div>
+      <div class="section-title">Auto-Generated Vault Content</div>
+      <p class="section-desc">Several pipeline components write to the vault automatically. All generated content must follow the wikilink convention to stay connected in the knowledge graph.</p>
+
+      <table class="compare-table">
+        <tr>
+          <th>Source</th>
+          <th>Vault Location</th>
+          <th>When</th>
+        </tr>
+        <tr>
+          <td class="label">Session digests</td>
+          <td><code>Daily Digests/{Project}/{date}.md</code></td>
+          <td>Every <code>/wrap</code> at session end</td>
+        </tr>
+        <tr>
+          <td class="label">Weekly standups</td>
+          <td><code>Standups/{YYYY-WNN}.md</code></td>
+          <td>On demand via <code>/weekly-standup</code></td>
+        </tr>
+        <tr>
+          <td class="label">Issues</td>
+          <td><code>Projects/{Project}/Issues/{ID}.md</code></td>
+          <td>Every <code>/issue</code> creation</td>
+        </tr>
+        <tr>
+          <td class="label">After-action reports</td>
+          <td>Appended to issue or as separate <code>{ID}-aar.md</code></td>
+          <td>Post-implementation via <code>/after-action</code></td>
+        </tr>
+        <tr>
+          <td class="label">Prime reports</td>
+          <td><code>Prime Reports/{date}.md</code></td>
+          <td>Session start via <code>/prime</code></td>
+        </tr>
+      </table>
+
+      <h3>Wikilink Rules for Generated Content</h3>
+      <p>Every piece of auto-generated content must include inline wikilinks and a footer section.</p>
+
+<pre><code># Inline wikilinks in the prose — first mention only
+"lbruton fixed the price scraper bug in [[StakTrakr]].
+ The fix was deployed to [[Portainer]] Stack 7. See [[STAK-498]]."
+
+# Footer section at the end
+## Related Pages
+
+- [[StakTrakr Overview]] — poller pipeline context
+- [[Portainer]] — deployment target
+- [[STAK-498]] — parent issue</code></pre>
+
+      <div class="callout callout-green">
+        <div class="callout-title">Why wikilinks matter in generated content</div>
+        Without wikilinks, daily digests are isolated text files. With them, every digest becomes a node in the knowledge graph — Obsidian's graph view shows connections between sessions, projects, and infrastructure. You can click "Portainer" in the backlinks panel and see every session that touched it.
+      </div>
+    </div>
+  </section>
+
+  <!-- Canvas Files -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Visual</div>
+      <div class="section-title">Canvas Diagrams</div>
+      <p class="section-desc">Obsidian Canvas files (<code>.canvas</code>) store visual flowcharts and architecture diagrams as JSON. Claude can read and write them — they're just nodes with positions, edges with connections.</p>
+
+<pre><code>{
+  "nodes": [
+    {
+      "id": "api",
+      "type": "text",
+      "text": "## API Server\nExpress + SQLite",
+      "x": 0, "y": 0,
+      "width": 250, "height": 120
+    },
+    {
+      "id": "poller",
+      "type": "text",
+      "text": "## Price Poller\nCron + Puppeteer",
+      "x": 400, "y": 0,
+      "width": 250, "height": 120
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "fromNode": "poller", "fromSide": "left",
+      "toNode": "api", "toSide": "right",
+      "label": "POST /prices"
+    }
+  ]
+}</code></pre>
+
+      <p>Canvas files render as interactive diagrams in Obsidian. They're version-controlled in git alongside the markdown. Use them for architecture overviews, data flow diagrams, and system topology maps.</p>
+    </div>
+  </section>
+
+  <!-- Getting Started -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">Quick Start</div>
+      <div class="section-title">Set Up Your Own Vault</div>
+
+      <h3>1. Create the vault</h3>
+<pre><code>mkdir -p ~/DocVault
+cd ~/DocVault
+git init</code></pre>
+
+      <h3>2. Create the index tree</h3>
+<pre><code># Root index
+cat &gt; INDEX.md &lt;&lt; 'EOF'
+# DocVault
+
+| Section | Description |
+|---------|-------------|
+| [[Projects Index\|Projects]] | Project documentation |
+| [[Infrastructure Index\|Infrastructure]] | Network, servers, services |
+| [[Architecture Index\|Architecture]] | Cross-project patterns |
+EOF
+
+# Create folders with _Index.md files
+for dir in Projects Infrastructure Architecture; do
+  mkdir -p "$dir"
+  echo -e "---\ntags: [index]\nupdated: $(date +%Y-%m-%d)\n---\n\n# $dir Index\n\n| Page | Summary |\n|------|---------|\n" &gt; "$dir/_Index.md"
+done</code></pre>
+
+      <h3>3. Add a CLAUDE.md</h3>
+<pre><code>cat &gt; CLAUDE.md &lt;&lt; 'EOF'
+# DocVault
+
+Central knowledge base. Navigate from INDEX.md.
+
+## Rules
+- Use [[wikilinks]] for all internal references
+- Every folder has _Index.md — update it when adding/removing pages
+- Update frontmatter `updated:` timestamp when editing
+- Commit directly to main (no PRs needed)
+- No secrets — reference Infisical key names, never paste keys
+EOF</code></pre>
+
+      <h3>4. Open in Obsidian</h3>
+      <p>Open Obsidian, choose "Open folder as vault," and select your DocVault directory. Enable the Graph View core plugin to visualize your wikilink connections.</p>
+
+      <h3>5. Tell Claude about it</h3>
+      <p>Add a line to your global <code>~/.claude/CLAUDE.md</code>:</p>
+<pre><code>## Knowledge Base
+Read ~/DocVault/ for architecture, infrastructure, and design questions.
+Start at INDEX.md and follow the index tree.</code></pre>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt for Claude: Build vault skills</div>
+        I have an Obsidian vault at <code>~/DocVault/</code> that I use as a knowledge base. Build me two Claude Code skills:
+        <br><br>
+        <strong>/vault-update:</strong> After I make code changes, identify which vault pages need updating, read them, update with current information, maintain the _Index.md tables, update frontmatter timestamps, and commit+push to main.
+        <br><br>
+        <strong>/docvault:</strong> An educational skill that explains what belongs in the vault vs in-repo docs. When I'm not sure where to put documentation, this skill should help me decide using the "does it change when the code changes?" test.
+        <br><br>
+        Save both as <code>~/.claude/skills/{name}/SKILL.md</code>.
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://www.lbruton.cc">lbruton.cc</a>
+        <a href="https://www.lbruton.cc/guides/session-memory/">Session Memory Guide</a>
+        <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+    </div>
+  </footer>
+
+</body>
+</html>
