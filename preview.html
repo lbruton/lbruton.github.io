@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design System Preview: lbruton.cc</title>
+<style>
+  :root {
+    --bg-deep: #070b14;
+    --bg-primary: #0a0e17;
+    --bg-card: #111a2e;
+    --bg-card-hover: #162040;
+    --border: #1e2a3a;
+    --border-hover: #2d3f5a;
+    --text: #b8c4d4;
+    --text-dim: #6b7d93;
+    --text-bright: #e6edf5;
+    --accent: #818cf8;
+    --accent-dim: #818cf820;
+    --hex: #22c55e;
+    --forge: #f59e0b;
+    --trmc: #00b4d8;
+    --whoseon: #a78bfa;
+    --stak: #3b82f6;
+    --mymelo: #f472b6;
+    --specflow: #6366f1;
+    --claude-ctx: #818cf8;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --cyan: #00b4d8;
+    --pink: #f472b6;
+    --red: #ef4444;
+    --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px; font-weight: 400; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: #070b14e8;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; }
+  .nav-brand span { color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; list-style: none; }
+  .nav-links a { font-size: 0.85rem; font-weight: 400; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text-bright); }
+  .nav-cta {
+    display: inline-block; background: var(--accent); color: #fff;
+    padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .nav-cta:hover { background: #6366f1; }
+
+  /* HERO */
+  .hero {
+    padding: 100px 32px 80px; text-align: center;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-deep) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-label {
+    font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 2.8rem; font-weight: 700; line-height: 1.2;
+    letter-spacing: -0.03em; color: var(--text-bright); margin-bottom: 20px;
+  }
+  .hero p { font-size: 1.15rem; font-weight: 400; line-height: 1.8; color: var(--text); max-width: 600px; margin: 0 auto 32px; }
+  .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff;
+    padding: 10px 24px; border-radius: 8px; border: none;
+    font-family: var(--sans); font-size: 0.9rem; font-weight: 500;
+    text-decoration: none; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #6366f1; }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--text);
+    padding: 10px 24px; border-radius: 8px;
+    border: 1px solid var(--border);
+    font-family: var(--sans); font-size: 0.9rem; font-weight: 500;
+    text-decoration: none; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--text-bright); }
+
+  /* SECTIONS */
+  .section { padding: 64px 32px; max-width: 960px; margin: 0 auto; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-label { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .section-title { font-size: 1.8rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--text-bright); margin-bottom: 32px; }
+
+  /* COLORS */
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .color-swatch { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .color-swatch-block { height: 72px; width: 100%; }
+  .color-swatch-info { padding: 10px 12px; background: var(--bg-card); }
+  .color-swatch-name { font-size: 0.82rem; font-weight: 600; color: var(--text-bright); margin-bottom: 2px; }
+  .color-swatch-hex { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); }
+  .color-swatch-role { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+  .color-group-title { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin: 24px 0 12px; }
+  .color-group-title:first-child { margin-top: 0; }
+
+  /* TYPOGRAPHY */
+  .type-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  .type-table th { text-align: left; padding: 12px 16px; background: var(--bg-card); color: var(--accent); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .type-table td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .type-table tr:last-child td { border-bottom: none; }
+  .type-meta { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; }
+
+  /* BUTTONS */
+  .button-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 24px; }
+  .button-group { margin-bottom: 32px; }
+  .button-group-label { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); margin-bottom: 12px; }
+
+  /* CARDS */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .demo-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; transition: all 0.25s ease; text-decoration: none; display: block;
+  }
+  .demo-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-2px); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .card-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .card-name { font-family: var(--mono); font-weight: 600; font-size: 1rem; color: var(--text-bright); }
+  .card-desc { font-size: 0.88rem; color: var(--text); line-height: 1.6; margin-bottom: 14px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-family: var(--mono); font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: var(--bg-deep); color: var(--text-dim); border: 1px solid var(--border); }
+
+  /* CALLOUTS */
+  .callout { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 16px; font-size: 0.9rem; }
+  .callout-amber { border-left: 3px solid var(--amber); }
+  .callout-green { border-left: 3px solid var(--green); }
+  .callout-red { border-left: 3px solid var(--red); }
+  .callout-title { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; margin-bottom: 6px; }
+  .callout-amber .callout-title { color: var(--amber); }
+  .callout-green .callout-title { color: var(--green); }
+  .callout-red .callout-title { color: var(--red); }
+
+  /* PROMPT BLOCK */
+  .prompt-block { background: linear-gradient(135deg, #111a2e 0%, #162040 100%); border: 1px solid var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 20px 24px; margin-bottom: 16px; font-size: 0.9rem; line-height: 1.8; }
+  .prompt-label { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+  /* CODE BLOCKS */
+  .file-header { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); padding: 10px 16px; background: var(--bg-card-hover); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; margin-top: 16px; }
+  .file-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .code-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; font-family: var(--mono); font-size: 0.82rem; line-height: 1.7; color: var(--text-bright); overflow-x: auto; white-space: pre; margin-bottom: 24px; }
+  .file-header + .code-block { margin-top: 0; border-radius: 0 0 10px 10px; }
+
+  /* DEPTH */
+  .depth-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .depth-sample { border-radius: 12px; padding: 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .depth-label { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); margin-bottom: 4px; }
+  .depth-name { font-size: 0.88rem; font-weight: 600; color: var(--text-bright); }
+
+  /* SIDEBAR */
+  .sidebar-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; max-width: 360px; }
+  .sidebar-title { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+  .sidebar-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .sidebar-item:last-child { border-bottom: none; }
+  .sidebar-label { color: var(--text-dim); }
+  .sidebar-value { color: var(--text-bright); font-weight: 500; }
+
+  /* FLOW DIAGRAM */
+  .flow-diagram { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px; font-family: var(--mono); font-size: 0.82rem; line-height: 2; color: var(--text); overflow-x: auto; white-space: pre; margin-bottom: 24px; }
+  .flow-diagram .phase { color: var(--accent); font-weight: 600; }
+  .flow-diagram .gate { color: var(--red); font-weight: 600; }
+  .flow-diagram .arrow { color: var(--text-dim); }
+  .flow-diagram .tool { color: var(--green); }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .hero h1 { font-size: 2rem; }
+    .hero { padding: 60px 32px 50px; }
+    .section { padding: 48px 24px; }
+    .color-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .card-grid { grid-template-columns: 1fr; }
+    .depth-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-brand">lbruton<span>.cc</span></div>
+    <div class="nav-links">
+      <a href="#">Guides</a>
+      <a href="#">Projects</a>
+      <a href="#">About</a>
+      <a href="#">How I Build</a>
+    </div>
+    <a href="#" class="nav-cta">GitHub</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-label">Design System Preview</div>
+    <h1>lbruton.cc</h1>
+    <p>Dark-first portfolio and guide site. Terminal-native aesthetic, infrastructure-informed design, monospace-as-UI-chrome.</p>
+    <div class="hero-buttons">
+      <a href="#" class="btn-primary">Primary Button</a>
+      <a href="#" class="btn-outline">Outline Button</a>
+    </div>
+  </section>
+
+  <!-- Colors -->
+  <div class="section">
+    <div class="section-label">Palette</div>
+    <div class="section-title">Color Palette & Roles</div>
+
+    <div class="color-group-title">Background Scale</div>
+    <div class="color-grid">
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#070b14"></div><div class="color-swatch-info"><div class="color-swatch-name">Deep</div><div class="color-swatch-hex">#070b14</div><div class="color-swatch-role">--bg-deep</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#0a0e17"></div><div class="color-swatch-info"><div class="color-swatch-name">Primary</div><div class="color-swatch-hex">#0a0e17</div><div class="color-swatch-role">--bg-primary</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#111a2e"></div><div class="color-swatch-info"><div class="color-swatch-name">Card</div><div class="color-swatch-hex">#111a2e</div><div class="color-swatch-role">--bg-card</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#162040"></div><div class="color-swatch-info"><div class="color-swatch-name">Card Hover</div><div class="color-swatch-hex">#162040</div><div class="color-swatch-role">--bg-card-hover</div></div></div>
+    </div>
+
+    <div class="color-group-title">Text Scale</div>
+    <div class="color-grid">
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#e6edf5"></div><div class="color-swatch-info"><div class="color-swatch-name">Bright</div><div class="color-swatch-hex">#e6edf5</div><div class="color-swatch-role">--text-bright</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#b8c4d4"></div><div class="color-swatch-info"><div class="color-swatch-name">Body</div><div class="color-swatch-hex">#b8c4d4</div><div class="color-swatch-role">--text</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#6b7d93"></div><div class="color-swatch-info"><div class="color-swatch-name">Dim</div><div class="color-swatch-hex">#6b7d93</div><div class="color-swatch-role">--text-dim</div></div></div>
+    </div>
+
+    <div class="color-group-title">Accent & Border</div>
+    <div class="color-grid">
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#818cf8"></div><div class="color-swatch-info"><div class="color-swatch-name">Accent</div><div class="color-swatch-hex">#818cf8</div><div class="color-swatch-role">--accent</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#1e2a3a"></div><div class="color-swatch-info"><div class="color-swatch-name">Border</div><div class="color-swatch-hex">#1e2a3a</div><div class="color-swatch-role">--border</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#2d3f5a"></div><div class="color-swatch-info"><div class="color-swatch-name">Border Hover</div><div class="color-swatch-hex">#2d3f5a</div><div class="color-swatch-role">--border-hover</div></div></div>
+    </div>
+
+    <div class="color-group-title">Project Accents</div>
+    <div class="color-grid">
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#22c55e"></div><div class="color-swatch-info"><div class="color-swatch-name">HexTrackr</div><div class="color-swatch-hex">#22c55e</div><div class="color-swatch-role">--hex</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#f59e0b"></div><div class="color-swatch-info"><div class="color-swatch-name">Forge</div><div class="color-swatch-hex">#f59e0b</div><div class="color-swatch-role">--forge</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#00b4d8"></div><div class="color-swatch-info"><div class="color-swatch-name">TRMCompare</div><div class="color-swatch-hex">#00b4d8</div><div class="color-swatch-role">--trmc</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#a78bfa"></div><div class="color-swatch-info"><div class="color-swatch-name">WhoseOnFirst</div><div class="color-swatch-hex">#a78bfa</div><div class="color-swatch-role">--whoseon</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#3b82f6"></div><div class="color-swatch-info"><div class="color-swatch-name">StakTrakr</div><div class="color-swatch-hex">#3b82f6</div><div class="color-swatch-role">--stak</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#f472b6"></div><div class="color-swatch-info"><div class="color-swatch-name">MyMelo</div><div class="color-swatch-hex">#f472b6</div><div class="color-swatch-role">--mymelo</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#6366f1"></div><div class="color-swatch-info"><div class="color-swatch-name">SpecFlow</div><div class="color-swatch-hex">#6366f1</div><div class="color-swatch-role">--specflow</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#818cf8"></div><div class="color-swatch-info"><div class="color-swatch-name">Claude Context</div><div class="color-swatch-hex">#818cf8</div><div class="color-swatch-role">--claude-ctx</div></div></div>
+    </div>
+
+    <div class="color-group-title">Semantic Colors</div>
+    <div class="color-grid">
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#22c55e"></div><div class="color-swatch-info"><div class="color-swatch-name">Green</div><div class="color-swatch-hex">#22c55e</div><div class="color-swatch-role">Success / --green</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#f59e0b"></div><div class="color-swatch-info"><div class="color-swatch-name">Amber</div><div class="color-swatch-hex">#f59e0b</div><div class="color-swatch-role">Warning / --amber</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#00b4d8"></div><div class="color-swatch-info"><div class="color-swatch-name">Cyan</div><div class="color-swatch-hex">#00b4d8</div><div class="color-swatch-role">Info / --cyan</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#f472b6"></div><div class="color-swatch-info"><div class="color-swatch-name">Pink</div><div class="color-swatch-hex">#f472b6</div><div class="color-swatch-role">Decorative / --pink</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-block" style="background:#ef4444"></div><div class="color-swatch-info"><div class="color-swatch-name">Red</div><div class="color-swatch-hex">#ef4444</div><div class="color-swatch-role">Error / --red</div></div></div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="section">
+    <div class="section-label">Typography</div>
+    <div class="section-title">Type Scale & Hierarchy</div>
+
+    <table class="type-table">
+      <thead><tr><th>Role</th><th>Sample</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="type-meta">Hero Title (Main)</div></td>
+          <td><span style="font-size:2.8rem;font-weight:700;color:var(--text-bright);letter-spacing:-0.03em;line-height:1.2">Tools built to solve</span></td>
+          <td><div class="type-meta">2.8rem / 700 / -0.03em</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Hero Title (Guide)</div></td>
+          <td><span style="font-size:2.4rem;font-weight:700;color:var(--text-bright);letter-spacing:-0.03em;line-height:1.2">Spec-Driven Development</span></td>
+          <td><div class="type-meta">2.4rem / 700 / -0.03em</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Section Title</div></td>
+          <td><span style="font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:-0.02em">Open-Source Projects</span></td>
+          <td><div class="type-meta">1.8rem / 700 / -0.02em</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Section Title (Guide)</div></td>
+          <td><span style="font-size:1.6rem;font-weight:700;color:var(--text-bright);letter-spacing:-0.02em">The Four Phases</span></td>
+          <td><div class="type-meta">1.6rem / 700 / -0.02em</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Subsection (H3)</div></td>
+          <td><span style="font-size:1.15rem;font-weight:600;color:var(--text-bright)">Codebase search is a hard gate</span></td>
+          <td><div class="type-meta">1.15rem / 600 / normal</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Body</div></td>
+          <td><span style="font-size:1rem;color:var(--text);line-height:1.7">Network engineer by trade. Photographer by passion. I build free, open-source tools for the problems I actually encounter.</span></td>
+          <td><div class="type-meta">1rem / 400 / lh 1.7</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Nav Brand</div></td>
+          <td><span style="font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--text-bright);letter-spacing:-0.02em">lbruton<span style="color:var(--accent)">.cc</span></span></td>
+          <td><div class="type-meta">Mono 1.1rem / 700 / -0.02em</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Card Name</div></td>
+          <td><span style="font-family:var(--mono);font-size:1rem;font-weight:600;color:var(--text-bright)">StakTrakr</span></td>
+          <td><div class="type-meta">Mono 1rem / 600</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Section Label</div></td>
+          <td><span style="font-family:var(--mono);font-size:0.75rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase">Open Source</span></td>
+          <td><div class="type-meta">Mono 0.75rem / uppercase / 2px</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Tag</div></td>
+          <td><span class="tag">Node.js</span> <span class="tag">Puppeteer</span> <span class="tag">GitHub Pages</span></td>
+          <td><div class="type-meta">Mono 0.7rem / 3px 8px pad</div></td>
+        </tr>
+        <tr>
+          <td><div class="type-meta">Code</div></td>
+          <td><span style="font-family:var(--mono);font-size:0.82rem;color:var(--text-bright);line-height:1.7">const config = require('./specflow.json');</span></td>
+          <td><div class="type-meta">Mono 0.82rem / 400 / lh 1.7</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Buttons -->
+  <div class="section">
+    <div class="section-label">Components</div>
+    <div class="section-title">Buttons</div>
+
+    <div class="button-group">
+      <div class="button-group-label">Primary (Filled)</div>
+      <div class="button-row">
+        <a href="#" class="btn-primary">View Guides</a>
+        <a href="#" class="btn-primary" style="background:#6366f1">Hovered</a>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <div class="button-group-label">Outline (Ghost)</div>
+      <div class="button-row">
+        <a href="#" class="btn-outline">GitHub Profile</a>
+        <a href="#" class="btn-outline" style="border-color:var(--accent);color:var(--text-bright)">Hovered</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="section">
+    <div class="section-label">Components</div>
+    <div class="section-title">Project Cards</div>
+
+    <div class="card-grid">
+      <a href="#" class="demo-card">
+        <div class="card-header">
+          <div class="card-dot" style="background:var(--stak)"></div>
+          <div class="card-name">StakTrakr</div>
+        </div>
+        <div class="card-desc">Track precious metals prices across vendors. Real-time scraping, portfolio management, price alerts.</div>
+        <div class="card-tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">Puppeteer</span>
+          <span class="tag">Chart.js</span>
+        </div>
+      </a>
+      <a href="#" class="demo-card">
+        <div class="card-header">
+          <div class="card-dot" style="background:var(--hex)"></div>
+          <div class="card-name">HexTrackr</div>
+        </div>
+        <div class="card-desc">Network monitoring dashboard for Cisco switches. SNMP polling, interface tracking, alert rules.</div>
+        <div class="card-tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">SNMP</span>
+          <span class="tag">Docker</span>
+        </div>
+      </a>
+      <a href="#" class="demo-card">
+        <div class="card-header">
+          <div class="card-dot" style="background:var(--specflow)"></div>
+          <div class="card-name">SpecFlow</div>
+        </div>
+        <div class="card-desc">Spec-driven development plugin for Claude Code. MCP server with real-time dashboard and approval gates.</div>
+        <div class="card-tags">
+          <span class="tag">TypeScript</span>
+          <span class="tag">MCP</span>
+          <span class="tag">React</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Callouts & Prompt Blocks -->
+  <div class="section">
+    <div class="section-label">Components</div>
+    <div class="section-title">Callouts & Prompt Blocks</div>
+
+    <div class="callout callout-amber">
+      <div class="callout-title">Warning</div>
+      Amber callout — used for warnings, caution states, and the task phase.
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Success</div>
+      Green callout — used for success states, tips, and the implementation phase.
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-title">Error</div>
+      Red callout — used for error states, danger zones, and hard gates.
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-label">Example Prompt</div>
+      Role: Backend Developer specializing in web scraping | Task: Fix price-extract.js to read eCheck/Wire column | Restrictions: Don't change other vendor parsers | Success: eCheck prices within $5 of website values.
+    </div>
+  </div>
+
+  <!-- Code Blocks -->
+  <div class="section">
+    <div class="section-label">Components</div>
+    <div class="section-title">Code Blocks</div>
+
+    <div class="file-header">
+      <div class="file-dot" style="background:var(--accent)"></div>
+      specflow/config.json
+    </div>
+    <div class="code-block">{
+  "project": "StakTrakr",
+  "docvault": "../DocVault",
+  "issue_prefix": "STAK"
+}</div>
+
+    <div class="code-block">const config = require('./specflow.json');
+const workflow = new SpecWorkflow(config);
+
+// Phase 1: Requirements → Phase 2: Design → Phase 3: Tasks → Phase 4: Implementation
+await workflow.run();</div>
+  </div>
+
+  <!-- Depth & Elevation -->
+  <div class="section">
+    <div class="section-label">Depth</div>
+    <div class="section-title">Elevation Scale</div>
+
+    <div class="depth-grid">
+      <div class="depth-sample" style="background:var(--bg-deep);border:1px solid var(--border)">
+        <div class="depth-label">Level 0 — Flat</div>
+        <div class="depth-name">--bg-deep</div>
+      </div>
+      <div class="depth-sample" style="background:var(--bg-primary);border:1px solid var(--border)">
+        <div class="depth-label">Level 0.5 — Primary</div>
+        <div class="depth-name">--bg-primary</div>
+      </div>
+      <div class="depth-sample" style="background:var(--bg-card);border:1px solid var(--border)">
+        <div class="depth-label">Level 1 — Surface</div>
+        <div class="depth-name">--bg-card</div>
+      </div>
+      <div class="depth-sample" style="background:var(--bg-card-hover);border:1px solid var(--border-hover)">
+        <div class="depth-label">Level 2 — Hover</div>
+        <div class="depth-name">--bg-card-hover</div>
+      </div>
+      <div class="depth-sample" style="background:#070b14e8;backdrop-filter:blur(12px);border:1px solid var(--border)">
+        <div class="depth-label">Special — Frosted</div>
+        <div class="depth-name">Nav (blur)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Panel -->
+  <div class="section">
+    <div class="section-label">Components</div>
+    <div class="section-title">Sidebar Panel</div>
+
+    <div class="sidebar-panel">
+      <div class="sidebar-title">Quick Facts</div>
+      <div class="sidebar-item"><span class="sidebar-label">Stack</span><span class="sidebar-value">Pure CSS</span></div>
+      <div class="sidebar-item"><span class="sidebar-label">Breakpoint</span><span class="sidebar-value">700px</span></div>
+      <div class="sidebar-item"><span class="sidebar-label">Card Radius</span><span class="sidebar-value">12px</span></div>
+      <div class="sidebar-item"><span class="sidebar-label">Accent</span><span class="sidebar-value">#818cf8</span></div>
+      <div class="sidebar-item"><span class="sidebar-label">Shadows</span><span class="sidebar-value">None</span></div>
+    </div>
+  </div>
+
+  <!-- Flow Diagram -->
+  <div class="section">
+    <div class="section-label">Components</div>
+    <div class="section-title">Flow Diagram</div>
+
+    <div class="flow-diagram"><span class="phase">Requirements</span> <span class="arrow">──</span> <span class="gate">APPROVAL</span> <span class="arrow">──▶</span> <span class="phase">Design</span> <span class="arrow">──</span> <span class="gate">APPROVAL</span> <span class="arrow">──▶</span> <span class="phase">Tasks</span> <span class="arrow">──</span> <span class="gate">APPROVAL</span> <span class="arrow">──▶</span> <span class="phase">Implementation</span>
+    <span class="arrow">│</span>                                                                                    <span class="arrow">│</span>
+<span class="tool">codebase-search</span>                                                                        <span class="tool">log-implementation</span></div>
+  </div>
+
+</body>
+</html>
