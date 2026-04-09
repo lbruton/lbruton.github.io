@@ -54,6 +54,7 @@ Each project has a unique accent used in card dots and guide-specific highlights
 | MyMelo | Pink | `#f472b6` | `--mymelo` |
 | SpecFlow | Indigo | `#6366f1` | `--specflow` |
 | Claude Context | Indigo | `#818cf8` | `--claude-ctx` |
+| PAPiTA | Cyan | `#66d9ff` | `--papita` |
 
 ### Semantic Colors (Guide Pages)
 - **Green** (`#22c55e`): `--green` — Success callouts, positive states, implementation phase.
@@ -318,6 +319,7 @@ The frosted glass nav is the only element using blur-based depth, creating a cle
 - Dim text: `#6b7d93`
 - Accent (links/labels): `#818cf8`
 - Button primary fill: `#818cf8`, hover `#6366f1`
+- PAPiTA accent: `#66d9ff`
 
 ### Example Component Prompts
 - "Create a hero section with dark background gradient (180deg, #0a0e17 to #070b14). Uppercase mono label at 0.8rem with #818cf8 color and 2px letter-spacing. H1 at 2.8rem weight 700, #e6edf5, letter-spacing -0.03em. Subtitle at 1.15rem weight 400, #b8c4d4, line-height 1.8, max-width 600px centered. Two buttons: primary (#818cf8 fill, white text, 8px radius) and outline (transparent, #1e2a3a border, 8px radius)."
