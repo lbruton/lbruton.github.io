@@ -248,6 +248,42 @@ claude-ds-p() {
     </div>
   </div></section>
 
+  <!-- Section 5c: Kimi Case Study -->
+  <section class="content"><div class="container">
+    <div class="section-label">Case Study</div>
+    <div class="section-title">Kimi K2.5 Tackles a Side-Scroller</div>
+    <p class="section-desc">Same night, harder prompt. Kimi K2.5 was given a similar brain dump but asked for a <strong>side-scrolling</strong> shooter (Metal Slug style) instead of top-down. Side-scrollers are objectively more complex &mdash; gravity, jump arcs, platform collision, directional shooting, parallax scrolling.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">1,827</div>
+        <div class="stat-label">lines of JavaScript</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">3</div>
+        <div class="stat-label">rounds to working build</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">262K</div>
+        <div class="stat-label">context window</div>
+      </div>
+    </div>
+
+    <img src="screenshot-kimi-side-scroller.png" alt="Kimi K2.5 generated a side-scrolling Phaser 3 zombie shooter with platforming, gravity, and wave-based enemies" class="screenshot" loading="lazy">
+
+    <p style="text-align:center;margin-top:-8px;margin-bottom:32px"><a href="demos/kimi-side-scroller/index.html" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;background:var(--amber);color:var(--bg-deep);font-family:var(--mono);font-weight:700;font-size:.9rem;border-radius:8px;letter-spacing:.5px;transition:opacity .2s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">PLAY IT &rarr;</a></p>
+
+    <h3>Honest comparison</h3>
+    <p>GLM shipped a working top-down game in one shot. Kimi needed three debugging rounds for the harder side-scroller. Neither result is directly comparable &mdash; the prompts were different, the complexity was different. A fair benchmark would use identical specs, which is planned for a future test.</p>
+
+    <p>What both results prove: alternative models can navigate Claude Code's full tool chain &mdash; file creation, MCP servers, Phaser documentation lookup, multi-file editing &mdash; and produce working software. The quality gap between models shows up in edge cases and debugging resilience, not in basic capability.</p>
+
+    <div class="callout">
+      <div class="callout-title">Prototype, not production</div>
+      The Kimi game is a rough prototype &mdash; it needs real level design and gameplay tuning. But as a proof of concept for Kimi K2.5 running through Claude Code's workflow, it demonstrates that the 262K context model can handle multi-file Phaser projects with full MCP integration.
+    </div>
+  </div></section>
+
   <!-- Section 6: Constraints -->
   <section class="content"><div class="container">
     <div class="section-label">Constraints</div>
