@@ -43,7 +43,7 @@
     <div class="section-title">Claude Code Is Model-Agnostic</div>
     <p class="section-desc">Claude Code talks to an API endpoint. Override <code>ANTHROPIC_BASE_URL</code> and the model resolves to whatever that endpoint serves. Your skills, MCP servers, hooks, memory, and CLAUDE.md all load normally &mdash; the model is just the brain, everything else is the same.</p>
 
-    <p>Three providers now offer <strong>native Anthropic-compatible APIs</strong> &mdash; no proxy, no translation layer, no LiteLLM:</p>
+    <p>Three providers now offer <strong>native Anthropic-compatible API endpoints</strong> &mdash; no third-party proxy like LiteLLM or OpenRouter needed. Your requests go directly to the provider's servers, though latency is still higher than native Claude MAX due to the additional network hop:</p>
 
     <div class="pipeline-grid">
       <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">GLM (z.ai)</div></div><p>GLM-5.1 &mdash; 204K context, 128K max output, reasoning-capable. $50/quarter for 3x Pro plan.</p></div>
@@ -80,7 +80,7 @@ alias claude-glm='ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
   ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.5-Air (Haiku slot)" \
   ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES="effort,thinking" \
   ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES="effort,thinking" \
-  API_TIMEOUT_MS="3000000" \
+  API_TIMEOUT_MS="600000" \
   claude'</code></pre>
 
     <div class="file-header"><div class="file-dot" style="background:var(--cyan)"></div>DeepSeek alias (same file)</div>
@@ -95,6 +95,19 @@ alias claude-ds='ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
   ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="DeepSeek V3.2 (Haiku slot)" \
   API_TIMEOUT_MS="600000" \
   claude --bare'</code></pre>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--amber)"></div>Kimi K2.5 alias (same file)</div>
+<pre><code># Kimi K2.5 (Moonshot) — pay-as-you-go, 262K context
+alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
+  ANTHROPIC_AUTH_TOKEN="your-kimi-api-key" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k2.5" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="kimi-k2.5" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="kimi-k2.5" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="Kimi K2.5 (Opus slot)" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="Kimi K2.5 (Sonnet slot)" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="Kimi K2.5 (Haiku slot)" \
+  API_TIMEOUT_MS="600000" \
+  claude'</code></pre>
 
     <div class="file-header"><div class="file-dot" style="background:var(--pink)"></div>~/.zshrc (one line)</div>
 <pre><code># Load AI aliases
@@ -247,7 +260,7 @@ claude-ds-p() {
     <p>You cannot change backends during a conversation. Each terminal session is locked to whatever backend it launched with. To use a different model, open a new terminal tab.</p>
 
     <h3>Latency</h3>
-    <p>All alternative backends route through proxy APIs. Expect noticeably slower first-token and streaming response times compared to native Claude MAX, which benefits from Anthropic's optimized infrastructure and prompt caching.</p>
+    <p>Alternative backends talk directly to the provider's API (no third-party proxy), but the additional network hop still adds latency. Expect noticeably slower first-token and streaming response times compared to native Claude MAX, which benefits from Anthropic's optimized infrastructure and prompt caching.</p>
 
     <h3>Tool use reliability varies</h3>
     <p>Claude is purpose-built for Claude Code's tool calling patterns. Alternative models may struggle with complex multi-step tool chains (Read &rarr; Edit &rarr; Grep &rarr; Bash sequences). GLM-5.1 tested well on a substantial scaffolding task, but long-session reliability for all backends is still being evaluated.</p>

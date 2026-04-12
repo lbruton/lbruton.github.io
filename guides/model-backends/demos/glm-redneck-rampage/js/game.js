@@ -1,6 +1,6 @@
 // ============================================================
 // REDNECK RAMPAGE: LAST CALL
-// A top-down hoard survival shooter
+// A top-down horde survival shooter
 // Alien Swarm meets Left 4 Dead meets Shaun of the Dead
 // ============================================================
 
