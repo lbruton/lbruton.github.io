@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Backends — Run Any Model Through Claude Code | lbruton.cc</title>
+  <meta name="description" content="Use GLM, DeepSeek, and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers — different model behind the API.">
+  <meta property="og:title" content="Model Backends — Run Any Model Through Claude Code">
+  <meta property="og:description" content="Shell alias, new terminal, done. Run GLM-5.1, DeepSeek, and Kimi through Claude Code alongside your MAX plan.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.lbruton.cc/guides/model-backends/">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <style>
+    :root{--bg-deep:#070b14;--bg-primary:#0a0e17;--bg-card:#111a2e;--bg-card-hover:#162040;--border:#1e2a3a;--border-hover:#2d3f5a;--text:#b8c4d4;--text-dim:#6b7d93;--text-bright:#e6edf5;--accent:#818cf8;--accent-dim:#818cf820;--green:#22c55e;--amber:#f59e0b;--cyan:#00b4d8;--pink:#f472b6;--red:#ef4444;--mono:'SF Mono','JetBrains Mono','Fira Code','Cascadia Code',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg-deep);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--text-bright)}.container{max-width:800px;margin:0 auto;padding:0 24px}
+    nav{position:sticky;top:0;z-index:100;background:#070b14e8;border-bottom:1px solid var(--border);padding:14px 0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}nav .container{display:flex;align-items:center;justify-content:space-between;max-width:800px}.nav-brand{font-family:var(--mono);font-weight:700;font-size:1.1rem;color:var(--text-bright);letter-spacing:-.02em}.nav-brand span{color:var(--accent)}.nav-links{display:flex;gap:24px}.nav-links a{font-size:.85rem;color:var(--text-dim);transition:color .2s}.nav-links a:hover{color:var(--text-bright)}
+    .hero{padding:80px 0 60px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--bg-primary) 0%,var(--bg-deep) 100%)}.hero-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}.hero h1{font-size:2.4rem;font-weight:700;color:var(--text-bright);line-height:1.2;letter-spacing:-.03em;margin-bottom:16px}.hero p{font-size:1.1rem;color:var(--text);max-width:600px;line-height:1.8}
+    .content{padding:48px 0}.content+.content{border-top:1px solid var(--border)}.section-label{font-family:var(--mono);font-size:.75rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}.section-title{font-size:1.6rem;font-weight:700;color:var(--text-bright);letter-spacing:-.02em;margin-bottom:12px}.section-desc{color:var(--text);margin-bottom:32px;line-height:1.8}h3{font-size:1.15rem;font-weight:600;color:var(--text-bright);margin:32px 0 12px}h3:first-child{margin-top:0}p{margin-bottom:16px;line-height:1.8}ul,ol{margin:0 0 16px 24px;line-height:1.8}li{margin-bottom:4px}
+    pre{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:16px 0 24px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--text-bright)}code{font-family:var(--mono);font-size:.85em;background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--text-bright)}pre code{background:none;padding:0}
+    .file-header{display:flex;align-items:center;gap:8px;margin-top:24px;margin-bottom:0;font-family:var(--mono);font-size:.78rem;color:var(--text-dim);padding:10px 16px;background:var(--bg-card-hover);border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0}.file-header+pre{margin-top:0;border-radius:0 0 10px 10px}.file-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .flow-diagram{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:32px;margin:24px 0;font-family:var(--mono);font-size:.82rem;line-height:2;color:var(--text);overflow-x:auto;white-space:pre}.flow-diagram .claude{color:var(--pink);font-weight:600}.flow-diagram .glm{color:var(--green);font-weight:600}.flow-diagram .ds{color:var(--cyan)}.flow-diagram .kimi{color:var(--amber)}.flow-diagram .arrow{color:var(--text-dim)}.flow-diagram .note{color:var(--text-dim)}
+    .compare-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.88rem}.compare-table th{text-align:left;padding:12px 16px;background:var(--bg-card);color:var(--accent);font-family:var(--mono);font-size:.78rem;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}.compare-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}.compare-table tr:last-child td{border-bottom:none}.compare-table .label{color:var(--text-dim);white-space:nowrap}
+    .callout{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:16px 20px;margin:20px 0;font-size:.9rem}.callout-title{font-family:var(--mono);font-size:.78rem;color:var(--amber);font-weight:600;margin-bottom:6px}.callout-green{border-left-color:var(--green)}.callout-green .callout-title{color:var(--green)}.callout-cyan{border-left-color:var(--cyan)}.callout-cyan .callout-title{color:var(--cyan)}.callout-pink{border-left-color:var(--pink)}.callout-pink .callout-title{color:var(--pink)}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0}.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center}.stat-number{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--green);line-height:1;margin-bottom:8px}.stat-label{font-size:.82rem;color:var(--text-dim);line-height:1.4}
+    .screenshot{width:100%;border-radius:12px;border:1px solid var(--border);margin:24px 0}
+    .pipeline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:24px 0}.pipe-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}.pipe-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pipe-card-name{font-family:var(--mono);font-weight:600;font-size:.9rem;color:var(--text-bright)}.pipe-card p{font-size:.85rem;color:var(--text);margin:0;line-height:1.6}
+    footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}.footer-links a{font-size:.85rem;color:var(--text-dim)}.footer-links a:hover{color:var(--accent)}.footer-copy{font-size:.8rem;color:var(--text-dim)}
+    @media(max-width:700px){.hero h1{font-size:1.8rem}.hero{padding:60px 0 40px}.content{padding:36px 0}.stat-grid{grid-template-columns:1fr}.pipeline-grid{grid-template-columns:1fr}.flow-diagram{font-size:.72rem;padding:20px}pre{font-size:.75rem;padding:16px}}
+  </style>
+</head>
+<body>
+  <nav><div class="container"><a href="https://www.lbruton.cc" class="nav-brand">lbruton<span>.cc</span></a><div class="nav-links"><a href="https://www.lbruton.cc#guides">Guides</a><a href="https://www.lbruton.cc#projects">Projects</a><a href="https://www.lbruton.cc#about">About</a><a href="https://www.lbruton.cc#philosophy">How I Build</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div></div></nav>
+
+  <section class="hero"><div class="container">
+    <div class="hero-label">Claude Code Guide</div>
+    <h1>Model Backends</h1>
+    <p>Use GLM, DeepSeek, and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers &mdash; different model behind the API. Shell alias, new terminal, done.</p>
+  </div></section>
+
+  <!-- Section 1: The Idea -->
+  <section class="content"><div class="container">
+    <div class="section-label">The Idea</div>
+    <div class="section-title">Claude Code Is Model-Agnostic</div>
+    <p class="section-desc">Claude Code talks to an API endpoint. Override <code>ANTHROPIC_BASE_URL</code> and the model resolves to whatever that endpoint serves. Your skills, MCP servers, hooks, memory, and CLAUDE.md all load normally &mdash; the model is just the brain, everything else is the same.</p>
+
+    <p>Three providers now offer <strong>native Anthropic-compatible APIs</strong> &mdash; no proxy, no translation layer, no LiteLLM:</p>
+
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">GLM (z.ai)</div></div><p>GLM-5.1 &mdash; 204K context, 128K max output, reasoning-capable. $50/quarter for 3x Pro plan.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">DeepSeek</div></div><p>DeepSeek V3.2 &mdash; 102K context. Pay-as-you-go at $0.28/M output tokens. 95% cheaper than Claude.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Kimi (Moonshot)</div></div><p>Kimi K2.5 &mdash; 262K context. Pay-as-you-go at $2.50/M output. Agent Swarm capability.</p></div>
+    </div>
+
+    <div class="flow-diagram"><span class="note">Your terminal — same machine, same directory, different backends</span>
+<span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>
+<span class="arrow">│</span> <span class="claude">claude</span>      <span class="arrow">│</span>   <span class="arrow">│</span> <span class="glm">claude-glm</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="ds">claude-ds</span>   <span class="arrow">│</span>   <span class="arrow">│</span> <span class="kimi">claude-kimi</span> <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">Opus 4.6</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">GLM-5.1</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">DeepSeek</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Kimi K2.5</span>   <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">1M context</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">204K</span>        <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">102K (bare)</span> <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">262K</span>        <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">$200/mo</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">~$17/mo</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">~$0.28/M</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">~$2.50/M</span>    <span class="arrow">│</span>
+<span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>
+       <span class="arrow">└──────────────┴──────────────┴──────────────┘</span>
+                    <span class="note">same skills, MCP, hooks, CLAUDE.md</span></div>
+  </div></section>
+
+  <!-- Section 2: The Setup -->
+  <section class="content"><div class="container">
+    <div class="section-label">Setup</div>
+    <div class="section-title">Shell Aliases &mdash; Two Minutes to Multi-Model</div>
+    <p class="section-desc">Create a file that defines aliases for each backend. Source it from your shell profile so it survives reboots. Each alias launches the same <code>claude</code> binary with different environment variables.</p>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--green)"></div>~/.ai-aliases.zsh</div>
+<pre><code># GLM (z.ai) — 3x Pro plan
+alias claude-glm='ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
+  ANTHROPIC_AUTH_TOKEN="your-glm-api-key" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="glm-5.1" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="glm-5.1" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="glm-4.5-air" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="GLM-5.1 (Opus slot)" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="GLM-5.1 (Sonnet slot)" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.5-Air (Haiku slot)" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES="effort,thinking" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES="effort,thinking" \
+  API_TIMEOUT_MS="3000000" \
+  claude'</code></pre>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--cyan)"></div>DeepSeek alias (same file)</div>
+<pre><code># DeepSeek — pay-as-you-go, 102K context (--bare required)
+alias claude-ds='ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
+  ANTHROPIC_AUTH_TOKEN="your-deepseek-api-key" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-chat" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-chat" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-chat" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="DeepSeek V3.2 (Opus slot)" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="DeepSeek V3.2 (Sonnet slot)" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="DeepSeek V3.2 (Haiku slot)" \
+  API_TIMEOUT_MS="600000" \
+  claude --bare'</code></pre>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--pink)"></div>~/.zshrc (one line)</div>
+<pre><code># Load AI aliases
+[ -f "$HOME/.ai-aliases.zsh" ] && source "$HOME/.ai-aliases.zsh"</code></pre>
+
+    <h3>Authentication precedence</h3>
+    <p>Claude Code checks credentials in this order: <code>ANTHROPIC_AUTH_TOKEN</code> &gt; <code>ANTHROPIC_API_KEY</code> &gt; OAuth login. Use <code>ANTHROPIC_AUTH_TOKEN</code> in your aliases &mdash; it takes priority over the saved OAuth token from your MAX subscription, avoiding the "auth conflict" warning.</p>
+
+    <p>Shell environment variables always override <code>settings.json</code>. No config file conflicts between backends &mdash; your regular <code>claude</code> command keeps using MAX, and each alias overrides cleanly.</p>
+
+    <div class="callout callout-green">
+      <div class="callout-title">First launch</div>
+      The first time you run a backend alias, Claude Code may ask "Do you want to use this API key?" &mdash; say Yes. The choice is remembered for that session. If you see an auth conflict warning, it's safe to proceed &mdash; the API key takes precedence.
+    </div>
+  </div></section>
+
+  <!-- Section 3: Model Comparison -->
+  <section class="content"><div class="container">
+    <div class="section-label">Comparison</div>
+    <div class="section-title">The Model Matrix</div>
+    <p class="section-desc">Each backend has different strengths, context limits, and cost profiles. Pick the right one for the task.</p>
+
+    <table class="compare-table">
+      <tr><th>Alias</th><th>Model</th><th>Context</th><th>Output</th><th>Cost</th><th>Best for</th></tr>
+      <tr><td class="label" style="color:var(--pink)"><code>claude</code></td><td>Opus 4.6</td><td>1M</td><td>~32K</td><td>$200/mo</td><td>Everything &mdash; primary driver</td></tr>
+      <tr><td class="label" style="color:var(--green)"><code>claude-glm</code></td><td>GLM-5.1</td><td>204K</td><td>128K</td><td>~$17/mo</td><td>Full interactive sessions, research, prototyping</td></tr>
+      <tr><td class="label" style="color:var(--cyan)"><code>claude-ds</code></td><td>DeepSeek V3.2</td><td>102K</td><td>~8K</td><td>~$0.28/M</td><td>Batch review via <code>-p</code> pipe mode</td></tr>
+      <tr><td class="label" style="color:var(--amber)"><code>claude-kimi</code></td><td>Kimi K2.5</td><td>262K</td><td>TBD</td><td>~$2.50/M</td><td>Evaluation, large-context tasks</td></tr>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title">Context limits matter</div>
+      A fully-loaded Claude Code session (CLAUDE.md + skills + MCP server prompts + hooks + memory) consumes ~82K tokens of system prompt. DeepSeek's 102K context can't fit that, which is why the <code>claude-ds</code> alias includes <code>--bare</code> (strips plugins, skills, and MCP servers). GLM and Kimi have enough headroom for the full stack.
+    </div>
+  </div></section>
+
+  <!-- Section 4: Pipe Mode -->
+  <section class="content"><div class="container">
+    <div class="section-label">Pipe Mode</div>
+    <div class="section-title">The <code>-p</code> Killer Feature</div>
+    <p class="section-desc">Non-interactive mode (<code>claude -p</code>) works with any backend alias. Pipe a task in, get results out. This is where the cost savings compound &mdash; cheap models doing batch work without burning your MAX tokens.</p>
+
+<pre><code># Code review on DeepSeek tokens (~$0.28/M output)
+git diff | claude-ds-p "Review this diff for bugs and security issues"
+
+# File analysis on GLM tokens (~$17/mo flat)
+claude-glm -p "Explain the architecture of src/auth/" \
+  --allowedTools "Read,Grep,Glob"
+
+# Structured output for CI pipelines
+claude-ds-p "List all TODO comments in this repo" \
+  --output-format json \
+  --allowedTools "Grep"</code></pre>
+
+    <h3>Defining a pipe function</h3>
+    <p>For backends that need <code>--bare</code>, define a shell function so the flags are baked in:</p>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--cyan)"></div>~/.ai-aliases.zsh</div>
+<pre><code># DeepSeek pipe mode — fire-and-forget batch worker
+claude-ds-p() {
+  ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
+  ANTHROPIC_AUTH_TOKEN="your-deepseek-api-key" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-chat" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-chat" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-chat" \
+  API_TIMEOUT_MS="600000" \
+  claude --bare -p "$@"
+}</code></pre>
+
+    <h3>Cross-backend delegation from an active session</h3>
+    <p>Inside any Claude Code session, you can shell out to another backend using the <code>!</code> prefix:</p>
+
+<pre><code># From a GLM session, delegate a complex task to Opus
+! claude -p "Analyze the security of src/auth.ts" --allowedTools "Read,Grep"
+
+# From a Claude MAX session, get a cheap DeepSeek review
+! git diff | claude-ds-p "Review for OWASP top 10 issues"</code></pre>
+  </div></section>
+
+  <!-- Section 5: Case Study -->
+  <section class="content"><div class="container">
+    <div class="section-label">Case Study</div>
+    <div class="section-title">GLM-5.1 Builds a Game in One Shot</div>
+    <p class="section-desc">The first task given to GLM-5.1 through Claude Code was a natural language game concept &mdash; a top-down zombie survival shooter inspired by Alien Swarm and Shaun of the Dead. The prompt was a casual brain dump, not a structured spec.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">6</div>
+        <div class="stat-label">sentences in the prompt</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">889</div>
+        <div class="stat-label">lines of JavaScript</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">0</div>
+        <div class="stat-label">errors on first run</div>
+      </div>
+    </div>
+
+    <img src="screenshot-redneck-rampage.png" alt="GLM-5.1 generated a fully playable Phaser 3 zombie survival game from a 6-sentence prompt" class="screenshot" loading="lazy">
+
+    <p style="text-align:center;margin-top:-8px;margin-bottom:32px"><a href="demos/glm-redneck-rampage/index.html" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;background:var(--green);color:var(--bg-deep);font-family:var(--mono);font-weight:700;font-size:.9rem;border-radius:8px;letter-spacing:.5px;transition:opacity .2s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">PLAY IT &rarr;</a></p>
+
+    <h3>What GLM produced</h3>
+    <ul>
+      <li>Phaser 3 with arcade physics, zero-gravity top-down movement</li>
+      <li>Procedural pixel art sprites generated at runtime &mdash; no external assets</li>
+      <li>Wave-based zombie AI with 4 variants and escalating difficulty</li>
+      <li>Collision detection, health bar, ammo counter, score tracker</li>
+      <li>Real-time minimap with zombie positions</li>
+      <li>Blood splats, screen shake, muzzle flash, death animations</li>
+      <li>4 checkpoints across a procedurally generated town map</li>
+      <li>Complete README with 5-phase roadmap</li>
+    </ul>
+
+    <p>All MCP servers (code search, memory, file operations) worked correctly throughout the session. GLM used <code>context7</code> to look up Phaser 3 documentation, <code>Read</code>/<code>Write</code>/<code>Edit</code> for file operations, and ran the same <code>/wrap</code> end-of-session workflow that Claude does. Tool use reliability was indistinguishable from a native Claude session for this task.</p>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Cost comparison</div>
+      This entire session &mdash; from concept to playable game &mdash; ran on a GLM 3x Pro plan (~$17/month). The equivalent Claude MAX session would have consumed a meaningful chunk of a $200/month subscription.
+    </div>
+  </div></section>
+
+  <!-- Section 5b: Production Workflow -->
+  <section class="content"><div class="container">
+    <div class="section-label">Production Use</div>
+    <div class="section-title">GLM Handling Real PR Workflows</div>
+    <p class="section-desc">Beyond prototyping &mdash; GLM-5.1 running <code>/pr-resolve</code> on a real pull request. Discovering review threads, creating patches, pushing branches, managing git worktrees. Full MCP tool chain: GitHub API, file operations, git commands.</p>
+
+    <img src="screenshot-glm-pr-workflow.png" alt="Split terminal: GLM-5.1 running pr-resolve on top, Claude Sonnet handling StakTrakr work on bottom — two models, two projects, parallel execution" class="screenshot" loading="lazy">
+
+    <p>Top pane: GLM resolving PR review threads &mdash; reading comments, patching code, pushing fixes. Bottom pane: Claude Sonnet running Playwright tests and managing worktrees on a different project. Two models, two projects, running simultaneously on the same machine.</p>
+
+    <div class="callout callout-green">
+      <div class="callout-title">This is the real benchmark</div>
+      Game prototypes are fun, but PR resolution is production work. GLM navigating <code>git branch</code>, <code>gh pr create</code>, file edits, and GitHub MCP tools without supervision &mdash; at 1/12th the cost of Claude MAX &mdash; is the data point that matters.
+    </div>
+  </div></section>
+
+  <!-- Section 6: Constraints -->
+  <section class="content"><div class="container">
+    <div class="section-label">Constraints</div>
+    <div class="section-title">Gotchas &amp; Limitations</div>
+
+    <h3>Context limits are the real constraint</h3>
+    <p>DeepSeek's 102K context cannot fit a fully-loaded Claude Code system prompt (~82K tokens). The <code>claude-ds</code> alias includes <code>--bare</code> which strips all plugins, skills, hooks, and MCP servers. This makes DeepSeek a bare-metal batch worker &mdash; powerful for <code>-p</code> pipe tasks, limited for interactive sessions that depend on your workflow tooling.</p>
+
+    <h3>No mid-session switching</h3>
+    <p>You cannot change backends during a conversation. Each terminal session is locked to whatever backend it launched with. To use a different model, open a new terminal tab.</p>
+
+    <h3>Latency</h3>
+    <p>All alternative backends route through proxy APIs. Expect noticeably slower first-token and streaming response times compared to native Claude MAX, which benefits from Anthropic's optimized infrastructure and prompt caching.</p>
+
+    <h3>Tool use reliability varies</h3>
+    <p>Claude is purpose-built for Claude Code's tool calling patterns. Alternative models may struggle with complex multi-step tool chains (Read &rarr; Edit &rarr; Grep &rarr; Bash sequences). GLM-5.1 tested well on a substantial scaffolding task, but long-session reliability for all backends is still being evaluated.</p>
+
+    <h3>Auth conflict on first launch</h3>
+    <p>If you're logged into <code>claude.ai</code> (MAX subscription), launching an alias will show a warning about conflicting credentials. Use <code>ANTHROPIC_AUTH_TOKEN</code> (higher auth priority than <code>ANTHROPIC_API_KEY</code>) to avoid this, or approve the API key once when prompted.</p>
+  </div></section>
+
+  <!-- Section 7: Beyond Claude Code -->
+  <section class="content"><div class="container">
+    <div class="section-label">Beyond</div>
+    <div class="section-title">Not Just Claude Code</div>
+    <p class="section-desc">These API keys work anywhere. The shell aliases are the convenience layer &mdash; not the only integration point.</p>
+
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">Direct REST</div></div><p><code>curl</code> to any endpoint for scripted automation, CI pipelines, or custom tooling.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">OpenAI SDKs</div></div><p>DeepSeek and Kimi expose OpenAI-compatible endpoints. Drop them into any app that uses the OpenAI SDK.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">MCP Servers</div></div><p>Any MCP server that accepts an API key and base URL can be pointed at these providers.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">OpenRouter</div></div><p>580+ models through a single API key. Useful for benchmarking across many models without signing up for each provider.</p></div>
+    </div>
+
+    <div class="callout callout-cyan">
+      <div class="callout-title">The bigger picture</div>
+      This setup is one piece of a <a href="/guides/multi-agent/">multi-agent workflow</a> that dispatches different models for different cognitive tasks. Claude MAX handles complex architecture. GLM handles experimental sessions. DeepSeek handles cheap batch work. Codex and Gemini run as peer CLI agents. The spec documents are the shared protocol &mdash; any agent can pick up a task from any other.
+    </div>
+  </div></section>
+
+  <footer><div class="container">
+    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/multi-agent/">Multi-Agent</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
+  </div></footer>
+</body>
+</html>
