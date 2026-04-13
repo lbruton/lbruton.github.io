@@ -113,7 +113,7 @@ alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
 [ -f "$HOME/.ai-aliases.zsh" ] && source "$HOME/.ai-aliases.zsh"</code></pre>
 
     <h3>Authentication precedence</h3>
-    <p>Claude Code checks credentials in this order: <code>ANTHROPIC_AUTH_TOKEN</code> &gt; <code>ANTHROPIC_API_KEY</code> &gt; OAuth login. Use <code>ANTHROPIC_AUTH_TOKEN</code> in your aliases &mdash; it takes priority over the saved OAuth token from your MAX subscription, avoiding the "auth conflict" warning.</p>
+    <p>Claude Code checks credentials in this order: <code>ANTHROPIC_AUTH_TOKEN</code> &gt; <code>ANTHROPIC_API_KEY</code> &gt; OAuth login. Either variable works in your aliases &mdash; <code>ANTHROPIC_API_KEY</code> is sufficient and avoids overwriting the OAuth token. You'll see a one-time auth prompt on first launch; approve it and the session uses the API key cleanly.</p>
 
     <p>Shell environment variables always override <code>settings.json</code>. No config file conflicts between backends &mdash; your regular <code>claude</code> command keeps using MAX, and each alias overrides cleanly.</p>
 
@@ -282,14 +282,32 @@ claude-glm -p "List all TODO comments in this repo" \
     <p>Claude is purpose-built for Claude Code's tool calling patterns. Alternative models may struggle with complex multi-step tool chains (Read &rarr; Edit &rarr; Grep &rarr; Bash sequences). GLM-5.1 tested well on a substantial scaffolding task, but long-session reliability for all backends is still being evaluated.</p>
 
     <h3>Auth conflict on first launch</h3>
-    <p>If you're logged into <code>claude.ai</code> (MAX subscription), launching an alias will show a warning about conflicting credentials. Use <code>ANTHROPIC_AUTH_TOKEN</code> (higher auth priority than <code>ANTHROPIC_API_KEY</code>) to avoid this, or approve the API key once when prompted.</p>
+    <p>If you're logged into <code>claude.ai</code> (MAX subscription), launching an alias will show a one-time warning about conflicting credentials. Approve the API key when prompted &mdash; it takes precedence for that session. This is cosmetic; both <code>ANTHROPIC_API_KEY</code> and <code>ANTHROPIC_AUTH_TOKEN</code> work correctly.</p>
   </div></section>
 
-  <!-- Section 7: Beyond Claude Code -->
+  <!-- Section 7: OpenCode -->
+  <section class="content"><div class="container">
+    <div class="section-label">Multi-CLI</div>
+    <div class="section-title">OpenCode &mdash; All Models, One CLI</div>
+    <p class="section-desc">Shell aliases give you one model per terminal. <a href="https://opencode.ai" target="_blank" rel="noopener">OpenCode</a> (open source, 75+ providers) lets you switch models mid-session with <code>Ctrl+O</code>. It reads your <code>CLAUDE.md</code> and <code>~/.claude/skills/</code> natively &mdash; same skills, same MCP servers, different UI.</p>
+
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Runtime switching</div></div><p>Configure all providers once. Pick the model per task at runtime &mdash; no alias dance, no new terminal.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">Reads Claude skills</div></div><p>OpenCode discovers <code>~/.claude/skills/</code> automatically. All 88 skills work without migration.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">Same MCP stack</div></div><p>Configure <code>~/.config/opencode/opencode.json</code> with the same MCP servers. Slightly different JSON format.</p></div>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Install</div>
+      <code>brew install anomalyco/tap/opencode</code> &mdash; then create <code>~/.config/opencode/opencode.json</code> with your MCP servers and provider keys. Run <code>opencode mcp list</code> to verify.
+    </div>
+  </div></section>
+
+  <!-- Section 8: Beyond Claude Code -->
   <section class="content"><div class="container">
     <div class="section-label">Beyond</div>
     <div class="section-title">Not Just Claude Code</div>
-    <p class="section-desc">These API keys work anywhere. The shell aliases are the convenience layer &mdash; not the only integration point.</p>
+    <p class="section-desc">These API keys work anywhere. The shell aliases and dedicated CLIs are the convenience layer &mdash; not the only integration point.</p>
 
     <div class="pipeline-grid">
       <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">Direct REST</div></div><p><code>curl</code> to any endpoint for scripted automation, CI pipelines, or custom tooling.</p></div>
