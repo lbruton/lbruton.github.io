@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Model Backends — Run Any Model Through Claude Code | lbruton.cc</title>
-  <meta name="description" content="Use GLM, DeepSeek, and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers — different model behind the API.">
+  <meta name="description" content="Use GLM and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers — different model behind the API.">
   <meta property="og:title" content="Model Backends — Run Any Model Through Claude Code">
-  <meta property="og:description" content="Shell alias, new terminal, done. Run GLM-5.1, DeepSeek, and Kimi through Claude Code alongside your MAX plan.">
+  <meta property="og:description" content="Shell alias, new terminal, done. Run GLM-5.1 and Kimi K2.5 through Claude Code alongside your MAX plan — delegate tasks and save tokens.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.lbruton.cc/guides/model-backends/">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
@@ -34,7 +34,7 @@
   <section class="hero"><div class="container">
     <div class="hero-label">Claude Code Guide</div>
     <h1>Model Backends</h1>
-    <p>Use GLM, DeepSeek, and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers &mdash; different model behind the API. Shell alias, new terminal, done.</p>
+    <p>Use GLM and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers &mdash; different model behind the API. Delegate tasks, save tokens, open a new terminal.</p>
   </div></section>
 
   <!-- Section 1: The Idea -->
@@ -43,23 +43,22 @@
     <div class="section-title">Claude Code Is Model-Agnostic</div>
     <p class="section-desc">Claude Code talks to an API endpoint. Override <code>ANTHROPIC_BASE_URL</code> and the model resolves to whatever that endpoint serves. Your skills, MCP servers, hooks, memory, and CLAUDE.md all load normally &mdash; the model is just the brain, everything else is the same.</p>
 
-    <p>Three providers now offer <strong>native Anthropic-compatible API endpoints</strong> &mdash; no third-party proxy like LiteLLM or OpenRouter needed. Your requests go directly to the provider's servers, though latency is still higher than native Claude MAX due to the additional network hop:</p>
+    <p>Two providers offer <strong>native Anthropic-compatible API endpoints</strong> &mdash; no third-party proxy like LiteLLM or OpenRouter needed. Your requests go directly to the provider's servers, though latency is still higher than native Claude MAX due to the additional network hop:</p>
 
     <div class="pipeline-grid">
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">GLM (z.ai)</div></div><p>GLM-5.1 &mdash; 204K context, 128K max output, reasoning-capable. $50/quarter for 3x Pro plan.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">DeepSeek</div></div><p>DeepSeek V3.2 &mdash; 102K context. Pay-as-you-go at $0.28/M output tokens. 95% cheaper than Claude.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Kimi (Moonshot)</div></div><p>Kimi K2.5 &mdash; 262K context. Pay-as-you-go at $2.50/M output. Agent Swarm capability.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">GLM (z.ai)</div></div><p>GLM-4.7 on the opus slot, GLM-4.7-Flash on sonnet &amp; haiku. 200K context. Coding plan available with free Flash tier.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Kimi (Moonshot)</div></div><p>Kimi K2.5 &mdash; 262K context. Subscription plan ($30/mo). Also ships its own CLI (<code>kimi</code>) that reads Claude Code skills natively.</p></div>
     </div>
 
     <div class="flow-diagram"><span class="note">Your terminal — same machine, same directory, different backends</span>
-<span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>
-<span class="arrow">│</span> <span class="claude">claude</span>      <span class="arrow">│</span>   <span class="arrow">│</span> <span class="glm">claude-glm</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="ds">claude-ds</span>   <span class="arrow">│</span>   <span class="arrow">│</span> <span class="kimi">claude-kimi</span> <span class="arrow">│</span>
-<span class="arrow">│</span> <span class="note">Opus 4.6</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">GLM-5.1</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">DeepSeek</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Kimi K2.5</span>   <span class="arrow">│</span>
-<span class="arrow">│</span> <span class="note">1M context</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">204K</span>        <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">102K (bare)</span> <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">262K</span>        <span class="arrow">│</span>
-<span class="arrow">│</span> <span class="note">$200/mo</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">~$17/mo</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">~$0.28/M</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">~$2.50/M</span>    <span class="arrow">│</span>
-<span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>
-       <span class="arrow">└──────────────┴──────────────┴──────────────┘</span>
-                    <span class="note">same skills, MCP, hooks, CLAUDE.md</span></div>
+<span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>
+<span class="arrow">│</span> <span class="claude">claude</span>      <span class="arrow">│</span>   <span class="arrow">│</span> <span class="glm">claude-glm</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="kimi">claude-kimi</span> <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">Opus 4.6</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">GLM-4.7</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Kimi K2.5</span>   <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">1M context</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">200K</span>        <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">262K</span>        <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">MAX plan</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Coding plan</span> <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Subscription</span><span class="arrow">│</span>
+<span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>
+       <span class="arrow">└──────────────┴──────────────┘</span>
+              <span class="note">same skills, MCP, hooks, CLAUDE.md</span></div>
   </div></section>
 
   <!-- Section 2: The Setup -->
@@ -69,44 +68,44 @@
     <p class="section-desc">Create a file that defines aliases for each backend. Source it from your shell profile so it survives reboots. Each alias launches the same <code>claude</code> binary with different environment variables.</p>
 
     <div class="file-header"><div class="file-dot" style="background:var(--green)"></div>~/.ai-aliases.zsh</div>
-<pre><code># GLM (z.ai) — 3x Pro plan
+<pre><code># GLM default — GLM-4.7 on opus, GLM-4.7-Flash on sonnet+haiku (free on coding plan)
+# Flash = 200K context, free tier, coding plan = 5hr rolling quota
 alias claude-glm='ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
-  ANTHROPIC_AUTH_TOKEN="your-glm-api-key" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL="glm-5.1" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL="glm-5.1" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="glm-4.5-air" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="GLM-5.1 (Opus slot)" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="GLM-5.1 (Sonnet slot)" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.5-Air (Haiku slot)" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES="effort,thinking" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES="effort,thinking" \
-  API_TIMEOUT_MS="600000" \
+  ANTHROPIC_API_KEY="your-glm-api-key" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="GLM-4.7" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="GLM-4.7-Flash" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="GLM-4.7-Flash" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="GLM-4.7" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="GLM-4.7-Flash" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.7-Flash" \
+  CLAUDE_CODE_AUTO_COMPACT_WINDOW="150000" \
+  API_TIMEOUT_MS="3000000" \
+  claude'
+
+# GLM 5.1 — GLM-5.1 on opus for heavy reasoning, GLM-4.7 on sonnet, Flash on haiku
+alias claude-glm5='ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
+  ANTHROPIC_API_KEY="your-glm-api-key" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="GLM-5.1" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="GLM-4.7" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="GLM-4.7-Flash" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="GLM-5.1" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="GLM-4.7" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.7-Flash" \
+  CLAUDE_CODE_AUTO_COMPACT_WINDOW="150000" \
+  API_TIMEOUT_MS="3000000" \
   claude'</code></pre>
 
-    <div class="file-header"><div class="file-dot" style="background:var(--cyan)"></div>DeepSeek alias (same file)</div>
-<pre><code># DeepSeek — pay-as-you-go, 102K context (--bare required)
-alias claude-ds='ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
-  ANTHROPIC_AUTH_TOKEN="your-deepseek-api-key" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-chat" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-chat" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-chat" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="DeepSeek V3.2 (Opus slot)" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="DeepSeek V3.2 (Sonnet slot)" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="DeepSeek V3.2 (Haiku slot)" \
-  API_TIMEOUT_MS="600000" \
-  claude --bare'</code></pre>
-
     <div class="file-header"><div class="file-dot" style="background:var(--amber)"></div>Kimi K2.5 alias (same file)</div>
-<pre><code># Kimi K2.5 (Moonshot) — pay-as-you-go, 262K context
+<pre><code># Kimi K2.5 (Moonshot) — subscription plan, 262K context
 alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
-  ANTHROPIC_AUTH_TOKEN="your-kimi-api-key" \
+  ANTHROPIC_API_KEY="your-kimi-api-key" \
   ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k2.5" \
   ANTHROPIC_DEFAULT_SONNET_MODEL="kimi-k2.5" \
   ANTHROPIC_DEFAULT_HAIKU_MODEL="kimi-k2.5" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="Kimi K2.5 (Opus slot)" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="Kimi K2.5 (Sonnet slot)" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="Kimi K2.5 (Haiku slot)" \
-  API_TIMEOUT_MS="600000" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="Kimi K2.5" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="Kimi K2.5" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="Kimi K2.5" \
+  API_TIMEOUT_MS="3000000" \
   claude'</code></pre>
 
     <div class="file-header"><div class="file-dot" style="background:var(--pink)"></div>~/.zshrc (one line)</div>
@@ -114,7 +113,7 @@ alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
 [ -f "$HOME/.ai-aliases.zsh" ] && source "$HOME/.ai-aliases.zsh"</code></pre>
 
     <h3>Authentication precedence</h3>
-    <p>Claude Code checks credentials in this order: <code>ANTHROPIC_AUTH_TOKEN</code> &gt; <code>ANTHROPIC_API_KEY</code> &gt; OAuth login. Use <code>ANTHROPIC_AUTH_TOKEN</code> in your aliases &mdash; it takes priority over the saved OAuth token from your MAX subscription, avoiding the "auth conflict" warning.</p>
+    <p>Claude Code checks credentials in this order: <code>ANTHROPIC_AUTH_TOKEN</code> &gt; <code>ANTHROPIC_API_KEY</code> &gt; OAuth login. Either variable works in your aliases &mdash; <code>ANTHROPIC_API_KEY</code> is sufficient and avoids overwriting the OAuth token. You'll see a one-time auth prompt on first launch; approve it and the session uses the API key cleanly.</p>
 
     <p>Shell environment variables always override <code>settings.json</code>. No config file conflicts between backends &mdash; your regular <code>claude</code> command keeps using MAX, and each alias overrides cleanly.</p>
 
@@ -131,16 +130,16 @@ alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
     <p class="section-desc">Each backend has different strengths, context limits, and cost profiles. Pick the right one for the task.</p>
 
     <table class="compare-table">
-      <tr><th>Alias</th><th>Model</th><th>Context</th><th>Output</th><th>Cost</th><th>Best for</th></tr>
-      <tr><td class="label" style="color:var(--pink)"><code>claude</code></td><td>Opus 4.6</td><td>1M</td><td>~32K</td><td>$200/mo</td><td>Everything &mdash; primary driver</td></tr>
-      <tr><td class="label" style="color:var(--green)"><code>claude-glm</code></td><td>GLM-5.1</td><td>204K</td><td>128K</td><td>~$17/mo</td><td>Full interactive sessions, research, prototyping</td></tr>
-      <tr><td class="label" style="color:var(--cyan)"><code>claude-ds</code></td><td>DeepSeek V3.2</td><td>102K</td><td>~8K</td><td>~$0.28/M</td><td>Batch review via <code>-p</code> pipe mode</td></tr>
-      <tr><td class="label" style="color:var(--amber)"><code>claude-kimi</code></td><td>Kimi K2.5</td><td>262K</td><td>TBD</td><td>~$2.50/M</td><td>Evaluation, large-context tasks</td></tr>
+      <tr><th>Alias</th><th>Opus Slot</th><th>Sonnet Slot</th><th>Haiku Slot</th><th>Context</th><th>Best for</th></tr>
+      <tr><td class="label" style="color:var(--pink)"><code>claude</code></td><td>Opus 4.6</td><td>Sonnet 4.5</td><td>Haiku 4.5</td><td>1M</td><td>Everything &mdash; primary driver</td></tr>
+      <tr><td class="label" style="color:var(--green)"><code>claude-glm</code></td><td>GLM-4.7</td><td>GLM-4.7-Flash (free)</td><td>GLM-4.7-Flash (free)</td><td>200K</td><td>Plan in opus, execute in sonnet for free</td></tr>
+      <tr><td class="label" style="color:var(--green)"><code>claude-glm5</code></td><td>GLM-5.1</td><td>GLM-4.7</td><td>GLM-4.7-Flash (free)</td><td>200K</td><td>Heavy reasoning on opus slot</td></tr>
+      <tr><td class="label" style="color:var(--amber)"><code>claude-kimi</code></td><td>Kimi K2.5</td><td>Kimi K2.5</td><td>Kimi K2.5</td><td>262K</td><td>Coding, task delegation, also has own CLI (<code>kimi</code>)</td></tr>
     </table>
 
     <div class="callout">
       <div class="callout-title">Context limits matter</div>
-      A fully-loaded Claude Code session (CLAUDE.md + skills + MCP server prompts + hooks + memory) consumes ~82K tokens of system prompt. DeepSeek's 102K context can't fit that, which is why the <code>claude-ds</code> alias includes <code>--bare</code> (strips plugins, skills, and MCP servers). GLM and Kimi have enough headroom for the full stack.
+      A fully-loaded Claude Code session (CLAUDE.md + skills + MCP server prompts + hooks + memory) consumes ~82K tokens of system prompt. GLM (200K) and Kimi (262K) have enough headroom for the full stack. Models with smaller context windows may need <code>--bare</code> mode.
     </div>
   </div></section>
 
@@ -148,34 +147,19 @@ alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
   <section class="content"><div class="container">
     <div class="section-label">Pipe Mode</div>
     <div class="section-title">The <code>-p</code> Killer Feature</div>
-    <p class="section-desc">Non-interactive mode (<code>claude -p</code>) works with any backend alias. Pipe a task in, get results out. This is where the cost savings compound &mdash; cheap models doing batch work without burning your MAX tokens.</p>
+    <p class="section-desc">Non-interactive mode (<code>claude -p</code>) works with any backend alias. Pipe a task in, get results out. Delegate batch work to alternative backends to save your MAX tokens for complex interactive sessions.</p>
 
-<pre><code># Code review on DeepSeek tokens (~$0.28/M output)
-git diff | claude-ds-p "Review this diff for bugs and security issues"
+<pre><code># Code review on GLM (coding plan)
+git diff | claude-glm -p "Review this diff for bugs and security issues"
 
-# File analysis on GLM tokens (~$17/mo flat)
-claude-glm -p "Explain the architecture of src/auth/" \
+# File analysis on Kimi tokens (subscription)
+claude-kimi -p "Explain the architecture of src/auth/" \
   --allowedTools "Read,Grep,Glob"
 
 # Structured output for CI pipelines
-claude-ds-p "List all TODO comments in this repo" \
+claude-glm -p "List all TODO comments in this repo" \
   --output-format json \
   --allowedTools "Grep"</code></pre>
-
-    <h3>Defining a pipe function</h3>
-    <p>For backends that need <code>--bare</code>, define a shell function so the flags are baked in:</p>
-
-    <div class="file-header"><div class="file-dot" style="background:var(--cyan)"></div>~/.ai-aliases.zsh</div>
-<pre><code># DeepSeek pipe mode — fire-and-forget batch worker
-claude-ds-p() {
-  ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
-  ANTHROPIC_AUTH_TOKEN="your-deepseek-api-key" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-chat" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-chat" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-chat" \
-  API_TIMEOUT_MS="600000" \
-  claude --bare -p "$@"
-}</code></pre>
 
     <h3>Cross-backend delegation from an active session</h3>
     <p>Inside any Claude Code session, you can shell out to another backend using the <code>!</code> prefix:</p>
@@ -183,8 +167,8 @@ claude-ds-p() {
 <pre><code># From a GLM session, delegate a complex task to Opus
 ! claude -p "Analyze the security of src/auth.ts" --allowedTools "Read,Grep"
 
-# From a Claude MAX session, get a cheap DeepSeek review
-! git diff | claude-ds-p "Review for OWASP top 10 issues"</code></pre>
+# From a Claude MAX session, hand off a review to Kimi
+! git diff | claude-kimi -p "Review for OWASP top 10 issues"</code></pre>
   </div></section>
 
   <!-- Section 5: Case Study -->
@@ -225,8 +209,8 @@ claude-ds-p() {
     <p>All MCP servers (code search, memory, file operations) worked correctly throughout the session. GLM used <code>context7</code> to look up Phaser 3 documentation, <code>Read</code>/<code>Write</code>/<code>Edit</code> for file operations, and ran the same <code>/wrap</code> end-of-session workflow that Claude does. Tool use reliability was indistinguishable from a native Claude session for this task.</p>
 
     <div class="callout callout-green">
-      <div class="callout-title">Cost comparison</div>
-      This entire session &mdash; from concept to playable game &mdash; ran on a GLM 3x Pro plan (~$17/month). The equivalent Claude MAX session would have consumed a meaningful chunk of a $200/month subscription.
+      <div class="callout-title">Zero MAX token burn</div>
+      This entire session &mdash; from concept to playable game &mdash; ran on GLM's coding plan. No Claude MAX tokens consumed. Same skills, same MCP servers, same workflow.
     </div>
   </div></section>
 
@@ -242,7 +226,7 @@ claude-ds-p() {
 
     <div class="callout callout-green">
       <div class="callout-title">This is the real benchmark</div>
-      Game prototypes are fun, but PR resolution is production work. GLM navigating <code>git branch</code>, <code>gh pr create</code>, file edits, and GitHub MCP tools without supervision &mdash; at 1/12th the cost of Claude MAX &mdash; is the data point that matters.
+      Game prototypes are fun, but PR resolution is production work. GLM navigating <code>git branch</code>, <code>gh pr create</code>, file edits, and GitHub MCP tools without supervision &mdash; on a separate coding plan that doesn't touch your MAX quota &mdash; is the data point that matters.
     </div>
   </div></section>
 
@@ -286,7 +270,7 @@ claude-ds-p() {
     <div class="section-title">Gotchas &amp; Limitations</div>
 
     <h3>Context limits are the real constraint</h3>
-    <p>DeepSeek's 102K context cannot fit a fully-loaded Claude Code system prompt (~82K tokens). The <code>claude-ds</code> alias includes <code>--bare</code> which strips all plugins, skills, hooks, and MCP servers. This makes DeepSeek a bare-metal batch worker &mdash; powerful for <code>-p</code> pipe tasks, limited for interactive sessions that depend on your workflow tooling.</p>
+    <p>A fully-loaded Claude Code session (~82K tokens of system prompt) needs a model with enough context headroom. GLM (200K) and Kimi (262K) handle this fine. Models with smaller windows may need <code>--bare</code> mode, which strips plugins, skills, and MCP servers.</p>
 
     <h3>No mid-session switching</h3>
     <p>You cannot change backends during a conversation. Each terminal session is locked to whatever backend it launched with. To use a different model, open a new terminal tab.</p>
@@ -298,25 +282,43 @@ claude-ds-p() {
     <p>Claude is purpose-built for Claude Code's tool calling patterns. Alternative models may struggle with complex multi-step tool chains (Read &rarr; Edit &rarr; Grep &rarr; Bash sequences). GLM-5.1 tested well on a substantial scaffolding task, but long-session reliability for all backends is still being evaluated.</p>
 
     <h3>Auth conflict on first launch</h3>
-    <p>If you're logged into <code>claude.ai</code> (MAX subscription), launching an alias will show a warning about conflicting credentials. Use <code>ANTHROPIC_AUTH_TOKEN</code> (higher auth priority than <code>ANTHROPIC_API_KEY</code>) to avoid this, or approve the API key once when prompted.</p>
+    <p>If you're logged into <code>claude.ai</code> (MAX subscription), launching an alias will show a one-time warning about conflicting credentials. Approve the API key when prompted &mdash; it takes precedence for that session. This is cosmetic; both <code>ANTHROPIC_API_KEY</code> and <code>ANTHROPIC_AUTH_TOKEN</code> work correctly.</p>
   </div></section>
 
-  <!-- Section 7: Beyond Claude Code -->
+  <!-- Section 7: OpenCode -->
+  <section class="content"><div class="container">
+    <div class="section-label">Multi-CLI</div>
+    <div class="section-title">OpenCode &mdash; All Models, One CLI</div>
+    <p class="section-desc">Shell aliases give you one model per terminal. <a href="https://opencode.ai" target="_blank" rel="noopener">OpenCode</a> (open source, 75+ providers) lets you switch models mid-session with <code>Ctrl+O</code>. It reads your <code>CLAUDE.md</code> and <code>~/.claude/skills/</code> natively &mdash; same skills, same MCP servers, different UI.</p>
+
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Runtime switching</div></div><p>Configure all providers once. Pick the model per task at runtime &mdash; no alias dance, no new terminal.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">Reads Claude skills</div></div><p>OpenCode discovers <code>~/.claude/skills/</code> automatically. All 88 skills work without migration.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">Same MCP stack</div></div><p>Configure <code>~/.config/opencode/opencode.json</code> with the same MCP servers. Slightly different JSON format.</p></div>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Install</div>
+      <code>brew install anomalyco/tap/opencode</code> &mdash; then create <code>~/.config/opencode/opencode.json</code> with your MCP servers and provider keys. Run <code>opencode mcp list</code> to verify.
+    </div>
+  </div></section>
+
+  <!-- Section 8: Beyond Claude Code -->
   <section class="content"><div class="container">
     <div class="section-label">Beyond</div>
     <div class="section-title">Not Just Claude Code</div>
-    <p class="section-desc">These API keys work anywhere. The shell aliases are the convenience layer &mdash; not the only integration point.</p>
+    <p class="section-desc">These API keys work anywhere. The shell aliases and dedicated CLIs are the convenience layer &mdash; not the only integration point.</p>
 
     <div class="pipeline-grid">
       <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">Direct REST</div></div><p><code>curl</code> to any endpoint for scripted automation, CI pipelines, or custom tooling.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">OpenAI SDKs</div></div><p>DeepSeek and Kimi expose OpenAI-compatible endpoints. Drop them into any app that uses the OpenAI SDK.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">OpenAI SDKs</div></div><p>Kimi and other providers expose OpenAI-compatible endpoints. Drop them into any app that uses the OpenAI SDK.</p></div>
       <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">MCP Servers</div></div><p>Any MCP server that accepts an API key and base URL can be pointed at these providers.</p></div>
       <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--text-dim)"></div><div class="pipe-card-name">OpenRouter</div></div><p>580+ models through a single API key. Useful for benchmarking across many models without signing up for each provider.</p></div>
     </div>
 
     <div class="callout callout-cyan">
       <div class="callout-title">The bigger picture</div>
-      This setup is one piece of a <a href="/guides/multi-agent/">multi-agent workflow</a> that dispatches different models for different cognitive tasks. Claude MAX handles complex architecture. GLM handles experimental sessions. DeepSeek handles cheap batch work. Codex and Gemini run as peer CLI agents. The spec documents are the shared protocol &mdash; any agent can pick up a task from any other.
+      This setup is one piece of a <a href="/guides/multi-agent/">multi-agent workflow</a> that dispatches different models for different cognitive tasks. Claude MAX handles complex architecture. GLM handles experimental sessions. Kimi handles coding and delegation (with its own CLI too). Codex and Gemini run as peer CLI agents. The spec documents are the shared protocol &mdash; any agent can pick up a task from any other.
     </div>
   </div></section>
 

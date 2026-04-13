@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-Agent Dispatch — Right Model for the Right Job | lbruton.cc</title>
-  <meta name="description" content="How to use different AI models for different cognitive tasks — Haiku for summarization, Sonnet for synthesis, Opus for architecture — with parallel dispatch and isolated execution.">
+  <meta name="description" content="Six AI CLIs sharing one MCP stack — Claude Code, OpenCode, Kimi, Codex, Gemini, GLM. Right model for the right job, with parallel dispatch and isolated execution.">
   <meta property="og:title" content="Multi-Agent Dispatch — Right Model for the Right Job">
-  <meta property="og:description" content="Stop using one model for everything. Dispatch Haiku for digests, Sonnet for search, Opus for architecture. Save tokens, get better results.">
+  <meta property="og:description" content="Six CLIs, one MCP stack, one skill library. Dispatch the right model for each task — Claude for architecture, GLM for implementation, Kimi for coding, Codex for review.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.lbruton.cc/guides/multi-agent/">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
@@ -33,7 +33,7 @@
   <section class="hero"><div class="container">
     <div class="hero-label">Claude Code Guide</div>
     <h1>Multi-Agent Dispatch</h1>
-    <p>Stop using one model for everything. Dispatch cheap models for mechanical work, smart models for architecture, and run them in parallel. Right model, right job, right cost.</p>
+    <p>Six CLIs, one MCP stack, one skill library. Dispatch the right model for each task &mdash; Claude for architecture, GLM for implementation, Kimi for coding, Codex for review. All sharing the same memory, secrets, and code intelligence.</p>
   </div></section>
 
   <section class="content"><div class="container">
@@ -153,29 +153,47 @@ Claude: [dispatches code-oracle agent → agent reads 50 files
 
   <section class="content"><div class="container">
     <div class="section-label">Multi-Model</div>
-    <div class="section-title">Beyond Subagents: Multi-Model Ecosystem</div>
-    <p class="section-desc">The dispatch pattern extends beyond Claude's model tiers. You can run Claude, Codex (GPT), and Gemini as peer agents sharing the same workspace — same git repos, same spec documents, same MCP servers.</p>
+    <div class="section-title">Beyond Subagents: Six CLIs, One Stack</div>
+    <p class="section-desc">The dispatch pattern extends beyond Claude's model tiers. Six CLIs share the same MCP infrastructure &mdash; memory, secrets, code search, quality gates, and the specflow workflow engine. The model is just the brain. The infrastructure is the nervous system.</p>
 
     <table class="compare-table">
-      <tr><th>Agent</th><th>Model</th><th>Strengths</th><th>Use for</th></tr>
-      <tr><td class="label">Claude Code</td><td>Opus 4.6</td><td>Complex reasoning, multi-module, all tasks</td><td>Architecture, spec design, orchestration</td></tr>
-      <tr><td class="label">Codex CLI</td><td>GPT-5.4</td><td>Fast mechanical work, clear unambiguous specs</td><td>Single-file patches, bulk fixes, repetitive tasks</td></tr>
-      <tr><td class="label">Gemini CLI</td><td>3.1 Pro</td><td>Good all-rounder, 1M context</td><td>Documentation, API work, medium complexity</td></tr>
+      <tr><th>CLI</th><th>Model</th><th>Strengths</th><th>Use for</th></tr>
+      <tr><td class="label" style="color:var(--pink)">Claude Code</td><td>Opus 4.6</td><td>Complex reasoning, multi-module, all tasks</td><td>Architecture, spec design, orchestration</td></tr>
+      <tr><td class="label" style="color:var(--amber)">OpenCode</td><td>75+ models</td><td>Multi-model runtime switching, open source</td><td>Flexible sessions, model comparison, backup CLI</td></tr>
+      <tr><td class="label" style="color:var(--amber)">Kimi CLI</td><td>Kimi K2.5</td><td>262K context, native Claude skill support</td><td>Coding tasks, large-context work</td></tr>
+      <tr><td class="label" style="color:var(--green)">claude-glm</td><td>GLM 4.7/5.1</td><td>Strong coding, spec task execution</td><td>Implementation, PR work, experimental</td></tr>
+      <tr><td class="label" style="color:var(--cyan)">Codex CLI</td><td>GPT-5.4</td><td>Fast mechanical work, clear unambiguous specs</td><td>Single-file patches, reviews, rescue</td></tr>
+      <tr><td class="label" style="color:var(--text-dim)">Gemini CLI</td><td>3.1 Pro</td><td>Good all-rounder, 1M context</td><td>Documentation, batch digests</td></tr>
     </table>
 
+    <h3>One MCP stack serves all</h3>
+    <p>Every CLI connects to the same infrastructure &mdash; no per-tool silos:</p>
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">specflow</div></div><p>Workflow orchestrator &mdash; specs, tasks, approvals. The shared protocol.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">mem0</div></div><p>Cross-session memory. Every CLI reads and writes the same memories.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">claude-context</div></div><p>Semantic code search (Milvus). One index, all agents query it.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">infisical</div></div><p>Self-hosted secrets. API keys, tokens &mdash; no plaintext in configs.</p></div>
+    </div>
+
     <h3>Shared workspace, separate instructions</h3>
-    <p>All three agents read from the same git repos and MCP servers. The spec documents (<code>tasks.md</code>) serve as the shared protocol — any agent can pick up a task, implement it, and log the result. Implementation logs prevent duplicate work.</p>
+    <p>All six CLIs read from the same git repos and MCP servers. The spec documents (<code>tasks.md</code>) serve as the shared protocol &mdash; any agent can pick up a task, implement it, and log the result. Implementation logs prevent duplicate work.</p>
 
-<pre><code># Claude plans, Codex implements:
-1. Claude creates issue + spec, gets approval
-2. User switches to Codex terminal: codex "@spec STAK-498"
-3. Codex implements tasks, logs artifacts
-4. User switches back to Claude for code review
+<pre><code># Claude plans, others implement:
+1. Claude creates issue + spec (requirements, design, tasks)
+2. Switch to GLM terminal: claude-glm → /spec STAK-498
+3. GLM implements tasks, logs artifacts via specflow MCP
+4. Switch back to Claude for code review + merge
 
-# Parallel implementation:
-1. Claude implements Tasks 1-3 in worktree-a
+# Parallel implementation across agents:
+1. GLM implements Tasks 1-3 in worktree-a
 2. Codex implements Tasks 4-6 in worktree-b
-3. Both log artifacts — no duplicate work</code></pre>
+3. Both log artifacts — specflow prevents duplicate work
+
+# Or use OpenCode with model switching:
+1. Start in OpenCode, pick Claude for architecture (Ctrl+O)
+2. Switch to GLM for implementation (Ctrl+O)
+3. Switch to Kimi K2.5 for a different perspective (Ctrl+O)
+4. All in one terminal, same MCP stack throughout</code></pre>
   </div></section>
 
   <section class="content"><div class="container">
@@ -262,48 +280,48 @@ EOF</code></pre>
 
     <div class="flow-diagram"><span class="phase">Cross-Agent Spec Lifecycle</span>
 
-<span class="opus">Claude (Opus)</span>          <span class="note">— creates issue, writes requirements</span>
-     <span class="arrow">│</span>                     <span class="note">   (best at: understanding user intent)</span>
+<span class="opus">Claude (Opus)</span>          <span class="note">— creates issue, writes requirements + design</span>
+     <span class="arrow">│</span>                     <span class="note">   (best at: understanding intent, architecture)</span>
      <span class="arrow">▼</span>
-<span class="note">Switch iTerm tab →</span>
-<span class="sonnet">Gemini (3.1 Pro)</span>        <span class="note">— loads spec, writes design document</span>
-     <span class="arrow">│</span>                     <span class="note">   (good at: API design, documentation)</span>
-     <span class="arrow">▼</span>
-<span class="note">Switch iTerm tab →</span>
-<span class="opus">Claude (Opus)</span>           <span class="note">— reviews design, writes tasks.md</span>
+<span class="opus">Claude (Opus)</span>          <span class="note">— reviews design, writes tasks.md</span>
      <span class="arrow">│</span>                     <span class="note">   (best at: breaking down complexity)</span>
      <span class="arrow">▼</span>
-<span class="note">Switch iTerm tab →</span>
-<span class="haiku">Codex (GPT-5.4)</span>         <span class="note">— implements tasks (mechanical, fast)</span>
-     <span class="arrow">│</span>                     <span class="note">   (best at: bounded code changes)</span>
+<span class="note">Switch iTerm tab →</span>  <span class="note">Any agent can pick up tasks from here:</span>
+     <span class="arrow">├──</span> <span class="haiku">GLM (claude-glm)</span>   <span class="note">— implements tasks (tested, strong coder)</span>
+     <span class="arrow">├──</span> <span class="sonnet">Kimi (kimi CLI)</span>    <span class="note">— implements tasks (262K context)</span>
+     <span class="arrow">├──</span> <span class="haiku">Codex (GPT-5.4)</span>    <span class="note">— implements tasks (mechanical, fast)</span>
+     <span class="arrow">└──</span> <span class="sonnet">OpenCode (any)</span>     <span class="note">— pick model at runtime (Ctrl+O)</span>
      <span class="arrow">▼</span>
-<span class="opus">Claude (Opus)</span>           <span class="note">— /codex:review, merge, /wrap</span></div>
+<span class="opus">Claude (Opus)</span>          <span class="note">— /codex:review, merge, /wrap</span></div>
 
     <h3>How handoff works</h3>
     <p>There's no custom IPC or message passing. The spec files (<code>requirements.md</code>, <code>design.md</code>, <code>tasks.md</code>) sit in the repo's <code>.spec-workflow/</code> directory. When you switch terminals:</p>
 <pre><code># In Codex terminal:
 codex "@spec STAK-498"
-# Codex reads .spec-workflow/specs/STAK-498-*/tasks.md
-# Sees which tasks are [ ] (pending) vs [x] (done)
+# Codex reads tasks.md, implements next pending task, logs artifacts
+
+# In GLM terminal (Kimi or OpenCode work the same way):
+claude-glm   # then: /spec STAK-498
+kimi         # then: /spec STAK-498
+opencode     # then: /spec STAK-498
+
+# Every agent reads the same spec, sees what's [ ] vs [x]
 # Implements the next pending task, logs artifacts
+# Implementation logs prevent duplicate work
 
-# In Gemini terminal:
-gemini "@spec STAK-498"
-# Same thing — reads the spec, picks up where the last agent left off
-
-# In Claude terminal:
+# In Claude terminal — review and merge:
 /spec STAK-498
-# Reads spec status, sees what was completed, continues</code></pre>
+# Reads spec status, sees what was completed, reviews, merges</code></pre>
 
     <h3>Implementation logging prevents conflicts</h3>
     <p>Every agent calls <code>log-implementation</code> after completing a task. The log records which files were modified, which API endpoints were created, and which components were built. The next agent reads these logs before starting — so it won't create a duplicate endpoint or reimplement a utility that another agent already built.</p>
 
     <h3>Session memory bridges the gap</h3>
-    <p>The <a href="/guides/session-memory/">session memory pipeline</a> ensures context transfers between agents. When Claude runs <code>/wrap</code>, it saves a digest to mem0 and the Obsidian vault. When Codex runs <code>@prime</code>, the <a href="/guides/hooks/">session-start hook</a> injects recent memories. Same project tag, same mem0 account — cross-agent continuity.</p>
+    <p>The <a href="/guides/session-memory/">session memory pipeline</a> ensures context transfers between agents. When Claude runs <code>/wrap</code>, it saves a digest to mem0 and the Obsidian vault. When any other CLI reads mem0, it gets the same memories. Same project tag, same mem0 account &mdash; cross-agent continuity across all six CLIs.</p>
 
     <div class="callout">
       <div class="callout-title">Start simple</div>
-      You don't need all three agents on day one. Start with Claude + <code>/codex:review</code> for second-opinion code reviews. Add Codex rescue when you're stuck. Add Gemini or cross-agent spec handoff when you're comfortable with the spec workflow.
+      You don't need six CLIs on day one. Start with Claude Code + <code>/codex:review</code> for second-opinion reviews. Add <code>opencode</code> as a backup CLI with model flexibility. Add Kimi or GLM when you want to delegate spec tasks. The MCP stack is the foundation &mdash; once it's set up, adding a new CLI is just copying a config file.
     </div>
   </div></section>
 
