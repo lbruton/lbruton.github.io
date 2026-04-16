@@ -392,7 +392,7 @@
     <div class="container">
       <div class="section-label">Architecture</div>
       <div class="section-title">The Session Memory Pipeline</div>
-      <p class="section-desc">The pipeline has four layers: automatic context injection via hooks, manual boot via skills, on-demand semantic search via session-rag, and batch log cleaning for raw terminal output. Each layer builds on the previous one.</p>
+      <p class="section-desc">The pipeline has five layers: automatic context injection via hooks, a digest agent for structured summaries, on-demand semantic search via session-rag, lifecycle skills for session bookends, and a batch scanner for missed sessions. Each layer builds on the previous one.</p>
 
       <div class="arch-flow"><span class="phase">SESSION START</span>                          <span class="phase">SESSION END</span>
      <span class="arrow">│</span>                                        <span class="arrow">│</span>
@@ -724,13 +724,13 @@ if __name__ == "__main__":
     <div class="container">
       <div class="section-label">Layer 2</div>
       <div class="section-title">The Session Digest Agent</div>
-      <p class="section-desc">The digest agent runs as an isolated subagent (so large logs don't eat your main context window). It reads the extracted conversation, writes a structured summary to an Obsidian vault, and saves it to mem0 cloud memory.</p>
+      <p class="section-desc">The digest agent runs as an isolated subagent (so large logs don't eat your main context window). It reads the extracted conversation and saves a structured summary to mem0 cloud memory. The Obsidian vault digest path described below is retained for reference but is no longer the active workflow — mem0 is now the sole authoritative store.</p>
 
       <h3>What the digest captures</h3>
       <p>Each digest is a dense 200-300 word prose summary covering: what was the goal, what was accomplished, what problems were hit, what decisions were made, and what's left unfinished. Concrete anchors (commit hashes, issue IDs, version numbers) are mandatory.</p>
 
-      <h3>Dual storage</h3>
-      <p>The digest is written to two places:</p>
+      <h3>Storage</h3>
+      <p>The digest is saved to mem0. The Obsidian Vault path below is legacy — no longer written by default.</p>
       <table class="compare-table">
         <tr>
           <th>Store</th>
@@ -738,14 +738,14 @@ if __name__ == "__main__":
           <th>Purpose</th>
         </tr>
         <tr>
-          <td class="label">Obsidian Vault</td>
+          <td class="label">Obsidian Vault <em>(legacy — retired)</em></td>
           <td>Markdown daily digest with <code>[[wikilinks]]</code></td>
-          <td>Human-browsable, shows up in vault graph view, backlinks panel. Organized by project and date.</td>
+          <td>Human-browsable, shows up in vault graph view, backlinks panel. Organized by project and date. <strong>No longer written by the active workflow.</strong></td>
         </tr>
         <tr>
           <td class="label">mem0</td>
           <td>Single memory entry with metadata tags</td>
-          <td>Searchable by future sessions via <code>/prime</code>. mem0 automatically decomposes the summary into granular facts.</td>
+          <td>Searchable by future sessions via <code>/prime</code> and <code>/start</code>. mem0 automatically decomposes the summary into granular facts.</td>
         </tr>
       </table>
 
@@ -779,7 +779,7 @@ if __name__ == "__main__":
       <h3>MCP tools</h3>
 <pre><code># Search across all sessions with optional date filtering
 search_all_sessions("what was the decision about X",
-    date_from="2026-04-01", date_to="2026-04-15")
+    date_from="2025-03-01", date_to="2025-03-15")
 
 # Search within a specific session
 search_session(session_id, "how did we fix the build error")
@@ -849,13 +849,15 @@ cleanup_sessions(older_than_days=90)</code></pre>
 
       <div class="prompt-block">
         <div class="prompt-label">Prompt for Claude: Build session lifecycle skills</div>
-        I want two Claude Code skills for session lifecycle management:
+        I want three Claude Code skills for session lifecycle management:
         <br><br>
-        <strong>/prime (session start):</strong> Search mem0 for recent project memories, check git status and open issues, verify code indexes are healthy, and present a briefing that tells me where I left off and what needs attention.
+        <strong>/start (quick resume):</strong> Query session-rag for recent session context, search mem0 for project memories, check git status and open issues, and present a quick briefing. No indexing or health checks — use this for same-day work or short breaks.
         <br><br>
-        <strong>/wrap (session end):</strong> Check for uncommitted work, capture retrospective lessons to mem0 (mistakes, successful approaches, preferences), write a session digest to my Obsidian vault and mem0, clean up merged branches, and print a session recap.
+        <strong>/prime (full session boot):</strong> Search mem0 for recent project memories, check git status and open issues, verify code indexes are healthy, and present a full briefing that tells me where I left off and what needs attention. Use this after days away or when switching projects.
         <br><br>
-        Both skills should be saved as <code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> files. They should ask me before taking destructive actions (deleting branches, discarding changes).
+        <strong>/wrap (session end):</strong> Check for uncommitted work, capture retrospective lessons to mem0 (mistakes, successful approaches, preferences), save a curated session summary to mem0, clean up merged branches, and print a session recap. Do not write to the Obsidian vault — mem0 and session-rag are the authoritative session context sources.
+        <br><br>
+        All three skills should be saved as <code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> files. They should ask me before taking destructive actions (deleting branches, discarding changes).
       </div>
     </div>
   </section>
@@ -1009,7 +1011,8 @@ done
       <p><a href="https://github.com/mwgreen/claude-code-session-rag" target="_blank" rel="noopener">session-rag</a> is an MCP server that indexes your Claude Code JSONL transcripts into a local Milvus Lite vector database and provides semantic search via MCP tools. It watches for new sessions automatically and indexes them in real-time. Add it to your MCP config alongside mem0 — together they form the two authoritative session context sources.</p>
 
       <h3>4. Create the skills</h3>
-<pre><code>mkdir -p ~/.claude/skills/prime
+<pre><code>mkdir -p ~/.claude/skills/start
+mkdir -p ~/.claude/skills/prime
 mkdir -p ~/.claude/skills/wrap
 # Create SKILL.md in each directory with the lifecycle logic</code></pre>
 
