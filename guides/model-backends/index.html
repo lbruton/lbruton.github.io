@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Model Backends — Run Any Model Through Claude Code | lbruton.cc</title>
-  <meta name="description" content="Use GLM and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers — different model behind the API.">
+  <meta name="description" content="Use GLM, Kimi, and Qwen alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers — different model behind the API.">
   <meta property="og:title" content="Model Backends — Run Any Model Through Claude Code">
-  <meta property="og:description" content="Shell alias, new terminal, done. Run GLM-5.1 and Kimi K2.5 through Claude Code alongside your MAX plan — delegate tasks and save tokens.">
+  <meta property="og:description" content="Shell alias, new terminal, done. Run GLM, Kimi K2.5, and Qwen through Claude Code alongside your MAX plan — delegate tasks and save tokens.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.lbruton.cc/guides/model-backends/">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
@@ -34,7 +34,7 @@
   <section class="hero"><div class="container">
     <div class="hero-label">Claude Code Guide</div>
     <h1>Model Backends</h1>
-    <p>Use GLM and Kimi alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers &mdash; different model behind the API. Delegate tasks, save tokens, open a new terminal.</p>
+    <p>Use GLM, Kimi, and Qwen alongside your Claude MAX subscription. Same CLI, same skills, same MCP servers &mdash; different model behind the API. Delegate tasks, save tokens, open a new terminal.</p>
   </div></section>
 
   <!-- Section 1: The Idea -->
@@ -43,22 +43,23 @@
     <div class="section-title">Claude Code Is Model-Agnostic</div>
     <p class="section-desc">Claude Code talks to an API endpoint. Override <code>ANTHROPIC_BASE_URL</code> and the model resolves to whatever that endpoint serves. Your skills, MCP servers, hooks, memory, and CLAUDE.md all load normally &mdash; the model is just the brain, everything else is the same.</p>
 
-    <p>Two providers offer <strong>native Anthropic-compatible API endpoints</strong> &mdash; no third-party proxy like LiteLLM or OpenRouter needed. Your requests go directly to the provider's servers, though latency is still higher than native Claude MAX due to the additional network hop:</p>
+    <p>Three providers offer <strong>native Anthropic-compatible API endpoints</strong> &mdash; no third-party proxy like LiteLLM or OpenRouter needed. Your requests go directly to the provider's servers, though latency is still higher than native Claude MAX due to the additional network hop:</p>
 
     <div class="pipeline-grid">
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">GLM (z.ai)</div></div><p>GLM-4.7 on the opus slot, GLM-4.7-Flash on sonnet &amp; haiku. 200K context. Coding plan available with free Flash tier.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Kimi (Moonshot)</div></div><p>Kimi K2.5 &mdash; 262K context. Subscription plan ($30/mo). Also ships its own CLI (<code>kimi</code>) that reads Claude Code skills natively.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">GLM (z.ai)</div></div><p>GLM-5.1 on opus, GLM-4.7 on sonnet &amp; haiku. 200K context. Coding plan. See token burn note below.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Kimi (Moonshot)</div></div><p>Kimi K2.5 &mdash; 262K context. Subscription plan ($30/mo). Token-efficient, comparable to Sonnet 4.5. Also ships its own CLI (<code>kimi</code>).</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">Qwen (Alibaba)</div></div><p>Qwen 3.6 Plus via Alibaba Cloud Coding Plan ($50/mo). Also bundles Kimi, GLM, and MiniMax models under one API key.</p></div>
     </div>
 
     <div class="flow-diagram"><span class="note">Your terminal — same machine, same directory, different backends</span>
-<span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>   <span class="arrow">┌─────────────┐</span>
-<span class="arrow">│</span> <span class="claude">claude</span>      <span class="arrow">│</span>   <span class="arrow">│</span> <span class="glm">claude-glm</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="kimi">claude-kimi</span> <span class="arrow">│</span>
-<span class="arrow">│</span> <span class="note">Opus 4.6</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">GLM-4.7</span>     <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Kimi K2.5</span>   <span class="arrow">│</span>
-<span class="arrow">│</span> <span class="note">1M context</span>  <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">200K</span>        <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">262K</span>        <span class="arrow">│</span>
-<span class="arrow">│</span> <span class="note">MAX plan</span>    <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Coding plan</span> <span class="arrow">│</span>   <span class="arrow">│</span> <span class="note">Subscription</span><span class="arrow">│</span>
-<span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>   <span class="arrow">└──────┬──────┘</span>
-       <span class="arrow">└──────────────┴──────────────┘</span>
-              <span class="note">same skills, MCP, hooks, CLAUDE.md</span></div>
+<span class="arrow">┌─────────────┐</span>  <span class="arrow">┌─────────────┐</span>  <span class="arrow">┌─────────────┐</span>  <span class="arrow">┌─────────────┐</span>
+<span class="arrow">│</span> <span class="claude">claude</span>      <span class="arrow">│</span>  <span class="arrow">│</span> <span class="glm">claude-glm</span>  <span class="arrow">│</span>  <span class="arrow">│</span> <span class="kimi">claude-kimi</span> <span class="arrow">│</span>  <span class="arrow">│</span> <span class="ds">claude-qwen</span> <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">Opus 4.6</span>    <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">GLM-5.1</span>     <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">Kimi K2.5</span>   <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">Qwen 3.6+</span>  <span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">1M context</span>  <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">200K</span>        <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">262K</span>        <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">Coding Plan</span><span class="arrow">│</span>
+<span class="arrow">│</span> <span class="note">MAX plan</span>    <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">z.ai</span>        <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">$30/mo</span>      <span class="arrow">│</span>  <span class="arrow">│</span> <span class="note">$50/mo</span>     <span class="arrow">│</span>
+<span class="arrow">└──────┬──────┘</span>  <span class="arrow">└──────┬──────┘</span>  <span class="arrow">└──────┬──────┘</span>  <span class="arrow">└──────┬──────┘</span>
+       <span class="arrow">└──────────────┴──────────────┴──────────────┘</span>
+                    <span class="note">same skills, MCP, hooks, CLAUDE.md</span></div>
   </div></section>
 
   <!-- Section 2: The Setup -->
@@ -68,49 +69,82 @@
     <p class="section-desc">Create a file that defines aliases for each backend. Source it from your shell profile so it survives reboots. Each alias launches the same <code>claude</code> binary with different environment variables.</p>
 
     <div class="file-header"><div class="file-dot" style="background:var(--green)"></div>~/.ai-aliases.zsh</div>
-<pre><code># GLM default — GLM-4.7 on opus, GLM-4.7-Flash on sonnet+haiku (free on coding plan)
-# Flash = 200K context, free tier, coding plan = 5hr rolling quota
+<pre><code># GLM — GLM-5.1 on opus, GLM-4.7 on sonnet/haiku/subagents
+# 200K context, z.ai coding plan
 alias claude-glm='ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
   ANTHROPIC_API_KEY="your-glm-api-key" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL="GLM-4.7" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL="GLM-4.7-Flash" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="GLM-4.7-Flash" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="GLM-4.7" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="GLM-4.7-Flash" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.7-Flash" \
-  CLAUDE_CODE_AUTO_COMPACT_WINDOW="150000" \
-  API_TIMEOUT_MS="3000000" \
-  claude'
-
-# GLM 5.1 — GLM-5.1 on opus for heavy reasoning, GLM-4.7 on sonnet, Flash on haiku
-alias claude-glm5='ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
-  ANTHROPIC_API_KEY="your-glm-api-key" \
+  ENABLE_TOOL_SEARCH=false \
   ANTHROPIC_DEFAULT_OPUS_MODEL="GLM-5.1" \
   ANTHROPIC_DEFAULT_SONNET_MODEL="GLM-4.7" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="GLM-4.7-Flash" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="GLM-4.7" \
   ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="GLM-5.1" \
   ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="GLM-4.7" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.7-Flash" \
-  CLAUDE_CODE_AUTO_COMPACT_WINDOW="150000" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="GLM-4.7" \
+  CLAUDE_CODE_SUBAGENT_MODEL="GLM-4.7" \
+  CLAUDE_CODE_MAX_OUTPUT_TOKENS="32000" \
+  CLAUDE_CODE_AUTO_COMPACT_WINDOW="180000" \
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1" \
+  CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS="1" \
   API_TIMEOUT_MS="3000000" \
   claude'</code></pre>
 
     <div class="file-header"><div class="file-dot" style="background:var(--amber)"></div>Kimi K2.5 alias (same file)</div>
-<pre><code># Kimi K2.5 (Moonshot) — subscription plan, 262K context
-alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
+<pre><code># Kimi K2.5 (Moonshot) — subscription plan ($30/mo), 262K context
+alias claude-kimi='ANTHROPIC_BASE_URL="https://api.kimi.com/coding/" \
   ANTHROPIC_API_KEY="your-kimi-api-key" \
-  ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k2.5" \
-  ANTHROPIC_DEFAULT_SONNET_MODEL="kimi-k2.5" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="kimi-k2.5" \
+  ENABLE_TOOL_SEARCH=false \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-for-coding" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="kimi-for-coding" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="kimi-for-coding" \
   ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="Kimi K2.5" \
   ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="Kimi K2.5" \
   ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="Kimi K2.5" \
+  CLAUDE_CODE_SUBAGENT_MODEL="kimi-for-coding" \
+  CLAUDE_CODE_MAX_OUTPUT_TOKENS="32000" \
+  CLAUDE_CODE_AUTO_COMPACT_WINDOW="230000" \
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1" \
+  CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS="1" \
   API_TIMEOUT_MS="3000000" \
   claude'</code></pre>
+
+    <div class="file-header"><div class="file-dot" style="background:var(--cyan)"></div>Qwen alias (same file)</div>
+<pre><code># Qwen 3.6 Plus (Alibaba Cloud Coding Plan) — $50/mo, multi-model plan
+# Also bundles kimi-k2.5, glm-5, MiniMax-M2.5 under the same API key
+alias claude-qwen='ANTHROPIC_BASE_URL="https://coding-intl.dashscope.aliyuncs.com/apps/anthropic" \
+  ANTHROPIC_API_KEY="your-alibaba-coding-plan-key" \
+  ENABLE_TOOL_SEARCH=false \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="qwen3.6-plus" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="qwen3.6-plus" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="qwen3.6-plus" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="Qwen 3.6+" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="Qwen 3.6+" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="Qwen 3.6+" \
+  CLAUDE_CODE_SUBAGENT_MODEL="qwen3.6-plus" \
+  CLAUDE_CODE_MAX_OUTPUT_TOKENS="32000" \
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1" \
+  CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS="1" \
+  API_TIMEOUT_MS="3000000" \
+  claude'</code></pre>
+
+    <div class="callout callout-cyan">
+      <div class="callout-title">Alibaba Coding Plan bundles multiple models</div>
+      The $50/mo Alibaba Cloud Coding Plan API key (<code>sk-sp-xxxxx</code>) also works with <code>kimi-k2.5</code>, <code>glm-5</code>, <code>qwen3-coder-plus</code>, and <code>MiniMax-M2.5</code>. You can use it as an alternative provider for your Kimi or GLM aliases by swapping the base URL to <code>coding-intl.dashscope.aliyuncs.com/apps/anthropic</code> and the model IDs to their Alibaba-hosted equivalents. One API key, multiple backends.
+    </div>
 
     <div class="file-header"><div class="file-dot" style="background:var(--pink)"></div>~/.zshrc (one line)</div>
 <pre><code># Load AI aliases
 [ -f "$HOME/.ai-aliases.zsh" ] && source "$HOME/.ai-aliases.zsh"</code></pre>
+
+    <h3>What the extra env vars do</h3>
+    <table class="compare-table">
+      <tr><th>Variable</th><th>Purpose</th></tr>
+      <tr><td class="label"><code>ENABLE_TOOL_SEARCH=false</code></td><td>Disables deferred tool schema loading. Required for GLM (see token burn note below). Recommended for all non-Anthropic backends.</td></tr>
+      <tr><td class="label"><code>CLAUDE_CODE_SUBAGENT_MODEL</code></td><td>Model used for subagent tasks. Without this, subagents may try to use the opus slot model unnecessarily.</td></tr>
+      <tr><td class="label"><code>CLAUDE_CODE_MAX_OUTPUT_TOKENS</code></td><td>Cap output tokens per response. Prevents runaway generation on models without native limits.</td></tr>
+      <tr><td class="label"><code>CLAUDE_CODE_AUTO_COMPACT_WINDOW</code></td><td>Token count at which auto-compaction triggers. Set below the model's actual context limit to compact before hitting the wall.</td></tr>
+      <tr><td class="label"><code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</code></td><td>Disables telemetry and analytics calls that consume tokens and add latency on non-Anthropic backends.</td></tr>
+      <tr><td class="label"><code>CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS</code></td><td>Disables experimental features that may not work correctly with non-Anthropic API endpoints.</td></tr>
+    </table>
 
     <h3>Authentication precedence</h3>
     <p>Claude Code checks credentials in this order: <code>ANTHROPIC_AUTH_TOKEN</code> &gt; <code>ANTHROPIC_API_KEY</code> &gt; OAuth login. Either variable works in your aliases &mdash; <code>ANTHROPIC_API_KEY</code> is sufficient and avoids overwriting the OAuth token. You'll see a one-time auth prompt on first launch; approve it and the session uses the API key cleanly.</p>
@@ -131,10 +165,10 @@ alias claude-kimi='ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic" \
 
     <table class="compare-table">
       <tr><th>Alias</th><th>Opus Slot</th><th>Sonnet Slot</th><th>Haiku Slot</th><th>Context</th><th>Best for</th></tr>
-      <tr><td class="label" style="color:var(--pink)"><code>claude</code></td><td>Opus 4.6</td><td>Sonnet 4.5</td><td>Haiku 4.5</td><td>1M</td><td>Everything &mdash; primary driver</td></tr>
-      <tr><td class="label" style="color:var(--green)"><code>claude-glm</code></td><td>GLM-4.7</td><td>GLM-4.7-Flash (free)</td><td>GLM-4.7-Flash (free)</td><td>200K</td><td>Plan in opus, execute in sonnet for free</td></tr>
-      <tr><td class="label" style="color:var(--green)"><code>claude-glm5</code></td><td>GLM-5.1</td><td>GLM-4.7</td><td>GLM-4.7-Flash (free)</td><td>200K</td><td>Heavy reasoning on opus slot</td></tr>
-      <tr><td class="label" style="color:var(--amber)"><code>claude-kimi</code></td><td>Kimi K2.5</td><td>Kimi K2.5</td><td>Kimi K2.5</td><td>262K</td><td>Coding, task delegation, also has own CLI (<code>kimi</code>)</td></tr>
+      <tr><td class="label" style="color:var(--pink)"><code>claude</code></td><td>Opus 4.6</td><td>Sonnet 4.6</td><td>Haiku 4.5</td><td>1M</td><td>Everything &mdash; primary driver</td></tr>
+      <tr><td class="label" style="color:var(--green)"><code>claude-glm</code></td><td>GLM-5.1</td><td>GLM-4.7</td><td>GLM-4.7</td><td>200K</td><td>Scaffolding, PR workflows, prototyping</td></tr>
+      <tr><td class="label" style="color:var(--amber)"><code>claude-kimi</code></td><td>Kimi K2.5</td><td>Kimi K2.5</td><td>Kimi K2.5</td><td>262K</td><td>Coding, task delegation &mdash; token-efficient, comparable to Sonnet 4.5</td></tr>
+      <tr><td class="label" style="color:var(--cyan)"><code>claude-qwen</code></td><td>Qwen 3.6+</td><td>Qwen 3.6+</td><td>Qwen 3.6+</td><td>TBD</td><td>Alibaba Coding Plan &mdash; also bundles Kimi, GLM, MiniMax</td></tr>
     </table>
 
     <div class="callout">
@@ -269,6 +303,14 @@ claude-glm -p "List all TODO comments in this repo" \
     <div class="section-label">Constraints</div>
     <div class="section-title">Gotchas &amp; Limitations</div>
 
+    <h3>GLM token burn: ToolSearch incompatibility</h3>
+    <p>Claude Code's deferred tool loading feature (<code>ENABLE_TOOL_SEARCH</code>, enabled by default) lets the model lazily fetch tool schemas on demand. GLM does not handle this flow natively &mdash; it loops on ToolSearch calls, burning millions of tokens on repeated schema fetches instead of resolving them. The fix is <code>ENABLE_TOOL_SEARCH=false</code> in your alias, which dumps all tool schemas upfront. The tradeoff: 60-70% of your context window is consumed at session start by ~100 MCP tool schemas. To reduce this, disable MCP servers you don't need for the task. This is a Claude Code compatibility issue with non-Anthropic backends, not a GLM API limitation &mdash; it may be resolved in a future Claude Code update.</p>
+
+    <div class="callout" style="border-left-color:var(--red)">
+      <div class="callout-title" style="color:var(--red)">Watch your token usage</div>
+      If you forget <code>ENABLE_TOOL_SEARCH=false</code> in your GLM alias, you may see 12M+ tokens consumed in a session that should use ~300K. The symptom is rapid auto-compaction and sluggish responses. Add the flag, and consider trimming your MCP server list for GLM sessions.
+    </div>
+
     <h3>Context limits are the real constraint</h3>
     <p>A fully-loaded Claude Code session (~82K tokens of system prompt) needs a model with enough context headroom. GLM (200K) and Kimi (262K) handle this fine. Models with smaller windows may need <code>--bare</code> mode, which strips plugins, skills, and MCP servers.</p>
 
@@ -318,12 +360,12 @@ claude-glm -p "List all TODO comments in this repo" \
 
     <div class="callout callout-cyan">
       <div class="callout-title">The bigger picture</div>
-      This setup is one piece of a <a href="/guides/multi-agent/">multi-agent workflow</a> that dispatches different models for different cognitive tasks. Claude MAX handles complex architecture. GLM handles experimental sessions. Kimi handles coding and delegation (with its own CLI too). Codex and Gemini run as peer CLI agents. The spec documents are the shared protocol &mdash; any agent can pick up a task from any other.
+      This setup is one piece of a <a href="/guides/multi-agent/">multi-agent workflow</a> that dispatches different models for different cognitive tasks. Claude MAX handles complex architecture. GLM handles scaffolding and prototyping. Kimi handles coding and delegation (with its own CLI too). Qwen adds another option via the Alibaba Coding Plan. Codex and Gemini run as peer CLI agents. The spec documents are the shared protocol &mdash; any agent can pick up a task from any other.
     </div>
   </div></section>
 
   <footer><div class="container">
-    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/multi-agent/">Multi-Agent</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/multi-agent/">Multi-Agent</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/statusline/">Statusline</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
     <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
   </div></footer>
 </body>
