@@ -392,26 +392,33 @@
     <div class="container">
       <div class="section-label">Architecture</div>
       <div class="section-title">The Session Memory Pipeline</div>
-      <p class="section-desc">The pipeline has four layers: automatic context injection via hooks, manual deep-load via skills, on-demand search via the oracle, and batch catch-up for missed sessions. Each layer builds on the previous one.</p>
+      <p class="section-desc">The pipeline has four layers: automatic context injection via hooks, manual boot via skills, on-demand semantic search via session-rag, and batch log cleaning for raw terminal output. Each layer builds on the previous one.</p>
 
       <div class="arch-flow"><span class="phase">SESSION START</span>                          <span class="phase">SESSION END</span>
      <span class="arrow">│</span>                                        <span class="arrow">│</span>
      <span class="arrow">▼</span>                                        <span class="arrow">▼</span>
 <span class="store">Hook</span> injects mem0 automatically        <span class="tool">/wrap</span> captures knowledge:
   <span class="arrow">└─</span> 5 recent memories, silent            <span class="arrow">├─</span> Retrospective lessons <span class="arrow">→</span> <span class="store">mem0</span>
-     <span class="arrow">│</span>                                     <span class="arrow">├─</span> Session digest <span class="arrow">→</span> <span class="store">DocVault</span>
-     <span class="arrow">▼</span>                                     <span class="arrow">├─</span> Curated summary <span class="arrow">→</span> <span class="store">mem0</span>
-<span class="tool">/prime</span> deep-loads context (optional)    <span class="arrow">└─</span> Worktree + branch cleanup
-  <span class="arrow">├─</span> <span class="store">DocVault</span> project pages
-  <span class="arrow">├─</span> Git status + open issues         <span class="phase">MISSED SESSION?</span>
-  <span class="arrow">└─</span> Code index health                     <span class="arrow">│</span>
-                                              <span class="arrow">▼</span>
-     <span class="phase">DURING SESSION</span>                    Batch digest scans for
-     <span class="arrow">│</span>                                 unprocessed JSONL files
-     <span class="arrow">▼</span>                                 and dispatches <span class="tool">session-digest</span>
-<span class="tool">session-oracle</span> agent:               agents to catch up
+     <span class="arrow">│</span>                                     <span class="arrow">├─</span> Curated summary <span class="arrow">→</span> <span class="store">mem0</span>
+     <span class="arrow">▼</span>                                     <span class="arrow">└─</span> Worktree + branch cleanup
+<span class="tool">/start</span> quick resume (same-day)
+  <span class="arrow">├─</span> <span class="store">session-rag</span> recent context
+  <span class="arrow">├─</span> <span class="store">mem0</span> project memories
+  <span class="arrow">└─</span> Git status + open issues
+     <span class="arrow">│</span>
+     <span class="arrow">▼</span>
+<span class="tool">/prime</span> full boot (days away)
+  <span class="arrow">├─</span> <span class="store">session-rag</span> + <span class="store">mem0</span> context
+  <span class="arrow">├─</span> Code index health
+  <span class="arrow">└─</span> Full project status
+
+     <span class="phase">DURING SESSION</span>
+     <span class="arrow">│</span>
+     <span class="arrow">▼</span>
+<span class="tool">session-rag</span> MCP server:
   Semantic search across all past
-  session logs via <span class="store">Milvus</span> vector DB
+  JSONL transcripts via <span class="store">Milvus Lite</span>
+  Real-time indexing via file watcher
      <span class="arrow">│</span>
 <span class="phase">COMPACTION?</span>
      <span class="arrow">│</span>
@@ -428,31 +435,31 @@
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
+            <div class="file-dot" style="background: var(--accent)"></div>
+            <div class="pipe-card-name">/start</div>
+          </div>
+          <p>Quick resume. Queries session-rag + mem0 for recent context, checks git state and open issues. Use for same-day work or short breaks.</p>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--green)"></div>
             <div class="pipe-card-name">/prime</div>
           </div>
-          <p>Manual. Deep project briefing — vault pages, git status, open issues, code index health. Use when you need the full picture.</p>
+          <p>Full boot. Queries session-rag + mem0, indexes codebase, checks code health, gathers project status. Use after days away or on new projects.</p>
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--amber)"></div>
             <div class="pipe-card-name">/wrap</div>
           </div>
-          <p>Manual. Captures retro lessons, writes digest to vault + mem0, cleans up branches. Run at session end.</p>
+          <p>Session close. Runs retrospective inline, saves lessons + curated summary to mem0, cleans up branches. No separate /retro needed.</p>
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">
             <div class="file-dot" style="background: var(--cyan)"></div>
-            <div class="pipe-card-name">session-oracle</div>
+            <div class="pipe-card-name">session-rag</div>
           </div>
-          <p>On demand. Semantic search across past iTerm2 session logs. "When did we decide X?" "How did we fix Y?"</p>
-        </div>
-        <div class="pipe-card">
-          <div class="pipe-card-header">
-            <div class="file-dot" style="background: var(--pink)"></div>
-            <div class="pipe-card-name">session-digest</div>
-          </div>
-          <p>Batch agent. Parses JSONL transcripts into vault + mem0 summaries. Dispatched by /wrap or run manually for missed sessions.</p>
+          <p>MCP server. Indexes JSONL transcripts into Milvus Lite in real-time. Semantic search with date filtering across all past sessions. Replaces the old session-oracle agent.</p>
         </div>
       </div>
     </div>
@@ -763,28 +770,36 @@ if __name__ == "__main__":
   <section class="content">
     <div class="container">
       <div class="section-label">Layer 3</div>
-      <div class="section-title">The Session Oracle</div>
-      <p class="section-desc">The oracle is a search agent that lets you ask questions about past sessions: "When did we decide to use SQLite instead of Postgres?" or "How did we fix that CORS issue last week?" It uses semantic vector search, not keyword grep.</p>
+      <div class="section-title">Session Search: session-rag</div>
+      <p class="section-desc"><a href="https://github.com/mwgreen/claude-code-session-rag" target="_blank" rel="noopener">session-rag</a> is an MCP server that indexes Claude Code JSONL transcripts directly into a Milvus Lite vector database, providing semantic search across all past sessions. It replaces the old session-oracle agent approach (which required cleaning iTerm2 logs and indexing them via claude-context). session-rag works natively with the JSONL format Claude Code already writes, indexes in real-time via a file watcher, and supports date range filtering.</p>
 
       <h3>How it works</h3>
-      <p>The oracle indexes your cleaned iTerm2 session logs (or JSONL transcripts) into a Milvus vector database using the <a href="https://github.com/lbruton/claude-context" target="_blank" rel="noopener">claude-context</a> MCP server. When you search, it returns contextualized excerpts categorized as decisions, solutions, discussions, or commands.</p>
+      <p>session-rag runs as an HTTP MCP server on port 7102. It watches <code>~/.claude/projects/</code> for new JSONL transcript files, chunks and embeds them using EmbeddingGemma-300M (optimized for Apple Silicon), and stores vectors in a local Milvus Lite database at <code>~/.session-rag/</code>. When you search, it returns semantically relevant turns with project and date attribution.</p>
 
-      <h3>Example queries</h3>
-<pre><code># Ask Claude to search past sessions
-/session-oracle "when did we set up the Portainer stack for the poller?"
-/session-oracle "how did we fix the webpack build error in StakTrakr?"
-/session-oracle "what was the decision about using mem0 vs local files?"</code></pre>
+      <h3>MCP tools</h3>
+<pre><code># Search across all sessions with optional date filtering
+search_all_sessions("what was the decision about X",
+    date_from="2026-04-01", date_to="2026-04-15")
+
+# Search within a specific session
+search_session(session_id, "how did we fix the build error")
+
+# Get full turns from a session by index
+get_turns(session_id, start=10, end=25)
+
+# Clean up old session indexes
+cleanup_sessions(older_than_days=90)</code></pre>
 
       <div class="prompt-block">
-        <div class="prompt-label">Prompt for Claude: Build a session search agent</div>
-        I want an agent that can search my past Claude Code sessions semantically. I have iTerm2 session logs in <code>~/.claude/iterm2/</code>. The agent should:
+        <div class="prompt-label">Prompt for Claude: Set up session-rag</div>
+        I want to set up <a href="https://github.com/mwgreen/claude-code-session-rag" target="_blank" rel="noopener">session-rag</a> as an MCP server for Claude Code. It indexes JSONL transcripts into a Milvus Lite vector DB and provides semantic search via MCP tools. The server should:
         <br><br>
-        1. Check if the log directory is indexed in a vector database (I use claude-context with Milvus, but any embedding store works)<br>
-        2. Run semantic search against the query<br>
-        3. Read surrounding context for each hit to understand the full conversation<br>
-        4. Classify each result as a decision, solution, discussion, or command<br>
-        5. Return clean excerpts with dates and project attribution<br><br>
-        The agent should strip ANSI codes from excerpts and limit results to 10 most relevant. Run it as a subagent to keep search results out of main context.
+        1. Run as an HTTP MCP server (default port 7102)<br>
+        2. Watch <code>~/.claude/projects/</code> for new JSONL files and index them automatically<br>
+        3. Provide <code>search_all_sessions</code> with date range filtering for cross-session queries<br>
+        4. Provide <code>search_session</code> for searching within a specific session<br>
+        5. Provide <code>get_turns</code> for retrieving verbatim conversation turns<br><br>
+        Add it to your Claude Code MCP config alongside mem0. Together, session-rag (verbatim transcript search) and mem0 (curated episodic memory) are the two authoritative sources for session context.
       </div>
     </div>
   </section>
@@ -793,31 +808,44 @@ if __name__ == "__main__":
   <section class="content">
     <div class="container">
       <div class="section-label">Layer 4</div>
-      <div class="section-title">Lifecycle Skills: /prime and /wrap</div>
-      <p class="section-desc">The real power comes from wiring the pipeline into your session lifecycle. Two skills handle this: <code>/prime</code> at session start and <code>/wrap</code> at session end.</p>
+      <div class="section-title">Lifecycle Skills: /start, /prime, and /wrap</div>
+      <p class="section-desc">The real power comes from wiring the pipeline into your session lifecycle. Three skills handle this: <code>/start</code> for quick resumes, <code>/prime</code> for full boots, and <code>/wrap</code> at session end.</p>
 
-      <h3>/prime — Session Boot</h3>
+      <h3>/start — Quick Resume</h3>
+      <p><code>/start</code> is the lightweight alternative to <code>/prime</code>. Use it for same-day work or resuming after a short break. Claude:</p>
+<pre><code>1. Queries session-rag for recent session context
+2. Searches mem0 for project memories
+3. Checks git state and open issues
+4. Presents a quick briefing — no indexing, no health checks
+
+   Use /start when you're continuing the same thread of work.
+   Use /prime when you've been away for days or switching projects.</code></pre>
+
+      <h3>/prime — Full Session Boot</h3>
       <p>When you start a session and type <code>/prime</code>, Claude:</p>
-<pre><code>1. Searches mem0 for recent memories about this project
-2. Reads project status from the Obsidian vault
+<pre><code>1. Queries session-rag for recent session context
+2. Searches mem0 for recent memories about this project
 3. Checks git status, open PRs, and unfinished issues
 4. Verifies code indexes are fresh (vector DB + graph DB)
-5. Presents a unified startup briefing:
+5. Gathers full project status
+6. Presents a unified startup briefing:
 
    "Last session you were working on STAK-498 (price scraper bug).
     PR #903 was merged. Tasks 4-5 are still open. The poller was
     redeployed to both Portainer and Fly.io. Code indexes are fresh."</code></pre>
 
       <h3>/wrap — Session End</h3>
-      <p>When you're done and type <code>/wrap</code>, Claude:</p>
+      <p>When you're done and type <code>/wrap</code>, Claude runs the retrospective inline (no separate <code>/retro</code> step) and saves everything to mem0:</p>
 <pre><code>1. Checks for uncommitted changes, open PRs, in-progress tasks
 2. Asks what to do with any loose ends (commit? stash? discard?)
-3. Updates documentation in the Obsidian vault
-4. Captures retrospective lessons to mem0 (prescriptive: what to
-   do differently, not just what happened)
-5. Writes a session digest to the vault + mem0
-6. Cleans up merged worktree branches
-7. Prints a session recap with shipped/pending/next-session summary</code></pre>
+3. Runs retrospective inline — captures prescriptive lessons
+   (what to do differently, not just what happened)
+4. Saves retro lessons + curated session summary to mem0
+5. Cleans up merged worktree branches
+6. Prints a session recap with shipped/pending/next-session summary
+
+   Note: /wrap no longer writes DocVault digests. session-rag + mem0
+   are the authoritative session context sources.</code></pre>
 
       <div class="prompt-block">
         <div class="prompt-label">Prompt for Claude: Build session lifecycle skills</div>
@@ -977,21 +1005,27 @@ done
       <h3>2. Set up mem0 (optional but recommended)</h3>
       <p>mem0 provides cloud-hosted cross-session memory with automatic fact decomposition. Sign up at <a href="https://mem0.ai" target="_blank" rel="noopener">mem0.ai</a> and add it as an MCP server in your Claude Code config.</p>
 
-      <h3>3. Create the skills</h3>
+      <h3>3. Set up session-rag</h3>
+      <p><a href="https://github.com/mwgreen/claude-code-session-rag" target="_blank" rel="noopener">session-rag</a> is an MCP server that indexes your Claude Code JSONL transcripts into a local Milvus Lite vector database and provides semantic search via MCP tools. It watches for new sessions automatically and indexes them in real-time. Add it to your MCP config alongside mem0 — together they form the two authoritative session context sources.</p>
+
+      <h3>4. Create the skills</h3>
 <pre><code>mkdir -p ~/.claude/skills/prime
 mkdir -p ~/.claude/skills/wrap
 # Create SKILL.md in each directory with the lifecycle logic</code></pre>
 
-      <h3>4. Create the agents</h3>
+      <h3>5. Create the agents</h3>
 <pre><code>mkdir -p ~/.claude/agents
-# Save session-digest.md and session-oracle.md
+# Save any custom agents here
 # Claude Code auto-discovers agents in this directory</code></pre>
 
-      <h3>5. Try it</h3>
+      <h3>6. Try it</h3>
 <pre><code># Start a new Claude Code session
 claude
 
-# Load context from past sessions
+# Quick resume (same-day work or short breaks)
+> /start
+
+# Or full boot (days away, new project)
 > /prime
 
 # ... do your work ...
