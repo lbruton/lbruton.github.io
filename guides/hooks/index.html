@@ -149,10 +149,13 @@
 
       <div class="flow-diagram"><span class="phase">SESSION LIFECYCLE</span>
 
-<span class="hook">SessionStart hook</span> fires <span class="arrow">→</span> mem0 memories injected silently
+<span class="hook">SessionStart hooks</span> fire <span class="arrow">→</span> mem0 memories injected silently (mem0-session-start.py)
+     <span class="arrow">│</span>                        session-rag server started (session-rag-server.sh)
      <span class="arrow">│</span>                       <span class="note">(Claude sees recent context without asking)</span>
      <span class="arrow">▼</span>
-  User types <span class="skill">/prime</span> <span class="arrow">→</span> Deep project briefing (git, issues, indexes)
+  User types <span class="skill">/start</span> <span class="arrow">→</span> Quick resume <span class="note">(session-rag + mem0 + git + issues)</span>
+     <span class="note">(or)</span>
+  User types <span class="skill">/prime</span> <span class="arrow">→</span> Full boot <span class="note">(session-rag + mem0 + indexes + health)</span>
      <span class="arrow">│</span>                    <span class="note">(optional — for when you need the full picture)</span>
      <span class="arrow">▼</span>
   User invokes a skill
@@ -175,7 +178,7 @@
             <div class="file-dot" style="background: var(--green)"></div>
             <div class="pipe-card-name">SessionStart</div>
           </div>
-          <p>Fires at session launch and after compaction. Two modes: lightweight (5 memories) on startup, heavy (10 memories + handoff state) after compact.</p>
+          <p>Fires at session launch and after compaction. Two separate hooks run: <code>mem0-session-start.py</code> injects mem0 memories silently, and <code>session-rag-server.sh start</code> ensures the session-rag server is running. Two modes: lightweight (5 memories) on startup, heavy (10 memories + handoff state) after compact.</p>
         </div>
         <div class="pipe-card">
           <div class="pipe-card-header">

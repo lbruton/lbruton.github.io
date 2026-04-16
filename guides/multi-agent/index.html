@@ -96,14 +96,14 @@ Run: python3 ~/.claude/scripts/extract-jsonl-session.py "$JSONL_FILE"
     <h3>The agent matrix</h3>
     <table class="compare-table">
       <tr><th>Agent</th><th>Model</th><th>Dispatched by</th></tr>
-      <tr><td class="label">session-digest</td><td style="color:var(--green)">Haiku</td><td><code>/wrap</code> at session end</td></tr>
+      <tr><td class="label">session-digest</td><td style="color:var(--green)">Haiku</td><td>legacy &mdash; replaced by session-rag MCP</td></tr>
       <tr><td class="label">health-monitor</td><td style="color:var(--green)">Haiku</td><td><code>/prime</code> at session start (background)</td></tr>
       <tr><td class="label">index-monitor</td><td style="color:var(--green)">Haiku</td><td><code>/prime</code> at session start (background)</td></tr>
       <tr><td class="label">implementation-logger</td><td style="color:var(--green)">Haiku</td><td><code>/spec</code> Phase 4 after each task</td></tr>
       <tr><td class="label">wiki-page-updater</td><td style="color:var(--green)">Haiku</td><td><code>/wiki-update</code> — one per page, parallel</td></tr>
       <tr><td class="label">firecrawl-scraper</td><td style="color:var(--green)">Haiku</td><td><code>/web-search</code>, <code>/discover</code></td></tr>
       <tr><td class="label">vault-linker</td><td style="color:var(--green)">Haiku</td><td>After issue creation</td></tr>
-      <tr><td class="label">session-oracle</td><td style="color:var(--cyan)">Sonnet</td><td><code>/session-oracle</code> for history search</td></tr>
+      <tr><td class="label">session-oracle</td><td style="color:var(--cyan)">Sonnet</td><td>session-rag MCP provides this natively now (legacy agent)</td></tr>
       <tr><td class="label">code-oracle</td><td style="color:var(--cyan)">Sonnet</td><td><code>/code-oracle</code> for codebase questions</td></tr>
       <tr><td class="label">issue-triage</td><td style="color:var(--cyan)">Sonnet</td><td><code>/issue-triage</code></td></tr>
       <tr><td class="label">project-manager</td><td style="color:var(--cyan)">Sonnet</td><td><code>/weekly-standup</code>, <code>/after-action</code>, <code>/update-roadmap</code></td></tr>
