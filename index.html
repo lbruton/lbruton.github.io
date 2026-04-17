@@ -369,12 +369,12 @@
             <div class="card-dot" style="background: var(--accent)"></div>
             <div class="card-name">Session Memory Pipeline</div>
           </div>
-          <div class="card-desc">How to give Claude Code persistent memory across sessions. session-rag for semantic transcript search, mem0 for curated memory, and lifecycle skills that load context at session start and capture knowledge at session end.</div>
+          <div class="card-desc">How to give Claude Code persistent memory across sessions. SessionFlow for semantic transcript search, MemFlow (mem0) for curated memory, and lifecycle skills that load context at session start and capture knowledge at session end.</div>
           <div class="card-tags">
             <span class="tag">Guide</span>
-            <span class="tag">session-rag</span>
+            <span class="tag">SessionFlow</span>
             <span class="tag">Skills</span>
-            <span class="tag">mem0</span>
+            <span class="tag">MemFlow</span>
           </div>
         </a>
 
@@ -411,11 +411,11 @@
             <div class="card-dot" style="background: var(--green)"></div>
             <div class="card-name">Hooks &amp; Automation</div>
           </div>
-          <div class="card-desc">Automatic context injection with no user action. mem0 memories at session start, retro lessons before skills, and context recovery after compaction.</div>
+          <div class="card-desc">Automatic context injection with no user action. MemFlow memories at session start, retro lessons before skills, and context recovery after compaction.</div>
           <div class="card-tags">
             <span class="tag">Guide</span>
             <span class="tag">Python Hooks</span>
-            <span class="tag">mem0</span>
+            <span class="tag">MemFlow</span>
             <span class="tag">Automatic</span>
           </div>
         </a>
@@ -453,7 +453,7 @@
             <div class="card-dot" style="background: var(--forge)"></div>
             <div class="card-name">Multi-Agent Dispatch</div>
           </div>
-          <div class="card-desc">Six CLIs, one MCP stack. Claude, OpenCode, Kimi, GLM, Codex, Gemini &mdash; all sharing memory, secrets, code search, and the specflow workflow engine.</div>
+          <div class="card-desc">Six CLIs, one MCP stack. Claude, OpenCode, Kimi, GLM, Codex, Gemini &mdash; all sharing SessionFlow, MemFlow, ContextFlow, and the SpecFlow workflow engine.</div>
           <div class="card-tags">
             <span class="tag">Guide</span>
             <span class="tag">Agents</span>
@@ -572,20 +572,33 @@
             <div class="card-dot" style="background: var(--specflow)"></div>
             <div class="card-name">specflow</div>
           </div>
-          <div class="card-desc">Spec-driven development plugin for Claude Code. Human-in-the-loop workflow with persistent project memory, shipped as an MCP server with a real-time dashboard.</div>
+          <div class="card-desc">Spec-driven development framework with persistent project memory. Human-in-the-loop workflow shipped as an MCP server with a real-time dashboard. Works with Claude Code, Gemini CLI, Codex CLI, and OpenCode.</div>
           <div class="card-tags">
             <span class="tag">MCP Server</span>
-            <span class="tag">Claude Code</span>
+            <span class="tag">Multi-Agent</span>
             <span class="tag">TypeScript</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/lbruton/SessionFlow" target="_blank" rel="noopener" class="project-card">
+          <div class="card-header">
+            <div class="card-dot" style="background: var(--green)"></div>
+            <div class="card-name">SessionFlow</div>
+          </div>
+          <div class="card-desc">Real-time session memory via semantic transcript indexing. Full recall of past conversations in seconds. Forked from mwgreen/claude-code-session-rag.</div>
+          <div class="card-tags">
+            <span class="tag">MCP Server</span>
+            <span class="tag">Milvus Lite</span>
+            <span class="tag">Python</span>
           </div>
         </a>
 
         <a href="https://github.com/lbruton/claude-context" target="_blank" rel="noopener" class="project-card">
           <div class="card-header">
             <div class="card-dot" style="background: var(--claude-ctx)"></div>
-            <div class="card-name">claude-context</div>
+            <div class="card-name">ContextFlow</div>
           </div>
-          <div class="card-desc">Semantic code search via self-hosted Milvus vector database. MCP-only fork with local infrastructure — no cloud dependencies.</div>
+          <div class="card-desc">Semantic + structural code search via self-hosted Milvus and Neo4j. Hardened fork with planned unification into one MCP server.</div>
           <div class="card-tags">
             <span class="tag">MCP Server</span>
             <span class="tag">Milvus</span>
