@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# AI tooling & personal config
+.claude/
+
+# Git worktrees
+.worktrees/
