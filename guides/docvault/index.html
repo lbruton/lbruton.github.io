@@ -131,7 +131,7 @@
     <div class="container">
       <div class="hero-label">Claude Code Guide</div>
       <h1>DocVault: Obsidian as a<br>Knowledge Base for AI</h1>
-      <p>How to structure an Obsidian vault so Claude Code can navigate it, update it, and learn from it. No vector database needed — just markdown, wikilinks, and a simple index tree.</p>
+      <p>DocVault is the human-facing knowledge base — an Obsidian vault at <code>/Volumes/DATA/GitHub/DocVault/</code> for architecture decisions, infrastructure maps, research, and project history. The agent gets <code>.context/</code>. This guide covers the human side: index trees, wikilinks, frontmatter, and CLI automation.</p>
     </div>
   </section>
 
@@ -147,6 +147,43 @@
       <div class="callout callout-green">
         <div class="callout-title">What makes this different from a wiki?</div>
         A wiki is read-mostly. DocVault is read-write — Claude actively updates it during every session via the <code>/vault-update</code> skill, writes daily digests into it, creates issues in it, and uses it as the first lookup source for any question about your projects or infrastructure.
+      </div>
+    </div>
+  </section>
+
+  <!-- Human/Agent Split -->
+  <section class="content">
+    <div class="container">
+      <div class="section-label">The Split</div>
+      <div class="section-title">DocVault for the Human, <code style="font-size:1.2rem">.context/</code> for the Agent</div>
+      <p class="section-desc">DocVault is the <strong>human-facing</strong> half of a two-part documentation system. The other half is <code>.context/</code> — a small directory that lives inside each repo and holds the agent-facing foundation docs.</p>
+
+      <table class="compare-table">
+        <tr>
+          <th>Layer</th>
+          <th>Location</th>
+          <th>Reader</th>
+          <th>Character</th>
+        </tr>
+        <tr>
+          <td class="label">DocVault</td>
+          <td><code>/Volumes/DATA/GitHub/DocVault/</code></td>
+          <td>Human — browsed in Obsidian with graph view, wikilinks, Bases queries, backlinks panel</td>
+          <td>Rich, interconnected, discoverable. Architecture decisions, KnowledgeBase, Research, Planning, Notes, Daily Digests.</td>
+        </tr>
+        <tr>
+          <td class="label">.context/</td>
+          <td><code>{repo}/.context/</code></td>
+          <td>Agent — read by Claude Code on demand during a session</td>
+          <td>Compact, structured, no decorative prose. Git topology, implementation gotchas, review patterns, <code>GLOSSARY.md</code>.</td>
+        </tr>
+      </table>
+
+      <p>The key distinction: Obsidian's graph view, wikilinks, and visual browsing are features for <em>you</em>. Claude Code doesn't need the graph — it reads files directly. For agent consumption, <code>.context/</code> files are deliberately minimal: short headings, bullet lists, the facts the agent needs before touching a file. DocVault holds the broader knowledge; <code>.context/</code> holds the session-scoped context fan-out from CLAUDE.md.</p>
+
+      <div class="callout callout-green">
+        <div class="callout-title">One-liner</div>
+        Obsidian/DocVault for the human. <code>.context/</code> for the agent. CLAUDE.md is the router that points to both.
       </div>
     </div>
   </section>
@@ -549,7 +586,10 @@ Start at INDEX.md and follow the index tree.</code></pre>
     <div class="container">
       <div class="footer-links">
         <a href="https://www.lbruton.cc">lbruton.cc</a>
-        <a href="https://www.lbruton.cc/guides/session-memory/">Session Memory Guide</a>
+        <a href="/guides/claude-md/">CLAUDE.md</a>
+        <a href="/guides/session-memory/">Session Memory</a>
+        <a href="/guides/hooks/">Hooks</a>
+        <a href="/guides/issue-pipeline/">Issues</a>
         <a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a>
       </div>
       <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>

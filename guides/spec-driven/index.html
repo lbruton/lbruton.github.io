@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spec-Driven Development — 4-Phase Workflow for Claude Code | lbruton.cc</title>
-  <meta name="description" content="A structured development methodology: Requirements, Design, Tasks, Implementation with approval gates, codebase analysis, and implementation logging. No code without a spec.">
-  <meta property="og:title" content="Spec-Driven Development — 4-Phase Workflow for Claude Code">
-  <meta property="og:description" content="Requirements → Design → Tasks → Implementation. Approval gates, codebase analysis, implementation logging. Battle-tested across 100+ specs.">
+  <title>Spec-Driven Development — Three-Tier Workflow for Claude Code | lbruton.cc</title>
+  <meta name="description" content="A three-tier development methodology powered by the SpecFlow MCP server: /gsd for quick fixes, /sketch for mid-size work, /spec for full approval-gated feature development. No code without a plan.">
+  <meta property="og:title" content="Spec-Driven Development — Three-Tier Workflow for Claude Code">
+  <meta property="og:description" content="/gsd for quick fixes, /sketch for phased markdown artifacts, /spec for full dashboard-gated development. Approval gates, codebase analysis, implementation logging. Powered by SpecFlow MCP.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.lbruton.cc/guides/spec-driven/">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
@@ -33,19 +33,123 @@
   <section class="hero"><div class="container">
     <div class="hero-label">Claude Code Guide</div>
     <h1>Spec-Driven Development</h1>
-    <p>A 4-phase methodology: Requirements, Design, Tasks, Implementation. Every phase is documented, approval-gated, and grounded in codebase analysis. No code without a spec.</p>
+    <p>Three tiers — <code>/gsd</code>, <code>/sketch</code>, <code>/spec</code> — powered by the SpecFlow MCP server. Pick the tier that matches the size of the work. Every tier shares the same non-negotiables: file an issue first, use a worktree, signed commits, and a PR. No code without a plan.</p>
   </div></section>
 
   <section class="content"><div class="container">
     <div class="section-label">Overview</div>
-    <div class="section-title">The Four Phases</div>
-    <p class="section-desc">Every non-trivial feature follows the same path. Each phase produces a document, gets approved through a dashboard, and builds on the previous phase. Claude never improvises architecture — it works from specs.</p>
+    <div class="section-title">Three Tiers, One Philosophy</div>
+    <p class="section-desc">Not every change needs a dashboard. Not every fix needs a markdown artifact. The three-tier model lets the overhead match the work — a CSS tweak and a multi-component feature should not go through the same process. What never changes: an issue is filed, a worktree is used, and the code is reviewed before it ships.</p>
 
     <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">/gsd</div></div><p>Quick fixes under ~30 min. No spec, no approval gates. Casual worktree, PR as a chore.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">/sketch</div></div><p>Middle tier. Markdown-first phased artifacts. File-based review, no dashboard. Supports cross-model peer review.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">/spec</div></div><p>Full workflow. Dashboard approval gates, implementation logging, multi-agent dispatch.</p></div>
+    </div>
+
+    <h3>SpecFlow MCP server</h3>
+    <p>All three tiers are powered by <a href="https://github.com/lbruton/SpecFlow" target="_blank" rel="noopener">SpecFlow</a> — an MCP server that ships 7 tools, 7 lifecycle prompts, and a real-time approval dashboard. It integrates directly into Claude Code as a standard MCP server. Install via <code>npm install -g @lbruton/specflow</code>, then add it to your MCP config.</p>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Universal rules across all three tiers</div>
+      File an issue first (tracked in Plane). Use a git worktree — never work directly on main. Signed commits + PR. No code merges without review.
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Tier Comparison</div>
+    <div class="section-title">Choosing the Right Tier</div>
+    <p class="section-desc">The right tier is determined by scope, not complexity. Use duration and file count as a quick heuristic — then check whether you need a design review or parallel agent dispatch.</p>
+
+    <table class="compare-table">
+      <tr><th>Dimension</th><th>/gsd</th><th>/sketch</th><th>/spec</th></tr>
+      <tr><td class="label">Typical duration</td><td>&lt;30 min</td><td>1–4 hours</td><td>Multi-session</td></tr>
+      <tr><td class="label">Files touched</td><td>1–3</td><td>4–15</td><td>Many / cross-cutting</td></tr>
+      <tr><td class="label">Approval style</td><td>None — just a PR</td><td>File-based per-phase review</td><td>Dashboard gates (SpecFlow approvals tool)</td></tr>
+      <tr><td class="label">Spec artifacts</td><td>None</td><td>requirements → discovery → approach → tasks (markdown files)</td><td>requirements → design → tasks → implementation log</td></tr>
+      <tr><td class="label">Peer review</td><td>PR review only</td><td><code>/sketch-review</code> — reviewer agent (often a different model) checks one phase</td><td>Spec compliance + code quality review per task</td></tr>
+      <tr><td class="label">Parallel agents</td><td>No</td><td>No</td><td>Yes — tasks dispatched in parallel where file sets don't overlap</td></tr>
+      <tr><td class="label">Implementation log</td><td>No</td><td>No</td><td>Mandatory (<code>log-implementation</code> before marking <code>[x]</code>)</td></tr>
+      <tr><td class="label">Promotion path</td><td>Promote to /sketch if scope grows</td><td>Promote to /spec if design review needed</td><td>—</td></tr>
+      <tr><td class="label">Commit prefix</td><td><code>chore:</code></td><td><code>feat:</code> / <code>fix:</code> as appropriate</td><td><code>feat:</code> / <code>fix:</code> as appropriate</td></tr>
+    </table>
+
+    <table class="compare-table">
+      <tr><th>Situation</th><th>Tier</th></tr>
+      <tr><td class="label">CSS tweak, typo, dependency bump</td><td><code>/gsd</code></td></tr>
+      <tr><td class="label">Simple bug fix (&lt;3 files)</td><td><code>/gsd</code> after <code>/systematic-debugging</code></td></tr>
+      <tr><td class="label">Small feature, 1 component</td><td><code>/sketch</code></td></tr>
+      <tr><td class="label">Feature spanning multiple files, needs design discussion</td><td><code>/sketch</code> or <code>/spec</code></td></tr>
+      <tr><td class="label">Complex refactor with ripple effects</td><td><code>/spec</code></td></tr>
+      <tr><td class="label">Multi-component feature, parallel agent dispatch</td><td><code>/spec</code></td></tr>
+    </table>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Tier 1</div>
+    <div class="section-title">/gsd — Get Stuff Done</div>
+    <p class="section-desc"><code>/gsd</code> is the fast path for work that's too small to justify a spec but still follows the worktree → PR discipline. The commit message uses a <code>chore:</code> prefix and the PR description is kept brief. No issue is strictly required, but one should be logged when the fix spans multiple files or affects runtime behavior.</p>
+
+    <h3>When to use it</h3>
+    <p>A CSS tweak, a config update, fixing a broken link, bumping a dependency, renaming a variable. If the work takes longer than ~30 minutes or touches more than a handful of files, promote to <code>/sketch</code>.</p>
+
+    <div class="flow-diagram"><span class="tool">$ /gsd</span>
+
+<span class="phase">1. Worktree</span>    <span class="arrow">──▶</span> create isolated branch
+<span class="phase">2. Fix</span>         <span class="arrow">──▶</span> edit 1–3 files
+<span class="phase">3. Commit</span>      <span class="arrow">──▶</span> <span class="tool">chore: &lt;message&gt;</span>  (signed)
+<span class="phase">4. PR</span>          <span class="arrow">──▶</span> open, squash-merge, delete branch</div>
+
+    <div class="callout">
+      <div class="callout-title">Scope creep check</div>
+      If you're mid-fix and realise the change is bigger than expected — stop. Commit what you have, open a <code>/sketch</code> or <code>/spec</code> for the rest, and link the issues.
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Tier 2</div>
+    <div class="section-title">/sketch — Phased Markdown Artifacts</div>
+    <p class="section-desc"><code>/sketch</code> is the middle tier: structured enough to catch design mistakes, lightweight enough to avoid dashboard overhead. Every phase produces a markdown file. Review happens file-by-file, not through a dashboard. A <code>/sketch</code> can be promoted to <code>/spec</code> at any point if the scope expands.</p>
+
+    <h3>The four sketch phases</h3>
+    <div class="pipeline-grid">
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">Requirements</div></div><p>User stories, acceptance criteria, non-functional requirements.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">Discovery</div></div><p>Codebase search — what already exists, what patterns to reuse, potential ripple effects.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Approach</div></div><p>2–3 implementation options, trade-offs, and the chosen direction.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">Tasks</div></div><p>Atomic steps. Each task is reviewed, implemented, and marked done directly (no log-implementation call).</p></div>
+    </div>
+
+    <h3>Cross-model peer review with /sketch-review</h3>
+    <p><code>/sketch</code> supports a dedicated review step at any phase boundary. A reviewer agent — often a different model running in a separate terminal — runs <code>/sketch-review</code>, which checks the phase artifact against the live codebase and flags conflicts, missing edge cases, or design gaps. This is agent-agnostic: the reviewer can be Claude Opus, a Gemini instance, or any other model that has MCP access.</p>
+
+    <div class="flow-diagram"><span class="tool">$ /sketch ISSUE-ID</span>
+
+<span class="phase">requirements.md</span> <span class="arrow">──▶</span> review <span class="arrow">──▶</span> <span class="phase">discovery.md</span> <span class="arrow">──▶</span> review
+                                                              <span class="arrow">│</span>
+                                                              <span class="arrow">▼</span>
+                                       <span class="phase">approach.md</span> <span class="arrow">──▶</span> review <span class="arrow">──▶</span> <span class="phase">tasks.md</span>
+                                                                              <span class="arrow">│</span>
+                                                                    implement, mark <span class="tool">[x]</span>
+                                                                              <span class="arrow">│</span>
+                                                                           PR + merge</div>
+
+    <div class="callout callout-green">
+      <div class="callout-title">Promote to /spec when…</div>
+      …the approach phase reveals cross-cutting concerns, the task count exceeds ~8, or you want parallel agent dispatch. Just run <code>/spec ISSUE-ID --from-sketch</code> and the existing artifacts carry over.
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
+    <div class="section-label">Tier 3</div>
+    <div class="section-title">/spec — Full Dashboard-Gated Workflow</div>
+    <p class="section-desc"><code>/spec</code> is the full workflow for non-trivial features. Every phase is approval-gated through the SpecFlow dashboard before the next phase begins. Implementation tasks are logged — creating a searchable record of every file, endpoint, and component added — so future specs never duplicate work.</p>
+
+    <h3>The four spec phases</h3>
+    <div class="pipeline-grid">
       <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">1. Requirements</div></div><p>WHAT are we building? User stories, acceptance criteria, non-functional requirements.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">2. Design</div></div><p>HOW will it work? Architecture, components, data models, error handling.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">3. Tasks</div></div><p>What are the atomic steps? Each task has a _Prompt, _Leverage, and file touch map.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">4. Implementation</div></div><p>Build it. Subagent dispatch, code review, implementation logging, then ship.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">2. Design</div></div><p>HOW will it work? Architecture, components, data models, error handling. Always references the codebase search.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">3. Tasks</div></div><p>Atomic steps with <code>_Prompt</code>, <code>_Leverage</code>, and file touch maps for parallel dispatch.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">4. Implementation</div></div><p>Subagent dispatch, spec compliance review, code quality review, <code>log-implementation</code>, then ship.</p></div>
     </div>
 
     <div class="flow-diagram"><span class="phase">Phase 1: Requirements</span> <span class="arrow">──</span> <span class="gate">APPROVAL</span> <span class="arrow">──▶</span> <span class="phase">Phase 2: Design</span>
@@ -60,22 +164,16 @@
                                                       <span class="arrow">├──</span> Review (spec + quality)
                                                       <span class="arrow">├──</span> <span class="gate">log-implementation</span>
                                                       <span class="arrow">└──</span> Mark <span class="tool">[x]</span></div>
-  </div></section>
-
-  <section class="content"><div class="container">
-    <div class="section-label">Phase 1</div>
-    <div class="section-title">Requirements</div>
-    <p class="section-desc">Before writing requirements, Claude must run a codebase search to understand what already exists. This produces an Impact Report showing files likely to be touched, existing patterns to reuse, and potential ripple effects.</p>
 
     <h3>Codebase search is a hard gate</h3>
-    <p>No requirements get written without the Impact Report. This prevents Claude from designing features that duplicate existing code or conflict with established patterns. The search uses structural (graph DB) and semantic (vector DB) tools to find related code.</p>
+    <p>Before requirements are written, Claude runs a codebase search to understand what already exists. This produces an Impact Report showing files likely to be touched, existing patterns to reuse, and potential ripple effects. The search uses structural (graph DB) and semantic (vector DB) tools to find related code. No requirements get written without it.</p>
 
     <h3>Requirements document structure</h3>
-<pre><code>.spec-workflow/specs/STAK-498-price-scraper-fix/requirements.md
+<pre><code>.spec-workflow/specs/PROJ-498-price-scraper-fix/requirements.md
 
 ## References
-- Issue: [[STAK-498]]
-- Spec path: .spec-workflow/specs/STAK-498-price-scraper-fix/
+- Issue: [[PROJ-498]]
+- Spec path: .spec-workflow/specs/PROJ-498-price-scraper-fix/
 
 ## Requirements
 
@@ -97,23 +195,9 @@ the eCheck/Wire price, so that I can compare actual purchase costs.
       <div class="callout-title">Acceptance criteria must be testable</div>
       Write criteria as "WHEN X THEN Y SHALL happen" — behavioral statements that can be verified in tests. Avoid vague criteria like "prices should be correct."
     </div>
-  </div></section>
 
-  <section class="content"><div class="container">
-    <div class="section-label">Phase 2</div>
-    <div class="section-title">Design</div>
-    <p class="section-desc">The design phase proposes 2-3 implementation approaches, references patterns found in the codebase search, and gets user feedback section by section. The output is a design document covering architecture, components, data models, and error handling.</p>
-
-    <p>Key sections: architecture overview, component interfaces (props/state/events for frontend, endpoints/schemas for backend), code reuse analysis (what existing utilities to leverage), and a testing strategy (framework, test directory, what to test).</p>
-  </div></section>
-
-  <section class="content"><div class="container">
-    <div class="section-label">Phase 3</div>
-    <div class="section-title">Tasks</div>
-    <p class="section-desc">Tasks break the design into atomic, implementable units. Each task touches 1-3 files and includes structured guidance that Claude uses during implementation.</p>
-
-    <h3>The _Prompt pattern</h3>
-    <p>Every task includes a <code>_Prompt</code> field with four components: Role, Task, Restrictions, and Success criteria. This is the instruction block that a subagent receives when implementing the task.</p>
+    <h3>The _Prompt pattern (Tasks phase)</h3>
+    <p>Every task includes a <code>_Prompt</code> field with four components: Role, Task, Restrictions, and Success criteria. This is the instruction block that a subagent receives when implementing the task. The file touch map is used by the orchestrator to batch non-overlapping tasks for parallel dispatch.</p>
 
     <div class="file-header"><div class="file-dot" style="background:var(--amber)"></div>tasks.md (example task)</div>
 <pre><code>## Task 1.1: Fix Price Column Selection
@@ -134,42 +218,11 @@ _Leverage: devops/pollers/shared/vendor-config.js (column mappings)
 
 _Requirements: Requirement #1, Acceptance Criteria #1, #2</code></pre>
 
-    <h3>File touch map</h3>
-    <p>Each task lists which files it creates, modifies, or tests. The orchestrator uses this to determine which tasks can run in parallel (no overlapping files) and which must run sequentially.</p>
-
-<pre><code># Tasks with no file overlap → dispatch in parallel
-Task 1: MODIFY price-extract.js, TEST price-extract.test.js
-Task 2: MODIFY retail-display.js, TEST retail-display.test.js
-         ↑ No overlap → parallel safe
-
-# Tasks sharing files → run sequentially
-Task 3: MODIFY price-extract.js ← conflicts with Task 1
-         ↑ Overlap → must wait for Task 1</code></pre>
-  </div></section>
-
-  <section class="content"><div class="container">
-    <div class="section-label">Phase 4</div>
-    <div class="section-title">Implementation</div>
-    <p class="section-desc">Implementation dispatches subagents with the task's <code>_Prompt</code> guidance. Each task goes through implementation, two rounds of code review, and mandatory logging before being marked complete.</p>
-
-    <h3>The implementation loop</h3>
-<pre><code>For each task:
-
-1. Mark in-progress    → [ ] becomes [-] in tasks.md
-2. Check existing logs → avoid duplicating prior work
-3. Dispatch subagent   → full _Prompt + _Leverage context
-4. Spec compliance review → does code match the task spec?
-   └─ FAIL? → fix and re-review
-5. Code quality review → architecture, error handling, tests
-   └─ FAIL? → fix critical/important issues
-6. Log implementation  → MANDATORY before marking done
-7. Mark complete       → [-] becomes [x] in tasks.md</code></pre>
-
     <h3>Implementation logging</h3>
-    <p>The <code>log-implementation</code> tool creates a searchable record of what was built: files modified, API endpoints created, components added, test results. Future specs check these logs to avoid creating duplicate endpoints or reimplementing existing components.</p>
+    <p>The <code>log-implementation</code> tool creates a searchable record of what was built: files modified, API endpoints created, components added, test results. Future specs check these logs to avoid creating duplicate endpoints or reimplementing existing components. This is what makes the system self-aware across specs.</p>
 
 <pre><code>log-implementation
-  specName: "STAK-498-price-scraper-fix"
+  specName: "PROJ-498-price-scraper-fix"
   taskId: "1.1"
   summary: "Fixed column selection order in JM Bullion parser"
   filesModified: ["devops/pollers/shared/price-extract.js"]
@@ -183,35 +236,36 @@ Task 3: MODIFY price-extract.js ← conflicts with Task 1
         count: "4 passed, 0 failed"</code></pre>
 
     <div class="callout callout-red">
-      <div class="callout-title">This is a hard gate</div>
-      Never mark a task <code>[x]</code> without calling <code>log-implementation</code> first. The logs are what make the system self-aware — without them, the next spec might create duplicate API endpoints or reimplement a utility that already exists.
+      <div class="callout-title">Hard gate — /spec only</div>
+      Never mark a task <code>[x]</code> in a <code>/spec</code> without calling <code>log-implementation</code> first. (<code>/sketch</code> marks <code>[x]</code> directly — no log-implementation call.)
     </div>
+
+    <h3>Multi-agent dispatch</h3>
+    <p>Tasks with non-overlapping file touch maps can be batched and dispatched to parallel subagents. The orchestrator reads each task's file list, identifies safe-to-parallel groups, and launches agents concurrently. Implementation logs from completed tasks prevent a second agent from duplicating work already done by a first.</p>
+
+<pre><code># Tasks with no file overlap → dispatch in parallel
+Task 1: MODIFY price-extract.js, TEST price-extract.test.js
+Task 2: MODIFY retail-display.js, TEST retail-display.test.js
+         ↑ No overlap → parallel safe
+
+# Tasks sharing files → run sequentially
+Task 3: MODIFY price-extract.js ← conflicts with Task 1
+         ↑ Overlap → must wait for Task 1</code></pre>
   </div></section>
 
   <section class="content"><div class="container">
-    <div class="section-label">When to Skip</div>
-    <div class="section-title">Not Everything Needs a Spec</div>
-
-    <table class="compare-table">
-      <tr><th>Situation</th><th>Approach</th><th>What to use</th></tr>
-      <tr><td class="label">Simple bug fix</td><td>Bug fast path — debug, issue, fix, PR</td><td><code>/systematic-debugging</code> &rarr; <code>/issue</code> &rarr; fix</td></tr>
-      <tr><td class="label">Trivial chore</td><td>No issue, no spec, just a <code>chore:</code> PR</td><td><code>/gsd</code> (Get Stuff Done)</td></tr>
-      <tr><td class="label">CSS tweak, typo fix</td><td>Direct fix in a worktree</td><td><code>/gsd</code></td></tr>
-      <tr><td class="label">New feature</td><td>Full 4-phase spec</td><td><code>/spec ISSUE-ID</code></td></tr>
-      <tr><td class="label">Complex refactor</td><td>Full spec — need design review</td><td><code>/spec ISSUE-ID</code></td></tr>
-      <tr><td class="label">Multi-component feature</td><td>Full spec with parallel task dispatch</td><td><code>/spec</code> + <code>/dispatching-parallel-agents</code></td></tr>
-    </table>
+    <div class="section-label">Getting Started</div>
+    <div class="section-title">Bootstrapping SpecFlow</div>
+    <p class="section-desc">SpecFlow ships as an npm package. Install it, add the MCP server to your Claude Code config, and the <code>/gsd</code>, <code>/sketch</code>, and <code>/spec</code> skills become available immediately.</p>
 
     <div class="prompt-block">
-      <div class="prompt-label">Prompt for Claude: Build a spec workflow</div>
-      I want to implement spec-driven development for my projects. Help me set up:
-      <br><br>
-      1. A <strong>spec directory structure</strong> at <code>.spec-workflow/specs/</code> with templates for requirements, design, and tasks<br>
-      2. A <strong>requirements template</strong> with user stories, acceptance criteria (WHEN/THEN/SHALL format), and non-functional requirements<br>
-      3. A <strong>tasks template</strong> with <code>_Prompt</code> (Role/Task/Restrictions/Success), <code>_Leverage</code>, <code>_Requirements</code>, and file touch maps<br>
-      4. A <strong>/spec skill</strong> that orchestrates the 4-phase workflow with approval checkpoints at each phase<br>
-      5. An <strong>implementation logging</strong> system that records what each task built (files, endpoints, components) so future specs can check for duplicates<br><br>
-      Start simple — I can add the dashboard approval system later. For now, just ask me "approve?" before proceeding to the next phase.
+      <div class="prompt-label">Prompt for Claude: Set up the three-tier workflow</div>
+      I want to add spec-driven development to my project using the SpecFlow MCP server. Help me:<br><br>
+      1. Install <strong>@lbruton/specflow</strong> globally and add it to my MCP config<br>
+      2. Set up <strong>.specflow/config.json</strong> pointing to my Plane project for issue tracking<br>
+      3. Walk me through my first <strong>/sketch</strong> on an open issue — I want to see the requirements → discovery → approach → tasks flow before trying /spec<br>
+      4. Show me how to invoke <strong>/sketch-review</strong> from a second terminal so I understand cross-model peer review<br><br>
+      Start with the install and config — I'll confirm before we open the first sketch.
     </div>
   </div></section>
 

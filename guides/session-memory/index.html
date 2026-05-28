@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Session Memory Pipeline — Claude Code Guide | lbruton.cc</title>
-  <meta name="description" content="A complete guide to building persistent session memory for Claude Code — session-rag for semantic search, mem0 for curated memory, and lifecycle skills for session bookends.">
+  <meta name="description" content="A complete guide to persistent session memory for Claude Code — SessionFlow for semantic transcript search, MemFlow (mem0) for curated memory, and hooks that keep every new session up to date with no startup prompt.">
   <meta property="og:title" content="Session Memory Pipeline — Claude Code Guide">
-  <meta property="og:description" content="session-rag, mem0, and lifecycle skills for persistent Claude Code session memory. Open source, battle-tested, ready to use.">
+  <meta property="og:description" content="SessionFlow, MemFlow, and lifecycle hooks for persistent Claude Code session memory across four harnesses. Open source, battle-tested, ready to use.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.lbruton.cc/guides/session-memory/">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
@@ -126,7 +126,7 @@
   <section class="hero"><div class="container">
     <div class="hero-label">Claude Code Guide</div>
     <h1>Session Memory Pipeline</h1>
-    <p>How to give Claude Code persistent memory across sessions using session-rag for semantic search, mem0 for curated memory, and lifecycle skills for session bookends. Battle-tested across 500+ sessions.</p>
+    <p>How to give Claude Code persistent memory across sessions using SessionFlow for semantic transcript search, MemFlow (mem0) for curated memory, and hooks that load context automatically. Battle-tested across 500+ sessions &mdash; these days I don't even run a startup prompt.</p>
   </div></section>
 
   <!-- The Problem -->
@@ -142,7 +142,7 @@
   <section class="content"><div class="container">
     <div class="section-label">Architecture</div>
     <div class="section-title">The Session Memory Pipeline</div>
-    <p class="section-desc">The pipeline has three layers: automatic context injection via hooks, semantic search over all past transcripts via session-rag, and lifecycle skills that load context at session start and capture knowledge at session end.</p>
+    <p class="section-desc">The pipeline has three layers: automatic context injection via hooks, semantic search over all past transcripts via SessionFlow, and lifecycle skills that load context at session start and capture knowledge at session end. The hooks and SessionFlow do the work automatically &mdash; the skills below are optional deep boots, not a required ritual.</p>
 
     <div class="arch-flow"><span class="phase">SESSION START</span>                          <span class="phase">SESSION END</span>
      <span class="arrow">│</span>                                        <span class="arrow">│</span>
@@ -152,23 +152,24 @@
      <span class="arrow">│</span>                                     <span class="arrow">├─</span> Curated summary <span class="arrow">→</span> <span class="store">mem0</span>
      <span class="arrow">▼</span>                                     <span class="arrow">└─</span> Worktree + branch cleanup
 <span class="tool">/start</span> quick resume (same-day)
-  <span class="arrow">├─</span> <span class="store">session-rag</span> recent context
+  <span class="arrow">├─</span> <span class="store">SessionFlow</span> recent context
   <span class="arrow">├─</span> <span class="store">mem0</span> project memories
   <span class="arrow">└─</span> Git status + open issues
      <span class="arrow">│</span>
      <span class="arrow">▼</span>
 <span class="tool">/prime</span> full boot (days away)
-  <span class="arrow">├─</span> <span class="store">session-rag</span> + <span class="store">mem0</span> context
+  <span class="arrow">├─</span> <span class="store">SessionFlow</span> + <span class="store">mem0</span> context
   <span class="arrow">├─</span> Code index health
   <span class="arrow">└─</span> Full project status
 
      <span class="phase">ALWAYS RUNNING</span>
      <span class="arrow">│</span>
      <span class="arrow">▼</span>
-<span class="tool">session-rag</span> MCP server:
-  Watches <span class="store">~/.claude/projects/</span> for new
-  JSONL transcripts, indexes automatically
-  via <span class="store">Milvus Lite</span> + <span class="store">SQLite FTS5</span> hybrid
+<span class="tool">SessionFlow</span> MCP server:
+  Watches <span class="store">~/.claude/projects/</span> + the
+  Codex / Antigravity / OpenCode transcript
+  paths, indexes automatically via
+  <span class="store">Milvus</span> + <span class="store">SQLite FTS5</span> hybrid
      <span class="arrow">│</span>
 <span class="phase">COMPACTION?</span>
      <span class="arrow">│</span>
@@ -176,27 +177,27 @@
   <span class="arrow">└─</span> Recovers handoff state + 10 memories</div>
 
     <div class="pipeline-grid">
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--amber)"></div><div class="pipe-card-name">SessionStart hook</div></div><p>Automatic. Silently injects mem0 memories at every session start. Switches to heavy mode after compaction to recover lost context. <a href="/guides/hooks/">Full guide &rarr;</a></p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--accent)"></div><div class="pipe-card-name">/start</div></div><p>Quick resume. Queries session-rag + mem0 for recent context, checks git state and open issues. Use for same-day work or short breaks.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--green)"></div><div class="pipe-card-name">/prime</div></div><p>Full boot. Queries session-rag + mem0, indexes codebase, checks code health, gathers project status. Use after days away or on new projects.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--pink)"></div><div class="pipe-card-name">/wrap</div></div><p>Session close. Runs retrospective inline, saves lessons + curated summary to mem0, cleans up branches. No separate /retro needed.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--cyan)"></div><div class="pipe-card-name">session-rag</div></div><p>MCP server. Indexes JSONL transcripts into Milvus Lite with FTS5 hybrid search. Real-time file watcher, date range filtering, cross-session semantic search.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--amber)"></div><div class="pipe-card-name">SessionStart hook</div></div><p>Automatic. Silently injects MemFlow (mem0) memories and starts the SessionFlow server at every session launch. Switches to heavy mode after compaction to recover lost context. <a href="/guides/hooks/">Full guide &rarr;</a></p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--accent)"></div><div class="pipe-card-name">/start</div></div><p>Optional quick resume. Queries SessionFlow + MemFlow for recent context, checks git state and open issues. Use for same-day work or short breaks.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--green)"></div><div class="pipe-card-name">/prime</div></div><p>Optional full boot. Queries SessionFlow + MemFlow, indexes codebase, checks code health, gathers project status. Use after days away or on new projects.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--pink)"></div><div class="pipe-card-name">/wrap</div></div><p>Session close. Runs retrospective inline, saves lessons + curated summary to MemFlow, cleans up branches. No separate /retro needed.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background: var(--cyan)"></div><div class="pipe-card-name">SessionFlow</div></div><p>MCP server. Indexes JSONL transcripts into Milvus with FTS5 hybrid search. Real-time file watcher, date range filtering, cross-session semantic search across all four harnesses.</p></div>
     </div>
   </div></section>
 
-  <!-- Layer 1: session-rag -->
+  <!-- Layer 1: SessionFlow -->
   <section class="content"><div class="container">
     <div class="section-label">Layer 1</div>
-    <div class="section-title">Session Search: session-rag</div>
-    <p class="section-desc"><a href="https://github.com/lbruton/claude-code-session-rag" target="_blank" rel="noopener">session-rag</a> is an MCP server that indexes Claude Code JSONL transcripts directly into a Milvus Lite vector database with a SQLite FTS5 keyword sidecar, providing hybrid semantic + keyword search across all past sessions. It works natively with the JSONL format Claude Code already writes, indexes in real-time via a file watcher, and supports date range filtering for historical queries.</p>
+    <div class="section-title">Session Search: SessionFlow</div>
+    <p class="section-desc"><a href="https://github.com/lbruton/SessionFlow" target="_blank" rel="noopener">SessionFlow</a> is an MCP server that indexes coding-session JSONL transcripts directly into a Milvus vector database with a SQLite FTS5 keyword sidecar, providing hybrid semantic + keyword search across all past sessions. It reads the transcript formats Claude Code, Codex, Antigravity, and OpenCode already write, indexes in real-time via a file watcher, and supports date range filtering for historical queries.</p>
 
     <div class="callout callout-green">
       <div class="callout-title">Fork note</div>
-      We run a <a href="https://github.com/lbruton/claude-code-session-rag" target="_blank" rel="noopener">fork</a> of the original <a href="https://github.com/mwgreen/claude-code-session-rag" target="_blank" rel="noopener">mwgreen/claude-code-session-rag</a>. The fork adds ISO 8601 date range filtering (<code>date_from</code>/<code>date_to</code>) for historical search, global MCP server architecture (single Milvus DB at <code>~/.session-rag/</code> vs. per-project databases), and hybrid search using Reciprocal Rank Fusion to merge vector and FTS5 keyword results.
+      SessionFlow is our <a href="https://github.com/lbruton/SessionFlow" target="_blank" rel="noopener">fork</a> (and rename) of the original <a href="https://github.com/mwgreen/claude-code-session-rag" target="_blank" rel="noopener">mwgreen/claude-code-session-rag</a>. It adds ISO 8601 date range filtering (<code>date_from</code>/<code>date_to</code>) for historical search, a global MCP server architecture (single Milvus DB vs. per-project databases), multi-harness transcript ingestion (Claude Code, Codex, Antigravity, OpenCode), and hybrid search using Reciprocal Rank Fusion to merge vector and FTS5 keyword results.
     </div>
 
     <h3>How it works</h3>
-    <p>session-rag runs as an HTTP MCP server on port 7102. It watches <code>~/.claude/projects/</code> for new JSONL transcript files, chunks and embeds them using EmbeddingGemma-300M (optimized for Apple Silicon), and stores vectors in a local Milvus Lite database at <code>~/.session-rag/</code>. A parallel SQLite FTS5 index provides keyword search. Results from both engines are merged using Reciprocal Rank Fusion (RRF) for the best of both worlds.</p>
+    <p>SessionFlow runs as an HTTP MCP server on port 7102. It watches the transcript directories each harness writes to, chunks and embeds them using EmbeddingGemma-300M (local MLX on Apple Silicon), and stores vectors in Milvus (Standalone, with a Milvus Lite fallback at <code>~/.sessionflow/</code>). A parallel SQLite FTS5 index provides keyword search. Results from both engines are merged using Reciprocal Rank Fusion (RRF) for the best of both worlds.</p>
 
     <h3>MCP tools</h3>
     <table class="compare-table">
@@ -226,13 +227,13 @@ get_session_stats()
 cleanup_sessions(max_age_days=90)</code></pre>
 
     <div class="callout">
-      <div class="callout-title">Why session-rag instead of log cleaning scripts?</div>
-      Earlier versions of this pipeline used Python scripts to clean iTerm2 logs and JSONL transcripts, then indexed them via claude-context. session-rag eliminates all of that &mdash; it reads JSONL natively, indexes automatically via a file watcher, and stores everything in a local vector DB. No cleaning scripts, no manual indexing, no cron jobs. The old scripts are retired.
+      <div class="callout-title">Why SessionFlow instead of log cleaning scripts?</div>
+      Earlier versions of this pipeline used Python scripts to clean iTerm2 logs and JSONL transcripts, then indexed them via ContextFlow. SessionFlow eliminates all of that &mdash; it reads transcripts natively, indexes automatically via a file watcher, and stores everything in a local vector DB. No cleaning scripts, no manual indexing, no cron jobs. The old scripts are retired.
     </div>
 
     <div class="prompt-block">
-      <div class="prompt-label">Prompt for Claude: Set up session-rag</div>
-      I want to set up <a href="https://github.com/lbruton/claude-code-session-rag" target="_blank" rel="noopener">session-rag</a> as an MCP server for Claude Code. It indexes JSONL transcripts into a Milvus Lite vector DB with FTS5 hybrid search and provides semantic search via MCP tools. The server should:
+      <div class="prompt-label">Prompt for Claude: Set up SessionFlow</div>
+      I want to set up <a href="https://github.com/lbruton/SessionFlow" target="_blank" rel="noopener">SessionFlow</a> as an MCP server for Claude Code. It indexes JSONL transcripts into a Milvus vector DB with FTS5 hybrid search and provides semantic search via MCP tools. The server should:
       <br><br>
       1. Run as an HTTP MCP server (default port 7102)<br>
       2. Watch <code>~/.claude/projects/</code> for new JSONL files and index them automatically<br>
@@ -240,7 +241,7 @@ cleanup_sessions(max_age_days=90)</code></pre>
       4. Provide <code>search_session</code> for current-session search with recency bias<br>
       5. Provide <code>get_turns</code> for retrieving verbatim conversation turns around a search hit<br>
       6. Provide <code>get_session_stats</code> for index health monitoring<br><br>
-      Add it to your Claude Code MCP config alongside mem0. Together, session-rag (verbatim transcript search) and mem0 (curated episodic memory) are the two authoritative sources for session context.
+      Add it to your Claude Code MCP config alongside mem0. Together, SessionFlow (verbatim transcript search) and MemFlow / mem0 (curated episodic memory) are the two authoritative sources for session context.
     </div>
   </div></section>
 
@@ -252,7 +253,7 @@ cleanup_sessions(max_age_days=90)</code></pre>
 
     <h3>/start &mdash; Quick Resume</h3>
     <p><code>/start</code> is the lightweight alternative to <code>/prime</code>. Use it for same-day work or resuming after a short break. Claude:</p>
-<pre><code>1. Queries session-rag for recent session context
+<pre><code>1. Queries SessionFlow for recent session context
 2. Searches mem0 for project memories
 3. Checks git state and open issues
 4. Presents a quick briefing — no indexing, no health checks
@@ -262,7 +263,7 @@ cleanup_sessions(max_age_days=90)</code></pre>
 
     <h3>/prime &mdash; Full Session Boot</h3>
     <p>When you start a session and type <code>/prime</code>, Claude:</p>
-<pre><code>1. Queries session-rag for recent session context
+<pre><code>1. Queries SessionFlow for recent session context
 2. Searches mem0 for recent memories about this project
 3. Checks git status, open PRs, and unfinished issues
 4. Verifies code indexes are fresh (vector DB + graph DB)
@@ -283,18 +284,18 @@ cleanup_sessions(max_age_days=90)</code></pre>
 5. Cleans up merged worktree branches
 6. Prints a session recap with shipped/pending/next-session summary
 
-   Note: /wrap saves to mem0 only. session-rag indexes the raw JSONL
+   Note: /wrap saves to MemFlow only. SessionFlow indexes the raw JSONL
    transcript automatically — no digest step needed.</code></pre>
 
     <div class="prompt-block">
       <div class="prompt-label">Prompt for Claude: Build session lifecycle skills</div>
       I want three Claude Code skills for session lifecycle management:
       <br><br>
-      <strong>/start (quick resume):</strong> Query session-rag for recent session context, search mem0 for project memories, check git status and open issues, and present a quick briefing. No indexing or health checks &mdash; use this for same-day work or short breaks.
+      <strong>/start (quick resume):</strong> Query SessionFlow for recent session context, search MemFlow for project memories, check git status and open issues, and present a quick briefing. No indexing or health checks &mdash; use this for same-day work or short breaks.
       <br><br>
       <strong>/prime (full session boot):</strong> Search mem0 for recent project memories, check git status and open issues, verify code indexes are healthy, and present a full briefing that tells me where I left off and what needs attention. Use this after days away or when switching projects.
       <br><br>
-      <strong>/wrap (session end):</strong> Check for uncommitted work, capture retrospective lessons to mem0 (mistakes, successful approaches, preferences), save a curated session summary to mem0, clean up merged branches, and print a session recap. session-rag handles transcript indexing automatically &mdash; no digest agent needed.
+      <strong>/wrap (session end):</strong> Check for uncommitted work, capture retrospective lessons to MemFlow (mistakes, successful approaches, preferences), save a curated session summary to MemFlow, clean up merged branches, and print a session recap. SessionFlow handles transcript indexing automatically &mdash; no digest agent needed.
       <br><br>
       All three skills should be saved as <code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> files. They should ask me before taking destructive actions (deleting branches, discarding changes).
     </div>
@@ -310,10 +311,10 @@ cleanup_sessions(max_age_days=90)</code></pre>
       <tr><th>Aspect</th><th>Lifecycle Pipeline</th><th>Universal Indexer</th></tr>
       <tr><td class="label">Philosophy</td><td>Capture at session boundaries with structured skills</td><td>Post-process logs into a symbolic ontology of primitives</td></tr>
       <tr><td class="label">When it runs</td><td>Integrated into workflow: <code>/prime</code> at start, <code>/wrap</code> at end</td><td>Batch processing &mdash; can run anytime against log corpus</td></tr>
-      <tr><td class="label">What it stores</td><td>Tagged memories (mem0) + raw transcript index (session-rag)</td><td>Structured primitives: terms, decisions, patterns, operators</td></tr>
-      <tr><td class="label">Search method</td><td>Hybrid vector + FTS5 (session-rag) + mem0 recall</td><td>Index lookup + differential tracking</td></tr>
-      <tr><td class="label">Multi-agent</td><td>Same pipeline works across Claude, Codex, Gemini sessions</td><td>Designed for Claude + Codex with synced index copies</td></tr>
-      <tr><td class="label">Survives compaction</td><td>Yes &mdash; lives in mem0 + session-rag, not conversation window</td><td>Yes &mdash; loaded from index files into CLAUDE.md/AGENTS.md</td></tr>
+      <tr><td class="label">What it stores</td><td>Tagged memories (MemFlow) + raw transcript index (SessionFlow)</td><td>Structured primitives: terms, decisions, patterns, operators</td></tr>
+      <tr><td class="label">Search method</td><td>Hybrid vector + FTS5 (SessionFlow) + MemFlow recall</td><td>Index lookup + differential tracking</td></tr>
+      <tr><td class="label">Multi-agent</td><td>Same pipeline works across Claude, Codex, Antigravity, OpenCode sessions</td><td>Designed for Claude + Codex with synced index copies</td></tr>
+      <tr><td class="label">Survives compaction</td><td>Yes &mdash; lives in MemFlow + SessionFlow, not conversation window</td><td>Yes &mdash; loaded from index files into CLAUDE.md/AGENTS.md</td></tr>
       <tr><td class="label">Best for</td><td>Workflow-integrated teams who want session bookends</td><td>Heavy research/exploration sessions needing deep corpus analysis</td></tr>
     </table>
 
@@ -325,21 +326,21 @@ cleanup_sessions(max_age_days=90)</code></pre>
     <div class="section-label">Quick Start</div>
     <div class="section-title">Get Started in 10 Minutes</div>
 
-    <h3>1. Set up session-rag</h3>
-    <p>Clone the <a href="https://github.com/lbruton/claude-code-session-rag" target="_blank" rel="noopener">session-rag fork</a> and run it as an HTTP MCP server. It indexes your Claude Code JSONL transcripts into a local Milvus Lite vector database with FTS5 hybrid search. The file watcher picks up new sessions automatically &mdash; no cron jobs or manual indexing needed.</p>
-<pre><code>git clone https://github.com/lbruton/claude-code-session-rag.git
-cd claude-code-session-rag
+    <h3>1. Set up SessionFlow</h3>
+    <p>Clone <a href="https://github.com/lbruton/SessionFlow" target="_blank" rel="noopener">SessionFlow</a> and run it as an HTTP MCP server. It indexes your coding-session JSONL transcripts into a Milvus vector database with FTS5 hybrid search. The file watcher picks up new sessions automatically &mdash; no cron jobs or manual indexing needed.</p>
+<pre><code>git clone https://github.com/lbruton/SessionFlow.git
+cd SessionFlow
 pip install -r requirements.txt
 python http_server.py  # runs on port 7102</code></pre>
 
-    <h3>2. Set up mem0</h3>
-    <p>mem0 provides cloud-hosted cross-session memory with automatic fact decomposition. Sign up at <a href="https://mem0.ai" target="_blank" rel="noopener">mem0.ai</a> and add it as an MCP server in your Claude Code config. Together with session-rag, these form the two authoritative session context sources.</p>
+    <h3>2. Set up MemFlow (mem0)</h3>
+    <p>mem0 provides cross-session memory with automatic fact decomposition. Sign up at <a href="https://mem0.ai" target="_blank" rel="noopener">mem0.ai</a> and add it as an MCP server in your Claude Code config. Together with SessionFlow, these form the two authoritative session context sources.</p>
 
     <h3>3. Add to MCP config</h3>
     <div class="file-header"><div class="file-dot" style="background: var(--accent)"></div>~/.claude.json (excerpt)</div>
 <pre><code>{
   "mcpServers": {
-    "session-rag": {
+    "sessionflow": {
       "type": "http",
       "url": "http://localhost:7102/mcp"
     },
@@ -374,12 +375,12 @@ claude
 
     <div class="callout">
       <div class="callout-title">Minimum viable version</div>
-      You don't need all of this at once. Start with just session-rag &mdash; it gives you searchable history with zero manual work. Add mem0 for curated memory that survives across projects. Add the lifecycle skills last for the full session-bookend experience.
+      You don't need all of this at once. Start with just SessionFlow &mdash; it gives you searchable history with zero manual work. Add MemFlow (mem0) for curated memory that survives across projects. Add the lifecycle skills last for the full session-bookend experience.
     </div>
   </div></section>
 
   <footer><div class="container">
-    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/multi-agent/">Multi-Agent</a><a href="/guides/model-backends/">Model Backends</a><a href="/guides/statusline/">Statusline</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="/guides/claude-md/">CLAUDE.md</a><a href="/guides/spec-driven/">Spec-Driven</a><a href="/guides/multi-agent/">Multi-Agent</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
     <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
   </div></footer>
 
