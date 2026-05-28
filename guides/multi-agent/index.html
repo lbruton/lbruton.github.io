@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Agent Dispatch — Right Model for the Right Job | lbruton.cc</title>
-  <meta name="description" content="Six AI CLIs sharing one MCP stack — Claude Code, OpenCode, Kimi, Codex, Gemini, GLM. Right model for the right job, with parallel dispatch and isolated execution.">
-  <meta property="og:title" content="Multi-Agent Dispatch — Right Model for the Right Job">
-  <meta property="og:description" content="Six CLIs, one MCP stack, one skill library. Dispatch the right model for each task — Claude for architecture, GLM for implementation, Kimi for coding, Codex for review.">
+  <title>Multi-Agent Dispatch &mdash; Four Harnesses, One MCP Stack | lbruton.cc</title>
+  <meta name="description" content="Four AI harnesses sharing one MCP stack &mdash; Claude Code, Codex, Antigravity, and OpenCode. Right model for the right job, with parallel dispatch and isolated execution.">
+  <meta property="og:title" content="Multi-Agent Dispatch &mdash; Four Harnesses, One MCP Stack">
+  <meta property="og:description" content="Four harnesses, one MCP stack, one skill library. Dispatch the right model for each task &mdash; Claude for architecture, Codex or Antigravity for implementation, OpenCode for flexible multi-model sessions. All sharing the same memory, secrets, and code intelligence.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.lbruton.cc/guides/multi-agent/">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
@@ -33,15 +33,15 @@
   <section class="hero"><div class="container">
     <div class="hero-label">Claude Code Guide</div>
     <h1>Multi-Agent Dispatch</h1>
-    <p>Six CLIs, one MCP stack, one skill library. Dispatch the right model for each task &mdash; Claude for architecture, GLM for implementation, Kimi for coding, Codex for review. All sharing the same memory, secrets, and code intelligence.</p>
+    <p>Four harnesses, one MCP stack, one skill library. Dispatch the right model for each task &mdash; Claude for architecture, Codex or Antigravity for implementation, OpenCode for flexible multi-model sessions. All sharing the same memory, secrets, and code intelligence.</p>
   </div></section>
 
   <section class="content"><div class="container">
     <div class="section-label">The Idea</div>
     <div class="section-title">Three Tiers of Cognition</div>
-    <p class="section-desc">Not every task needs your most expensive model. Session digests don't need architectural reasoning. Code search doesn't need creative synthesis. Matching the model to the cognitive demand saves tokens and often produces better results — specialized agents with narrow focus outperform generalists.</p>
+    <p class="section-desc">Not every task needs your most expensive model. Session digests don't need architectural reasoning. Code search doesn't need creative synthesis. Matching the model to the cognitive demand saves tokens and often produces better results &mdash; specialized agents with narrow focus outperform generalists.</p>
 
-    <div class="flow-diagram"><span class="phase">DISPATCHER</span> <span class="note">(your main Claude session — Opus)</span>
+    <div class="flow-diagram"><span class="phase">DISPATCHER</span> <span class="note">(your main Claude session &mdash; Opus)</span>
      <span class="arrow">│</span>
      <span class="arrow">├──</span> "Digest this session log"
      <span class="arrow">│   └──</span> <span class="haiku">Haiku agent</span> <span class="note">— mechanical, fast, cheap</span>
@@ -91,19 +91,19 @@ Run: python3 ~/.claude/scripts/extract-jsonl-session.py "$JSONL_FILE"
 ## Step 3: Save to DocVault + mem0
 ...</code></pre>
 
-    <p>The <code>model: haiku</code> frontmatter tells Claude Code to run this agent on Haiku instead of the current session's model. The agent runs in <strong>isolation</strong> — its context is separate from your main session, so large search results or log content don't eat your primary context window.</p>
+    <p>The <code>model: haiku</code> frontmatter tells Claude Code to run this agent on Haiku instead of the current session's model. The agent runs in <strong>isolation</strong> &mdash; its context is separate from your main session, so large search results or log content don't eat your primary context window.</p>
 
     <h3>The agent matrix</h3>
     <table class="compare-table">
       <tr><th>Agent</th><th>Model</th><th>Dispatched by</th></tr>
-      <tr><td class="label">session-digest</td><td style="color:var(--green)">Haiku</td><td>legacy &mdash; replaced by session-rag MCP</td></tr>
+      <tr><td class="label">session-digest</td><td style="color:var(--green)">Haiku</td><td>legacy &mdash; replaced by SessionFlow MCP</td></tr>
       <tr><td class="label">health-monitor</td><td style="color:var(--green)">Haiku</td><td><code>/prime</code> at session start (background)</td></tr>
       <tr><td class="label">index-monitor</td><td style="color:var(--green)">Haiku</td><td><code>/prime</code> at session start (background)</td></tr>
       <tr><td class="label">implementation-logger</td><td style="color:var(--green)">Haiku</td><td><code>/spec</code> Phase 4 after each task</td></tr>
-      <tr><td class="label">wiki-page-updater</td><td style="color:var(--green)">Haiku</td><td><code>/wiki-update</code> — one per page, parallel</td></tr>
+      <tr><td class="label">wiki-page-updater</td><td style="color:var(--green)">Haiku</td><td><code>/wiki-update</code> &mdash; one per page, parallel</td></tr>
       <tr><td class="label">firecrawl-scraper</td><td style="color:var(--green)">Haiku</td><td><code>/web-search</code>, <code>/discover</code></td></tr>
       <tr><td class="label">vault-linker</td><td style="color:var(--green)">Haiku</td><td>After issue creation</td></tr>
-      <tr><td class="label">session-oracle</td><td style="color:var(--cyan)">Sonnet</td><td>session-rag MCP provides this natively now (legacy agent)</td></tr>
+      <tr><td class="label">session-oracle</td><td style="color:var(--cyan)">Sonnet</td><td>legacy &mdash; SessionFlow MCP provides this natively now</td></tr>
       <tr><td class="label">code-oracle</td><td style="color:var(--cyan)">Sonnet</td><td><code>/code-oracle</code> for codebase questions</td></tr>
       <tr><td class="label">issue-triage</td><td style="color:var(--cyan)">Sonnet</td><td><code>/issue-triage</code></td></tr>
       <tr><td class="label">project-manager</td><td style="color:var(--cyan)">Sonnet</td><td><code>/weekly-standup</code>, <code>/after-action</code>, <code>/update-roadmap</code></td></tr>
@@ -135,7 +135,7 @@ Phase 2: N × pr-thread-resolver (Sonnet) — one per thread, in parallel
          Each fixes code or drafts a reply independently</code></pre>
 
     <h3>3. Isolation for context protection</h3>
-    <p>Agents run in their own context windows. This is the key architectural insight — when a code-oracle agent searches through 50 files, those file contents stay in the agent's context, not yours. The agent returns a synthesized 200-word report instead of 50K tokens of raw search results.</p>
+    <p>Agents run in their own context windows. This is the key architectural insight &mdash; when a code-oracle agent searches through 50 files, those file contents stay in the agent's context, not yours. The agent returns a synthesized 200-word report instead of 50K tokens of raw search results.</p>
 <pre><code># Without isolation:
 You: "search for price extraction code"
 Claude: [reads 50 files into YOUR context → burns 40K tokens]
@@ -147,53 +147,53 @@ Claude: [dispatches code-oracle agent → agent reads 50 files
 
     <div class="callout callout-green">
       <div class="callout-title">The isolation principle</div>
-      Every agent that touches large datasets (search results, log files, API responses) should run in isolation. The main session's context is precious — don't contaminate it with raw data that can be summarized by a cheaper model.
+      Every agent that touches large datasets (search results, log files, API responses) should run in isolation. The main session's context is precious &mdash; don't contaminate it with raw data that can be summarized by a cheaper model.
     </div>
   </div></section>
 
   <section class="content"><div class="container">
     <div class="section-label">Multi-Model</div>
-    <div class="section-title">Beyond Subagents: Six CLIs, One Stack</div>
-    <p class="section-desc">The dispatch pattern extends beyond Claude's model tiers. Six CLIs share the same MCP infrastructure &mdash; memory, secrets, code search, quality gates, and the specflow workflow engine. The model is just the brain. The infrastructure is the nervous system.</p>
+    <div class="section-title">Four Harnesses, One MCP Stack</div>
+    <p class="section-desc">The dispatch pattern extends beyond Claude's model tiers. Four harnesses share the same MCP infrastructure &mdash; memory, secrets, code search, quality gates, and the SpecFlow workflow engine. The model is just the brain. The infrastructure is the nervous system.</p>
+
+    <h3>Harness overview</h3>
 
     <table class="compare-table">
-      <tr><th>CLI</th><th>Model</th><th>Strengths</th><th>Use for</th></tr>
-      <tr><td class="label" style="color:var(--pink)">Claude Code</td><td>Opus 4.6</td><td>Complex reasoning, multi-module, all tasks</td><td>Architecture, spec design, orchestration</td></tr>
-      <tr><td class="label" style="color:var(--amber)">OpenCode</td><td>75+ models</td><td>Multi-model runtime switching, open source</td><td>Flexible sessions, model comparison, backup CLI</td></tr>
-      <tr><td class="label" style="color:var(--amber)">Kimi CLI</td><td>Kimi K2.5</td><td>262K context, native Claude skill support</td><td>Coding tasks, large-context work</td></tr>
-      <tr><td class="label" style="color:var(--green)">claude-glm</td><td>GLM 4.7/5.1</td><td>Strong coding, spec task execution</td><td>Implementation, PR work, experimental</td></tr>
-      <tr><td class="label" style="color:var(--cyan)">Codex CLI</td><td>GPT-5.4</td><td>Fast mechanical work, clear unambiguous specs</td><td>Single-file patches, reviews, rescue</td></tr>
-      <tr><td class="label" style="color:var(--text-dim)">Gemini CLI</td><td>3.1 Pro</td><td>Good all-rounder, 1M context</td><td>Documentation, batch digests</td></tr>
+      <tr><th>Harness</th><th>Instruction file</th><th>Skills &amp; agents dir</th><th>Use for</th></tr>
+      <tr><td class="label" style="color:var(--pink)">Claude Code</td><td><code>CLAUDE.md</code></td><td><code>.claude/</code></td><td>Architecture, spec design, orchestration, complex reasoning</td></tr>
+      <tr><td class="label" style="color:var(--cyan)">Codex CLI</td><td><code>AGENTS.md</code></td><td><code>.agents/</code></td><td>Fast mechanical work, single-file patches, clear unambiguous specs</td></tr>
+      <tr><td class="label" style="color:var(--amber)">Antigravity</td><td><code>AGENTS.md</code></td><td><code>.agents/</code></td><td>Implementation, PR work, spec task execution (replaces Gemini CLI)</td></tr>
+      <tr><td class="label" style="color:var(--green)">OpenCode</td><td><code>AGENTS.md</code> + <code>CLAUDE.md</code></td><td><code>.agents/</code></td><td>Multi-model runtime &mdash; switch models mid-session without losing MCP context</td></tr>
     </table>
 
+    <p>Codex and Antigravity share the same path conventions (<code>AGENTS.md</code> + <code>.agents/</code>). OpenCode reads <em>both</em> <code>AGENTS.md</code> and <code>CLAUDE.md</code>, bridging the two ecosystems.</p>
+
+    <h3>OpenCode: the multi-model runtime</h3>
+    <p>OpenCode is more than a fourth harness &mdash; it's the runtime that lets you run other models without leaving your MCP stack. Rather than spinning up separate CLIs for different model families, you switch the active model inside a single OpenCode session:</p>
+
+    <table class="compare-table">
+      <tr><th>Model family</th><th>Available via OpenCode</th></tr>
+      <tr><td class="label">GLM</td><td>GLM-5, GLM-5.1</td></tr>
+      <tr><td class="label">Kimi</td><td>Kimi K2.5, Kimi K2.6</td></tr>
+      <tr><td class="label">MiMo</td><td>MiMo-V2.5, MiMo-V2.5-Pro</td></tr>
+      <tr><td class="label">MiniMax</td><td>MiniMax M2.5, MiniMax M2.7</td></tr>
+      <tr><td class="label">Qwen</td><td>Qwen3.5 Plus, Qwen3.6 Plus, Qwen3.7 Max</td></tr>
+      <tr><td class="label">DeepSeek</td><td>DeepSeek V4 Pro, DeepSeek V4 Flash</td></tr>
+      <tr><td class="label">Anthropic</td><td>Claude (all tiers)</td></tr>
+      <tr><td class="label">OpenAI</td><td>Codex / GPT family</td></tr>
+    </table>
+
+    <p>GLM, Kimi, and the rest are no longer first-class CLIs in this stack. "Run a different model" now means opening OpenCode and pressing <kbd>Ctrl+O</kbd> to switch &mdash; same terminal, same MCP session, same memory.</p>
+
     <h3>One MCP stack serves all</h3>
-    <p>Every CLI connects to the same infrastructure &mdash; no per-tool silos:</p>
+    <p>Every harness connects to the same infrastructure &mdash; no per-tool silos:</p>
     <div class="pipeline-grid">
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">specflow</div></div><p>Workflow orchestrator &mdash; specs, tasks, approvals. The shared protocol.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">mem0</div></div><p>Cross-session memory. Every CLI reads and writes the same memories.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">claude-context</div></div><p>Semantic code search (Milvus). One index, all agents query it.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">infisical</div></div><p>Self-hosted secrets. API keys, tokens &mdash; no plaintext in configs.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--accent)"></div><div class="pipe-card-name">SpecFlow</div></div><p>Workflow orchestrator &mdash; specs, tasks, approvals. The shared protocol for cross-agent handoff.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">MemFlow</div></div><p>Cross-session memory (mem0). Every harness reads and writes the same memories.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--cyan)"></div><div class="pipe-card-name">ContextFlow</div></div><p>Semantic code search (Milvus, forked from claude-context). One index, all agents query it.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--pink)"></div><div class="pipe-card-name">SessionFlow</div></div><p>Session memory MCP. Semantic search over conversation history across all harnesses.</p></div>
+      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">Infisical</div></div><p>Self-hosted secrets. API keys, tokens &mdash; no plaintext in configs.</p></div>
     </div>
-
-    <h3>Shared workspace, separate instructions</h3>
-    <p>All six CLIs read from the same git repos and MCP servers. The spec documents (<code>tasks.md</code>) serve as the shared protocol &mdash; any agent can pick up a task, implement it, and log the result. Implementation logs prevent duplicate work.</p>
-
-<pre><code># Claude plans, others implement:
-1. Claude creates issue + spec (requirements, design, tasks)
-2. Switch to GLM terminal: claude-glm → /spec STAK-498
-3. GLM implements tasks, logs artifacts via specflow MCP
-4. Switch back to Claude for code review + merge
-
-# Parallel implementation across agents:
-1. GLM implements Tasks 1-3 in worktree-a
-2. Codex implements Tasks 4-6 in worktree-b
-3. Both log artifacts — specflow prevents duplicate work
-
-# Or use OpenCode with model switching:
-1. Start in OpenCode, pick Claude for architecture (Ctrl+O)
-2. Switch to GLM for implementation (Ctrl+O)
-3. Switch to Kimi K2.5 for a different perspective (Ctrl+O)
-4. All in one terminal, same MCP stack throughout</code></pre>
   </div></section>
 
   <section class="content"><div class="container">
@@ -231,52 +231,65 @@ EOF</code></pre>
       <div class="prompt-label">Prompt for Claude: Build an agent system</div>
       I want to create a multi-agent system for my Claude Code workflow. Help me define agents for:
       <br><br>
-      1. <strong>Session digest</strong> (Haiku) — processes session transcripts into summaries<br>
-      2. <strong>Code search</strong> (Sonnet) — searches codebase and returns synthesized findings<br>
-      3. <strong>Health check</strong> (Haiku) — pings my infrastructure endpoints and reports status<br><br>
+      1. <strong>Session digest</strong> (Haiku) &mdash; processes session transcripts into summaries<br>
+      2. <strong>Code search</strong> (Sonnet) &mdash; searches codebase and returns synthesized findings<br>
+      3. <strong>Health check</strong> (Haiku) &mdash; pings my infrastructure endpoints and reports status<br><br>
       Each agent should run in <strong>isolation</strong> (so large results don't eat my main context). Define them as <code>~/.claude/agents/{name}.md</code> files with frontmatter specifying the model tier. Include clear instructions for what the agent receives, what it does, and what it returns.
     </div>
   </div></section>
 
-  <!-- Codex Plugin -->
+  <!-- Peer Review -->
   <section class="content"><div class="container">
-    <div class="section-label">Codex Plugin</div>
-    <div class="section-title">Codex Reviews Inside Claude Code</div>
-    <p class="section-desc">The <a href="https://github.com/openai/codex-plugin-cc" target="_blank" rel="noopener">openai/codex-plugin-cc</a> plugin lets you dispatch work to GPT-5.4 (Codex) directly from Claude Code. It shares your auth, config, and repo checkout — no separate terminal needed for reviews.</p>
+    <div class="section-label">Peer Review</div>
+    <div class="section-title">Cross-Harness Peer Review</div>
+    <p class="section-desc">The most effective peer review happens when two different models evaluate the same work independently. No plugins required &mdash; the workflow is a deliberate copy-paste between terminals. Simple, safe, and surprisingly effective at catching different classes of issues.</p>
 
-    <h3>Three review modes</h3>
-    <div class="pipeline-grid">
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--green)"></div><div class="pipe-card-name">/codex:review</div></div><p>Standard code review of uncommitted or branch changes. Reads the diff, returns findings. Review-only — never applies fixes.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--amber)"></div><div class="pipe-card-name">/codex:adversarial-review</div></div><p>Challenges the <em>approach itself</em>. Questions design choices, assumptions, tradeoffs, and where the design could fail under real-world conditions.</p></div>
-      <div class="pipe-card"><div class="pipe-card-header"><div class="file-dot" style="background:var(--pink)"></div><div class="pipe-card-name">/codex:rescue</div></div><p>Delegates investigation or a fix to Codex. Runs as a background task — fire and forget, check back with <code>/codex:status</code>.</p></div>
+    <h3>The pattern</h3>
+    <p>After implementing a feature in one harness, generate a review prompt or review annotations, then manually pass the diff or prompt to a second harness in another terminal. The second model reads the diff cold &mdash; no implementation context, no sunk-cost bias.</p>
+
+<pre><code># Step 1: In your Claude session, generate a review prompt
+> Create a review prompt for the changes on this branch. Include
+  the diff, the spec requirements, and any known tradeoffs.
+
+# Step 2: Copy the prompt to a Codex or Antigravity terminal
+codex "Review this diff for correctness, complexity, and edge cases:
+[paste prompt here]"
+
+# Step 3: Bring findings back to Claude for resolution
+> Here are Codex's review findings. Which are worth fixing before merge?</code></pre>
+
+    <h3>Review annotations</h3>
+    <p>For longer sessions, agents can produce structured review annotations &mdash; a list of file, line, severity, and finding. These travel as plain text between terminals, so they don't require any integration or plugin.</p>
+
+<pre><code># Claude reviewing Codex's implementation:
+1. Claude session reads the branch diff
+2. Generates review-annotations.md with findings
+3. Human copies findings back to Codex terminal for fixes
+
+# Or use /sketch-review for a structured phase review:
+/sketch-review       # reads the current sketch phase, returns findings
+                     # model-agnostic: run from any harness</code></pre>
+
+    <div class="callout">
+      <div class="callout-title">Why not a plugin?</div>
+      Plugin-based cross-harness review commands (<code>/codex:review</code>, <code>/codex:adversarial-review</code>, <code>/gemini:*</code>) are disabled in this stack &mdash; they bill separately per invocation and add dependency surface. The copy-paste pattern costs nothing extra and keeps you in control of what each model sees.
     </div>
 
-    <h3>How it fits into the workflow</h3>
-<pre><code># After implementing a feature, get a second opinion:
-> /codex:review --background
-
-# Before merging, pressure-test the design:
-> /codex:adversarial-review --background
-# "Is this the right approach? What assumptions could break?"
-
-# Stuck on a bug? Hand it off:
-> /codex:rescue investigate why the price poller returns stale data
-# Codex runs in background, you keep working
-# Check back: /codex:status → /codex:result</code></pre>
-
-    <p>The key insight: <strong>Codex reviews Claude's work, not the other way around.</strong> Claude writes the code (it has the full spec context), Codex reviews it with fresh eyes. Two different models catching different classes of issues — Claude tends to over-engineer, Codex catches unnecessary complexity. Codex misses architectural context, Claude catches integration risks.</p>
-
-    <div class="callout callout-green">
-      <div class="callout-title">Install</div>
-      <code>claude plugin add openai/codex-plugin-cc</code> — then <code>/codex:setup</code> to verify auth and connectivity. Requires the Codex CLI installed locally (<code>npm i -g @anthropic-ai/codex</code>).
-    </div>
+    <h3>Which combination works best</h3>
+    <table class="compare-table">
+      <tr><th>Reviewer</th><th>Author</th><th>Catches well</th></tr>
+      <tr><td class="label" style="color:var(--pink)">Claude (Opus)</td><td>Codex or Antigravity</td><td>Integration risk, architectural context, over-simplification</td></tr>
+      <tr><td class="label" style="color:var(--cyan)">Codex CLI</td><td>Claude</td><td>Unnecessary complexity, ambiguous naming, mechanical correctness</td></tr>
+      <tr><td class="label" style="color:var(--amber)">Antigravity</td><td>Claude</td><td>Implementation gaps, missing edge cases, spec adherence</td></tr>
+      <tr><td class="label" style="color:var(--green)">OpenCode (any model)</td><td>Any</td><td>Flexible &mdash; switch to the model family best suited to the domain</td></tr>
+    </table>
   </div></section>
 
   <!-- Cross-Agent Spec Handoff -->
   <section class="content"><div class="container">
     <div class="section-label">Advanced</div>
     <div class="section-title">Cross-Agent Spec Handoff</div>
-    <p class="section-desc">The spec documents are the handoff protocol. Any agent that can read markdown and call MCP tools can pick up a spec at any phase. This enables a workflow where different models handle different phases based on their strengths.</p>
+    <p class="section-desc">The spec documents are the handoff protocol. Any harness that can read markdown and call MCP tools can pick up a spec at any phase. This enables a workflow where different models handle different phases based on their strengths.</p>
 
     <div class="flow-diagram"><span class="phase">Cross-Agent Spec Lifecycle</span>
 
@@ -286,42 +299,40 @@ EOF</code></pre>
 <span class="opus">Claude (Opus)</span>          <span class="note">— reviews design, writes tasks.md</span>
      <span class="arrow">│</span>                     <span class="note">   (best at: breaking down complexity)</span>
      <span class="arrow">▼</span>
-<span class="note">Switch iTerm tab →</span>  <span class="note">Any agent can pick up tasks from here:</span>
-     <span class="arrow">├──</span> <span class="haiku">GLM (claude-glm)</span>   <span class="note">— implements tasks (tested, strong coder)</span>
-     <span class="arrow">├──</span> <span class="sonnet">Kimi (kimi CLI)</span>    <span class="note">— implements tasks (262K context)</span>
-     <span class="arrow">├──</span> <span class="haiku">Codex (GPT-5.4)</span>    <span class="note">— implements tasks (mechanical, fast)</span>
+<span class="note">Switch iTerm tab →</span>  <span class="note">Any harness can pick up tasks from here:</span>
+     <span class="arrow">├──</span> <span class="haiku">Codex CLI</span>          <span class="note">— implements tasks (mechanical, fast)</span>
+     <span class="arrow">├──</span> <span class="sonnet">Antigravity</span>        <span class="note">— implements tasks (strong coder)</span>
      <span class="arrow">└──</span> <span class="sonnet">OpenCode (any)</span>     <span class="note">— pick model at runtime (Ctrl+O)</span>
      <span class="arrow">▼</span>
-<span class="opus">Claude (Opus)</span>          <span class="note">— /codex:review, merge, /wrap</span></div>
+<span class="opus">Claude (Opus)</span>          <span class="note">— peer review, merge, /wrap</span></div>
 
     <h3>How handoff works</h3>
     <p>There's no custom IPC or message passing. The spec files (<code>requirements.md</code>, <code>design.md</code>, <code>tasks.md</code>) sit in the repo's <code>.spec-workflow/</code> directory. When you switch terminals:</p>
 <pre><code># In Codex terminal:
-codex "@spec STAK-498"
+codex "@spec WWW-12"
 # Codex reads tasks.md, implements next pending task, logs artifacts
 
-# In GLM terminal (Kimi or OpenCode work the same way):
-claude-glm   # then: /spec STAK-498
-kimi         # then: /spec STAK-498
-opencode     # then: /spec STAK-498
+# In Antigravity terminal (OpenCode works the same way):
+antigravity   # then: /spec WWW-12
+opencode      # then: /spec WWW-12  (switch model with Ctrl+O if needed)
 
-# Every agent reads the same spec, sees what's [ ] vs [x]
+# Every harness reads the same spec, sees what's [ ] vs [x]
 # Implements the next pending task, logs artifacts
 # Implementation logs prevent duplicate work
 
 # In Claude terminal — review and merge:
-/spec STAK-498
+/spec WWW-12
 # Reads spec status, sees what was completed, reviews, merges</code></pre>
 
     <h3>Implementation logging prevents conflicts</h3>
-    <p>Every agent calls <code>log-implementation</code> after completing a task. The log records which files were modified, which API endpoints were created, and which components were built. The next agent reads these logs before starting — so it won't create a duplicate endpoint or reimplement a utility that another agent already built.</p>
+    <p>Every harness calls <code>log-implementation</code> (via SpecFlow MCP) after completing a task. The log records which files were modified, which API endpoints were created, and which components were built. The next harness reads these logs before starting &mdash; so it won't create a duplicate endpoint or reimplement a utility that another agent already built.</p>
 
     <h3>Session memory bridges the gap</h3>
-    <p>The <a href="/guides/session-memory/">session memory pipeline</a> ensures context transfers between agents. When Claude runs <code>/wrap</code>, it saves a digest to mem0 and the Obsidian vault. When any other CLI reads mem0, it gets the same memories. Same project tag, same mem0 account &mdash; cross-agent continuity across all six CLIs.</p>
+    <p>The <a href="/guides/session-memory/">session memory pipeline</a> ensures context transfers between harnesses. When Claude runs <code>/wrap</code>, it saves a digest to MemFlow (mem0) and the Obsidian vault. When any other harness reads MemFlow, it gets the same memories. SessionFlow provides cross-harness semantic search over full conversation history &mdash; no per-harness silos.</p>
 
     <div class="callout">
       <div class="callout-title">Start simple</div>
-      You don't need six CLIs on day one. Start with Claude Code + <code>/codex:review</code> for second-opinion reviews. Add <code>opencode</code> as a backup CLI with model flexibility. Add Kimi or GLM when you want to delegate spec tasks. The MCP stack is the foundation &mdash; once it's set up, adding a new CLI is just copying a config file.
+      You don't need all four harnesses on day one. Start with Claude Code for everything. Add <code>opencode</code> as a backup CLI with model flexibility &mdash; switching models inside one terminal is the lowest-friction path to model diversity. Add Codex or Antigravity when you want a dedicated implementation harness with a separate instruction file. The MCP stack is the foundation &mdash; once it's running, adding a harness is just a config file and an <code>AGENTS.md</code>.
     </div>
   </div></section>
 

@@ -263,6 +263,49 @@ Never answer from training knowledge alone.</code></pre>
   </div></section>
 
   <section class="content"><div class="container">
+    <div class="section-label">Documentation Split</div>
+    <div class="section-title">DocVault for the Human, <code style="font-size:1.2rem">.context/</code> for the Agent</div>
+    <p class="section-desc">CLAUDE.md should not contain documentation — it should <em>point</em> to it. But there are two distinct documentation targets, and they serve different audiences.</p>
+
+    <table class="compare-table">
+      <tr><th>Layer</th><th>Location</th><th>Audience</th><th>Contents</th></tr>
+      <tr><td class="label">DocVault</td><td><code>/Volumes/DATA/GitHub/DocVault/</code></td><td>Human — browsed in Obsidian (graph view, wikilinks, frontmatter)</td><td>KnowledgeBase, Research, Planning, Notes, Daily Digests, Architecture decisions</td></tr>
+      <tr><td class="label">.context/</td><td><code>{repo}/.context/</code></td><td>Agent — read by Claude at session start</td><td>Foundation docs, git topology, implementation gotchas, review patterns, GLOSSARY.md, architecture specifics for this repo</td></tr>
+    </table>
+
+    <p>The split is intentional. DocVault is rich and human-navigable — Obsidian's graph view, backlinks, and Bases features make it great for browsing. <code>.context/</code> is compact and structured for agent consumption: short files, clear headings, no decorative prose. Claude reads <code>.context/</code> files on demand; humans rarely open them directly.</p>
+
+    <div class="flow-diagram"><span class="phase">CLAUDE.md</span> <span class="note">(the router)</span>
+ <span class="arrow">│</span>
+ <span class="arrow">├──</span> "See DocVault/Projects/MyProject/ for architecture"
+ <span class="arrow">│   └──</span> <span class="layer">Human knowledge base</span> — Obsidian graph, wikilinks, research
+ <span class="arrow">│</span>
+ <span class="arrow">└──</span> "Read .context/architecture.md for implementation details"
+     <span class="arrow">└──</span> <span class="layer">Agent context files</span> — compact, structured, session-scoped</div>
+
+    <h3>What goes where</h3>
+    <ul>
+      <li><strong>DocVault</strong> — architecture decisions, infrastructure maps (IPs, stacks), cross-project patterns, daily digests, planning docs, research clippings, runbooks for humans to reference</li>
+      <li><strong><code>.context/</code></strong> — git topology, branch targets, PR patterns, implementation gotchas specific to this repo, the domain <code>GLOSSARY.md</code>, coding conventions that override global rules</li>
+      <li><strong>CLAUDE.md</strong> — pointers to both; never the content itself</li>
+    </ul>
+
+    <div class="file-header"><div class="file-dot" style="background: var(--cyan)"></div>MyProject/CLAUDE.md (pointer pattern)</div>
+<pre><code>## Documentation
+Project docs: `/Volumes/DATA/GitHub/DocVault/Projects/MyProject/`
+Start at Overview.md for architecture. Follow the index.
+
+## Agent Context
+Foundation docs: `.context/` — read architecture.md before
+modifying the data model; read gotchas.md before touching auth.</code></pre>
+
+    <div class="callout callout-green">
+      <div class="callout-title">One-liner to remember</div>
+      Obsidian/DocVault for the human. <code>.context/</code> for the agent. CLAUDE.md is the router that points to both.
+    </div>
+  </div></section>
+
+  <section class="content"><div class="container">
     <div class="section-label">Quick Start</div>
     <div class="section-title">Build Your CLAUDE.md</div>
 
@@ -301,6 +344,7 @@ mkdir -p ~/.claude/skills/wrap
 
   <footer><div class="container">
     <div class="footer-links"><a href="https://www.lbruton.cc">lbruton.cc</a><a href="/guides/session-memory/">Session Memory</a><a href="/guides/hooks/">Hooks</a><a href="/guides/docvault/">DocVault</a><a href="/guides/issue-pipeline/">Issues</a><a href="https://github.com/lbruton" target="_blank" rel="noopener">GitHub</a></div>
+
     <div class="footer-copy">&copy; 2025&ndash;2026 Lonnie Bruton. MIT Licensed. Built with Claude Code.</div>
   </div></footer>
 </body>
