@@ -1,0 +1,11 @@
+{
+  "name": "Portfolio",
+  "tag": "portfolio",
+  "issuePrefix": "WWW",
+  "issueTag": "portfolio",
+  "description": "Personal portfolio and Claude Code guides site",
+  "plane": {
+    "workspace": "lbruton",
+    "projectId": "8267e307-d3b9-48f2-8bbe-1f4cc961e63a"
+  }
+}
