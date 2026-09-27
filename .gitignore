@@ -2,8 +2,8 @@
 .DS_Store
 Thumbs.db
 
-# AI tooling & personal config
-.claude/
-
-# Git worktrees
+# AI tools: config and instructions are tracked; only machine-local state is ignored
+.claude/settings.local.json
+.claude/**/*.local.*
+.claude/worktrees/
 .worktrees/
