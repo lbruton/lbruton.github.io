@@ -1,0 +1,14 @@
+# Jekyll build config for GitHub Pages (legacy build from main /).
+# Keep repo-internal docs off the public site (DEVS-78): without this, GitHub Pages'
+# optional-front-matter plugin renders CLAUDE.md and DocVault/*.md as public HTML.
+exclude:
+  - DocVault/
+  - CLAUDE.md
+  - AGENTS.md
+  - GEMINI.md
+  - README.md
+  # Jekyll's defaults — on Jekyll 3.x an explicit exclude list replaces them.
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/

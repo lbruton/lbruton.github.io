@@ -6,7 +6,7 @@ Personal portfolio at **www.lbruton.cc**: hub-and-spoke site linking to all proj
 
 ## Documentation
 
-Project docs: `/Volumes/DATA/GitHub/DocVault/Projects/Portfolio/`
+Project docs: in-repo `DocVault/` (start at `DocVault/Overview.md`; excluded from the Pages build by `_config.yml`). LAN/DNS detail lives in the private companion `Devops/DocVault/Projects/Portfolio/` (DEVS-78).
 
 Start at `Overview.md` and follow the index.
 
