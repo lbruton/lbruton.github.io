@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "detectedAt": "2026-09-23T04:29:31.624Z",
+  "testing": {
+    "framework": null,
+    "command": null,
+    "configFile": null,
+    "testDir": null,
+    "hasBrowserbase": false
+  },
+  "versioning": {
+    "hasVersionLock": false,
+    "lockFile": null,
+    "packageVersion": null,
+    "userDeclinedSetup": false
+  },
+  "changelog": {
+    "hasChangelog": false,
+    "file": null,
+    "format": null,
+    "docvaultFallback": false
+  }
+}
