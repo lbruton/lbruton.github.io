@@ -12,9 +12,9 @@ Start at `Overview.md` and follow the index.
 
 ## Issue Tracking
 
-Prefix: `WWW-`. Issues tracked in Plane: <https://plane.lbruton.cc/lbruton/projects/8267e307-d3b9-48f2-8bbe-1f4cc961e63a/>.
+Prefix: `WWW-`. Issues tracked in the Plane **Web Portals** project, shared with `lonniebruton.com`: <https://plane.lbruton.cc/lbruton/projects/8267e307-d3b9-48f2-8bbe-1f4cc961e63a/>.
 
-Portfolio was born directly in Plane (2026-04-27) — there is no DocVault `Issues/` archive for this project. New issues are created via `/issue` (which reads the `plane` block in `.claude/project.json`) or directly via `mcp__plane__workitem` (`action: "create"`).
+The project was born directly in Plane (2026-04-27, as "Portfolio") — there is no DocVault `Issues/` archive for it. New issues are created via `/issue` (which reads the `plane` block in `.claude/project.json`) or directly via `mcp__plane__workitem` (`action: "create"`).
 
 ## Git Topology
 
