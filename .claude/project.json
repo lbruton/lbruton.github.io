@@ -12,5 +12,18 @@
     "userId": "lbruton",
     "project": "portfolio"
   },
-  "infisical": null
+  "infisical": null,
+  "kind": "code",
+  "harnesses": {
+    "claude": true,
+    "codex": true
+  },
+  "skills": {
+    "profiles": [
+      "code-core",
+      "web"
+    ],
+    "extra": [],
+    "exclude": []
+  }
 }
