@@ -50,7 +50,7 @@ Personal portfolio and project showcase at **www.lbruton.cc**.
 | Network Administration | HexTrackr, Forge, TRMCompare, WhoseOnFirst |
 | Finance & Investment | StakTrakr |
 | AI Companions | MyMelo |
-| Developer Tools | specflow (fork), claude-context (fork) |
+| Developer Tools | None. The specflow and claude-context forks are retired |
 
 ## Existing Hero Pages
 
